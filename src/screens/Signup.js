@@ -54,28 +54,48 @@ const RadioTitle = styled.Text`
 
 const Signup = ({ navigation, route }) => {
 
-    //별명
+    //별명, 업체명
     const [userId, setuserId] = useState('');
     //아이디인 이메일
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [passwordConfirm, setPasswordConfirm] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
     const [disabled, setDisabled] = useState(true);
-    const [emailValidated, setEmailValidated] = useState(false);
     const [age, setAge] = useState("");
     const [isMan, setIsMan] = useState(false); 
     const [isWoman, setIsWoman] = useState(false);
-    const [photoUrl, setPhotoUrl] = useState(null);
-    //증명 서류 사진 변수
+
+    const [errorMessage, setErrorMessage] = useState('');
+    const [emailErrorMessage, setEmailErrorMessage] = useState("");
+
+    //이메일 중복확인 클릭 여부
+    const [pressBeforeEmail, setPressBeforeEmail] = useState(false);
+    const [isEmailValidated, setIsEmailValidated] = useState(false);
+    
+     //이메일 인증버튼 클릭 여부
+     const [emailConfirmPress, setEmailConfirmPress] = useState(false);
+
+    //이메일 인증번호
+    const [emailConfirmCode, setEmailConfirmCode] = useState("");
+    const [emailCodePress, setEmailCodePress] = useState(false);
+    const [pressBeforCode, setPressBeforeCode] = useState(false);
+
+
+    //서버를 통해 받아온 값 (임의) 
+    //이메일 중복 확인 결과
+    const [isSameEmail, setIsSameEmail] = useState(true);
+    //이메일 인증 확인 결과
+    const [isConfirmedEmail, setIsConfirmedEmail] = useState(false);
+
 
     const userIdRef =useRef();
-    const emailRef = useRef();
+    const emailConfirmRef = useRef();
     const passwordRef = useRef();
     const passwordConfirmRef = useRef();
     const didMountRef = useRef();
     const ageRef = useRef();
-    
+    const emailMountRef = useRef();
+
     useEffect(() => {
 
         if (didMountRef.current) {
@@ -83,10 +103,12 @@ const Signup = ({ navigation, route }) => {
             if(!email){
                 _errorMessage = "이메일을 입력하세요.";
             }
-            else if (!validateEmail(email)) {
-                _errorMessage = "이메일 형식을 확인하세요.";
-            }else if (!emailValidated){
+            else if (!emailConfirmPress && !isSameEmail)
+            {
                 _errorMessage = "이메일을 인증하세요.";
+            }else if(!isSameEmail && !pressBeforCode) 
+            {
+                _errorMessage = "이메일 인증번호를 확인하세요. ";
             }
             else if(!password){
                 _errorMessage = "비밀번호를 입력하세요.";
@@ -98,9 +120,6 @@ const Signup = ({ navigation, route }) => {
             else if (password !== passwordConfirm){
                 _errorMessage = "비밀번호를 확인하세요.";
             }
-            else if (!userId){
-                _errorMessage = "닉네임을 입력하세요.";
-            }
             else if(route.params.mode === "User"){
                 if(isMan===false && isWoman==false){
                     _errorMessage = "성별을 입력하세요.";
@@ -108,10 +127,12 @@ const Signup = ({ navigation, route }) => {
                 if(!age){
                     _errorMessage = "나이를 입력하세요.";
                 }
-            } 
-            else if(route.params.mode === "Store"){
-                if(!photoUrl) {
-                    _errorMessage = "서류를 등록하세요.";
+                if (!userId){
+                    _errorMessage = "닉네임을 입력하세요.";
+                }
+            }else if (route.params.mode === "Store") {
+                if (!userId){
+                    _errorMessage = "업체명을 입력하세요.";
                 }
             }
             else{
@@ -122,28 +143,81 @@ const Signup = ({ navigation, route }) => {
             didMountRef.current = true;
             }
         
-    }, [email, password, passwordConfirm, userId, emailValidated, isMan, isWoman,photoUrl,age]);
+    }, [email, password, passwordConfirm, userId, emailConfirmPress,isMan, isWoman,age,isSameEmail, pressBeforCode]);
+
+    useEffect(() => {
+        
+        if(emailMountRef.current){
+            let _emailErrorMessage = '';
+            if(!email){
+                _emailErrorMessage="이메일을 입력하세요.";
+            }else if(!validateEmail(email)) {
+                _emailErrorMessage = "이메일 형식을 확인하세요. ";
+            }
+            else if(!isEmailValidated){
+                _emailErrorMessage = "이메일 중복확인을 해주세요.";
+            }
+            else if(isSameEmail){
+                _emailErrorMessage = "중복된 이메일입니다. ";
+            }
+            else if(!isSameEmail && !pressBeforCode){
+                _emailErrorMessage="사용 가능한 이메일입니다. ";
+            }
+            else if(!emailConfirmCode){
+                _emailErrorMessage="이메일 인증번호를 입력하세요. ";
+            }else if(!emailCodePress){
+                _emailErrorMessage="이메일 인증번호를 확인하세요. ";
+            }
+            else if(!isConfirmedEmail && emailCodePress) {
+                _emailErrorMessage="인증번호가 틀렸습니다. ";
+            }
+            else {
+                _emailErrorMessage = "";
+            }
+            setEmailErrorMessage(_emailErrorMessage);
+        }else {
+            emailMountRef.current = true;
+        }
+    },[pressBeforeEmail,email,isSameEmail, isConfirmedEmail, emailConfirmCode, emailCodePress, isEmailValidated, pressBeforCode]);
 
         useEffect(() => {
             setDisabled(            
-                !(userId && email && password && passwordConfirm && !errorMessage &&emailValidated)
+                !(userId && email && password && passwordConfirm && !errorMessage &&isEmailValidated && !emailErrorMessage)
             );
-            if(route.params.mode==="Store"){
-                if(!photoUrl){
-                    setDisabled(true);
-                }
-            }else {
+            if(route.params.mode==="User"){
                 if(isMan===false && isWoman==false){
                     setDisabled(true);
                 }
             }
-        }, [userId, email, password, passwordConfirm, errorMessage, emailValidated, isMan, isWoman,photoUrl,age]);
+        }, [userId, email, password, passwordConfirm, errorMessage, isEmailValidated, isMan, isWoman,age, emailErrorMessage]);
 
-        const _handleValidateEmailButtonPress = () => {
-            setEmailValidated(true);
+        const _handleEmailButtonPress = () => {
+            if(!isSameEmail){
+                setEmailConfirmPress(true);
+            }else{
+                setPressBeforeEmail(true);
+                if(email){
+                    setIsEmailValidated(true);
+                    //중복 확인 코드 
+                    // setIsSameEmail(true);
+                    setIsSameEmail(false);
+                }
+            }
+           
         };
         //서버 연동 후 이메일 인증 
 
+        const _handleEmailVaildatePress = () => {
+                setPressBeforeCode(true);
+                if(emailConfirmCode)
+                {
+                    setEmailCodePress(true);
+                    //이메일 인증 코드
+                    //setIsConfirmedEmail(false);
+                    setIsConfirmedEmail(true);
+                }
+               
+        };
 
     return (
         <KeyboardAwareScrollView
@@ -155,14 +229,29 @@ const Signup = ({ navigation, route }) => {
                 label="이메일"
                 value={email}
                 onChangeText={ text => setEmail(removeWhitespace(text))}
-                onSubmitEditing={() => passwordRef.current.focus()} 
+                onSubmitEditing={emailConfirmPress? ()=> emailConfirmRef.current.focus() : () => passwordRef.current.focus()} 
                 placeholder="이메일을 입력하세요"
                 returnKeyType="next"
                 hasButton
-                buttonTitle="인증"
-                onPress={_handleValidateEmailButtonPress}
+                buttonTitle={isSameEmail? "중복확인" : "인증"}
+                onPress={_handleEmailButtonPress}
+                completed={emailConfirmPress? true : false}
             />
+           {emailErrorMessage !== "" && <ErrorText>{emailErrorMessage}</ErrorText>}
 
+            {emailConfirmPress&&
+            <Input label="이메일 인증번호"
+            ref={emailConfirmRef}
+            value={emailConfirmCode}
+            onChangeText={text => setEmailConfirmCode(removeWhitespace(text))}
+            onSubmitEditing={() => passwordRef.current.focus()}
+            placeholder="인증번호를 입력하세요"
+            returnKeyType="next"
+            hasButton
+            buttonTitle="인증확인"
+            onPress={_handleEmailVaildatePress}
+            completed={isConfirmedEmail? true : false}
+            />}
 
             <Input
                 ref={passwordRef}
@@ -171,7 +260,7 @@ const Signup = ({ navigation, route }) => {
                 onChangeText={ text => setPassword(removeWhitespace(text))}
                 onSubmitEditing={() => passwordConfirmRef.current.focus()} 
                 placeholder="비밀번호를 입력하세요"
-                returnKeyType="done"
+                returnKeyType="next"
                 isPassword
             />
             <Input
@@ -187,12 +276,12 @@ const Signup = ({ navigation, route }) => {
             
             <Input
                 ref={userIdRef}
-                label="닉네임"
+                label={route.params.mode === "User"? "닉네임" : "업체명"}
                 value={userId}
                 onChangeText={ text => setuserId(removeWhitespace(text))}
                 onSubmitEditing= { route.params.mode === 'User' ? 
                 () => ageRef.current.focus() : null }
-                placeholder="닉네임을 입력하세요"
+                placeholder={route.params.mode === "User"? "닉네임을 입력하세요" : "업체명을 입력하세요"}
                 returnKeyType= {route.params.mode === "User"? "next" : "done"}
             />
 
@@ -232,15 +321,6 @@ const Signup = ({ navigation, route }) => {
                 </UserView>
             )}
             
-    
-           {/* 업체 서류 추가 */}
-           { route.params.mode === 'Store' && (
-                <Image 
-                    label= "서류"
-                    url={photoUrl}
-                    onChangeImage={url => setPhotoUrl(url)}
-                />   
-            )}
             <ErrorText>{errorMessage}</ErrorText>
             <Button
                 title="회원가입"

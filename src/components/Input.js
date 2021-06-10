@@ -76,12 +76,11 @@ const Input = forwardRef(
       buttonTitle,
       onPress,
       keyboardType,
+      completed,
     },
     ref
   ) => {
     const [isFocused, setIsFocused] = useState(false);
-    const [completed, setCompleted] = useState(false);
-
 
     return (
       <Container>
@@ -111,10 +110,7 @@ const Input = forwardRef(
         {hasButton && 
         <InputButton 
         title={buttonTitle} 
-        onPress={()=> {
-          onPress();
-          setCompleted(true);
-        }} 
+        onPress={onPress} 
         completed={completed}/>}
         </InputContainer>
       </Container>
@@ -127,6 +123,7 @@ Input.defaultProps = {
   hasButton: false,
   buttonTitle: "",
   onPress: ()=> {},
+  completed: false,
 };
 
 Input.propTypes = {
@@ -145,6 +142,7 @@ Input.propTypes = {
   buttonTitle: PropTypes.string,
   onPress: PropTypes.func,
   keyboardType: PropTypes.string,
+  completed: PropTypes.bool,
 };
 
 export default Input;
