@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 const Container = styled.View`
 flex-direction: column;
 width: 100%;
-margin: 5px 0;
+margin-top: 10px;
 `;
 
 const Label = styled.Text`

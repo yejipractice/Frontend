@@ -158,6 +158,7 @@ const RegisterAuction = ({navigation}) => {
     const _onPress = () => {
       setUploaded(true);
       if(!disabled){
+        // 서버에 post후
         setTitle('');
         setBookDate("");
         setBookTime("");
@@ -479,7 +480,7 @@ const RegisterAuction = ({navigation}) => {
         </InputContiner>
 
 
-            <Label>공고 마감 날짜 및 시긱</Label>
+            <Label>공고 마감 날짜 및 시각</Label>
             <DateContainer onPress={_handleEndDatePress} >
              <ButtonTitle>{endDate? endDate :"공고를 마감할 날짜를 입력하세요."}</ButtonTitle>
            </DateContainer>

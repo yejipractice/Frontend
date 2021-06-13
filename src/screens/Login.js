@@ -1,7 +1,7 @@
 // 로그인 페이지
-import React, {useState, useRef,useEffect} from 'react';
-import styled from "styled-components/native";
-import {Input,Button, CheckBoxLetter} from "../components";
+import React, {useState, useRef,useEffect, useContext} from 'react';
+import styled, {ThemeContext} from "styled-components/native";
+import {Input,Button, CheckBoxLetter, IconButton} from "../components";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import {validateEmail,removeWhitespace} from "../utils/common";
 import {images} from "../images";
@@ -11,29 +11,82 @@ const Container = styled.View`
     justify-content: flex-start;
     align-items: center;
     background-color: ${({theme})=> theme.background};
-    padding: 20px;
+    padding: 0 20px;
 `;
 
 const Title = styled.Text`
     font-size: 40px;
     font-weight: bold;
     color: ${({theme}) => theme.titleColor};
-    margin-top: 40px;
 `;
 
 const Letter = styled.View`
     width: 100%;
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
+`;
+
+const AdditionalLetter = styled.View`
+    width: 100%;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
 `;
 
 const ErrorText = styled.Text`
-    width: 100%;
     font-size: 14px;
     font-weight: bold;
-    line-height: 17px;
     color: ${({theme}) => theme.errorText}
+    padding: 2px 0;
 `;
+
+const QText = styled.Text`
+    font-size: 14px;
+    font-weight: bold;
+    color: ${({theme}) => theme.text}
+    padding: 2px 0;
+    align-self: flex-start;
+`;
+
+const SocialContainer = styled.View`
+    width: 100%;
+    margin-top: 10%;
+`;
+
+const KakaoImage = styled.Image`
+    height: 28px;
+    width: 28px;
+    position: absolute;
+    left: 6%;
+`;
+
+const NaverImage = styled.Image`
+    height: 40px;
+    width: 40px;
+    position: absolute;
+    left: 5%;
+`;
+
+const SocialBackground = styled.TouchableOpacity`
+    flex-direction: row;
+    width: 100%;
+    height: 50px;
+    background-color: ${({color,theme})=> color? color : theme.background};
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+    margin-top : ${({hasMarginTop})=> hasMarginTop? 5 : 0}px;
+`;
+
+const ButtonText = styled.Text`
+    height: 30px;
+    line-height: 30px;
+    font-size: 16px;
+    font-weight: bold;
+    color: ${({theme, isKakao}) => isKakao? theme.kakaoTextColor : theme.buttonTextColor};
+`;
+
 
 const Login = ({navigation}) => {
     const [userId, setUserId] = useState("");
@@ -42,6 +95,8 @@ const Login = ({navigation}) => {
     const [autoLogin, setAutoLogin] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const passwordRef = useRef();
+
+    const theme = useContext(ThemeContext);
 
     useEffect(()=> {setDisabled(!(userId&&password))}, [userId,password]);
 
@@ -72,7 +127,7 @@ const Login = ({navigation}) => {
             placeholder="이메일을 입력하세요" 
             returnKeyType="next" 
             />
-            <ErrorText>{errorMessage}</ErrorText>
+            
             <Input 
             ref={passwordRef} 
             label="비밀번호" 
@@ -81,27 +136,50 @@ const Login = ({navigation}) => {
             onSubmitEditing={_handleLoginButtonPress} 
             placeholder="비밀번호를 입력하세요" 
             returnKeyType="done" 
-            isPassword />
-
+            isPassword 
+            containerStyle={0}/>
+            
+            <AdditionalLetter>
+            <ErrorText>{errorMessage}</ErrorText>
+            </AdditionalLetter>
+            
+            <Button title="로그인" onPress={_handleLoginButtonPress} disabled={disabled}
+            containerStyle={{marginTop: 0, marginBottom: 2}}/>
 
             <Letter>
+            
             <CheckBoxLetter
             hasIcon={true}
             type={autoLogin? images.checked : images.unchecked}
             title="자동 로그인"
             onPress={() => setAutoLogin(!autoLogin)} />
-
-            <CheckBoxLetter
+             <CheckBoxLetter
             hasIcon={false}
             title="아이디/비밀번호 찾기"
             onPress={()=> {navigation.navigate("AccountFind")}}
             />
             </Letter>
-            <Button title="로그인" onPress={_handleLoginButtonPress} disabled={disabled}/>
-            <Button title="회원가입" onPress={() => {
-                navigation.navigate("Mode");
-            }}
-             />
+
+           
+           <SocialContainer>
+                <QText>SNS 계정 로그인</QText>
+                <SocialBackground color={theme.kakaoColor}>
+                    <KakaoImage source={images.kakaoLogin} />
+                    <ButtonText isKakao={true}>카카오 로그인</ButtonText>
+                </SocialBackground>
+                <SocialBackground color={theme.naverColor} hasMarginTop={true}>
+                    <NaverImage source={images.naverLogin} />
+                    <ButtonText>네이버 로그인</ButtonText>
+                </SocialBackground>
+            </SocialContainer>
+
+            <SocialContainer style={{marginTop: 8}}>
+                <QText>아직 회원이 아니신가요?</QText>
+                <Button title="회원가입" containerStyle={{marginTop: 0}}
+                onPress={() => {
+                    navigation.navigate("Mode");
+                }}/>
+            </SocialContainer>
         </Container>
         </KeyboardAwareScrollView>
     );
