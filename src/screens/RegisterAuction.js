@@ -4,7 +4,11 @@ import {MaterialCommunityIcons} from "@expo/vector-icons";
 import {DateTimePicker,  RadioButton} from "../components";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import {removeWhitespace} from "../utils/common";
+import DropDownPicker from "react-native-dropdown-picker";
+import {Dimensions} from "react-native";
+import { theme } from '../theme';
 
+const WIDTH = Dimensions.get("screen").width;
 
 const Container = styled.View`
     flex: 1;
@@ -50,24 +54,52 @@ const Container = styled.View`
       margin-bottom:5px;
   `;
 
+  const InfoLabel = styled.Text`
+      font-size: 20px;
+      color: ${({theme})=> theme.text}
+      font-weight: bold;
+      align-self: flex-start;
+      margin-bottom:10px;
+  `;
+
   const TripleLabel = styled.Text`
+  font-size: 16px;
+  color: ${({theme})=> theme.text}
+  align-self: flex-start;
+  width: 30%;
+  margin-left: 1%;
+`;
+
+const DoubleLabel = styled.Text`
 font-size: 16px;
 color: ${({theme})=> theme.text}
 align-self: flex-start;
-width: 35%
+width: 51%;
+margin-bottom: 2px;
 `;
 
-
 const RadioContiner = styled.View`
-margin-left: 2px;
-width: 100%;
-flex-direction: row;
+  margin-left: 2px;
+  width: 100%;
+  flex-direction: row;
 `;
 
 const InputContiner = styled.View`
-width: 100%;
-flex-direction: row;
-justify-content: space-between;
+  width: 100%;
+  flex-direction: row;
+  justify-content: space-between;
+`;
+
+const RegionContiner = styled.View`
+  width: 100%;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 10px;
+`;
+
+const SmallContainer = styled.View`
+  height: 50%;
+  align-self: center;
 `;
 
 const StyledTextInputs  = styled.TextInput.attrs(({ theme }) => ({
@@ -93,6 +125,19 @@ const StyledTextInputs  = styled.TextInput.attrs(({ theme }) => ({
     color: ${({ theme }) => theme.errorText};
 `;
 
+const AddContainer = styled.View`
+  width: 100%;
+  flex-direction: row;
+  justify-content: space-between;
+`;
+
+const AdditionContainer = styled.View`
+  background-color:  ${({ theme }) => theme.label};
+  height: 1px;
+`;
+
+
+
 const RegisterAuction = ({navigation}) => {
   //각 변수들에 대한 state 
     const [title, setTitle] = useState("");
@@ -107,12 +152,60 @@ const RegisterAuction = ({navigation}) => {
     const [meetingType, setMeetingType] = useState("");
     const [foodType, setFoodType] = useState("");
     const [numOfPeople, setNumOfPeople] = useState("");
-    const [city, setCity] = useState("");
-    const [price, setPrice] = useState("");
+    const [maxPrice, setMaxPrice] = useState("");
+    const [minPrice, setMinPrice] = useState("");
     const [errorMessage, setErrorMessage] = useState("아래 정보를 입력해주세요.");
     const [disabled, setDisabled] = useState(true);
     const [uploaded, setUploaded] = useState(false);
+    const [content, setContent] = useState('');
     const didMountRef = useRef();
+
+    // 지역 드롭다운  
+    const [open, setOpen] = useState(false);
+    const [selected, setSelected] = useState(""); // 선택된 지역(시,도)
+    const [city, setCity] = useState(""); // 상세 지역
+    const [cities, setCities] = useState([
+      {label: "서울특별시", value: "서울특별시"},
+      {label: "부산광역시", value: "부산광역시"},
+      {label: "대구광역시", value: "대구광역시"},
+      {label: "인천광역시", value: "인천광역시"},
+      {label: "광주광역시", value: "광주광역시"},
+      {label: "대전광역시", value: "대전광역시"},
+      {label: "울산광역시", value: "울산광역시"},
+      {label: "세종특별자치시", value: "세종특별자치시"},
+      {label: "강원도", value: "강원도"},
+      {label: "경기도", value: "경기도"},
+      {label: "충청북도", value: "충청북도"},
+      {label: "충청남도", value: "충청남도"},
+      {label: "전라북도", value: "전라북도"},
+      {label: "전라남도", value: "전라남도"},
+      {label: "경상북도", value: "경상북도"},
+      {label: "경상남도", value: "경상남도"},
+      {label: "제주특별자치도", value: "제주특별자치도"},
+    ]);
+
+    // 나이 드롭다운  
+    const [open1, setOpen1] = useState(false);
+    const [selectedAge, setSelectedAge] = useState("");
+    const [ages, setAges] = useState([
+      {label: "~19", value: "~19"},
+      {label: "20~25", value: "20~25"},
+      {label: "26~30", value: "26~30"},
+      {label: "31~35", value: "31~35"},
+      {label: "36~40", value: "36~40"},
+      {label: "41~50", value: "41~50"},
+      {label: "51~60", value: "51~60"},
+      {label: "60~", value: "60~"},
+    ]);
+
+    // 성별 드롭다운 
+    const [open2, setOpen2] = useState(false);
+    const [selectedSex, setSelectedSex] = useState("");
+    const [sexes, setSexes] = useState([
+      {label: "남자", value: "남자"},
+      {label: "여자", value: "여자"},
+      {label: "반반", value: "반반"},
+    ]); 
 
     //에러 메세지 설정 
     useEffect(() => {
@@ -130,11 +223,15 @@ const RegisterAuction = ({navigation}) => {
           _errorMessage = "선호 메뉴을 입력하세요";
         }else if(!numOfPeople){
           _errorMessage = "인원 수를 입력하세요";
-        }else if(!city){
-          _errorMessage = "선호 지역을 입력하세요";
-        }else if(!price){
-          _errorMessage = "선호 가격대을 입력하세요";
-        }else if(!endDate){
+        }else if(!maxPrice){
+          _errorMessage = "선호가격대의 최대 가격을 입력하세요";
+        }else if(!minPrice){
+          _errorMessage = "선호가격대의 최소 가격을 입력하세요";
+        }
+        else if(!selected){
+          _errorMessage = "선호지역을 입력하세요";
+        }
+        else if(!endDate){
           _errorMessage = "공고 마감 날짜를 입력하세요";
         }
         else if(!endTime){
@@ -148,11 +245,11 @@ const RegisterAuction = ({navigation}) => {
       }else {
         didMountRef.current = true;
       }
-    },[title, bookDate,bookTime,endDate,endTime,meetingType,foodType,numOfPeople,city,price]);
+    },[title, bookDate,bookTime,endDate,endTime,meetingType,foodType,numOfPeople,minPrice, maxPrice,selected]);
 
     useEffect(()=> {
-      setDisabled(!(title && bookDate && bookTime && endDate && endTime && meetingType && foodType && numOfPeople && city && price && !errorMessage));
-    },[title, bookDate,bookTime,endDate,endTime,meetingType,foodType,numOfPeople,city,price,errorMessage]);
+      setDisabled(!(title && bookDate && bookTime && endDate && endTime && meetingType && foodType && numOfPeople && selected  && maxPrice && minPrice && !errorMessage));
+    },[title, bookDate,bookTime,endDate,endTime,meetingType,foodType,numOfPeople,minPrice,maxPrice,errorMessage,selected]);
 
     //공고 등록 버튼 액션: 공고 등록 후 공고 상세 보여주기 함수 연동 후 스피너 추가
     const _onPress = () => {
@@ -167,8 +264,13 @@ const RegisterAuction = ({navigation}) => {
         setMeetingType("");
         setFoodType("");
         setNumOfPeople("");
+        setSelected("");
+        setSelectedAge("");
+        setSelectedSex("");
+        setContent("");
         setCity("");
-        setPrice("");
+        setMinPrice("");
+        setMaxPrice("");
         setErrorMessage("아래 정보를 입력해주세요");
         setDisabled(true);
         setUploaded(false);
@@ -441,44 +543,77 @@ const RegisterAuction = ({navigation}) => {
             </RadioContiner>
            <RadioContiner>
            <TripleLabel>인원수</TripleLabel>
-            <TripleLabel>선호지역</TripleLabel>
-            <TripleLabel>선호가격대</TripleLabel>
+          <TripleLabel>선호가격대</TripleLabel>
            </RadioContiner>
+           
             <InputContiner>
-            <StyledTextInputs 
-           value={numOfPeople}
-           onChangeText={text => setNumOfPeople(removeWhitespace(text))}
-           autoCapitalize="none"
-           keyboardType="number-pad"
-           autoCorrect={false}
-           placeholder="인원수"
-           textContentType="none" // iOS only
-           underlineColorAndroid="transparent" // Android only
-           />
+                  <StyledTextInputs 
+                value={numOfPeople}
+                onChangeText={text => setNumOfPeople(removeWhitespace(text))}
+                autoCapitalize="none"
+                keyboardType="number-pad"
+                autoCorrect={false}
+                placeholder="인원수"
+                textContentType="none" // iOS only
+                underlineColorAndroid="transparent" // Android only
+                />
 
-           <StyledTextInputs 
-           value={city}
-           onChangeText={text => setCity(removeWhitespace(text))}
-           autoCapitalize="none"
-           placeholder="선호지역"
-           autoCorrect={false}
-           textContentType="none" // iOS only
-           underlineColorAndroid="transparent" // Android only
-           />
-
-           <StyledTextInputs
-           value={price}
-           onChangeText={text => setPrice(removeWhitespace(text))}
-           autoCapitalize="none"
-           keyboardType="number-pad"
-           placeholder="선호가격대"
-           autoCorrect={false}
-           textContentType="none" // iOS only
-           underlineColorAndroid="transparent" // Android only
-           />
+                <StyledTextInputs 
+                value={minPrice}
+                onChangeText={text => setMinPrice(removeWhitespace(text))}
+                autoCapitalize="none"
+                keyboardType="number-pad"
+                placeholder="최소가격"
+                autoCorrect={false}
+                textContentType="none" // iOS only
+                underlineColorAndroid="transparent" // Android only
+                />
+                <SmallContainer>
+                  <Label>~</Label>
+                </SmallContainer>
+                <StyledTextInputs
+                value={maxPrice}
+                onChangeText={text => setMaxPrice(removeWhitespace(text))}
+                autoCapitalize="none"
+                keyboardType="number-pad"
+                placeholder="최대가격"
+                autoCorrect={false}
+                textContentType="none" // iOS only
+                underlineColorAndroid="transparent" // Android only
+                />
 
         </InputContiner>
 
+        <RadioContiner style={{marginBottom: 5}}>
+            <TripleLabel>선호 지역</TripleLabel>
+        </RadioContiner>
+
+ <RegionContiner>
+        <DropDownPicker 
+        open={open}
+        value={selected}
+        items={cities}
+        setOpen={setOpen}
+        setValue={setSelected}
+        setItems={setCities}
+        containerStyle={{width: WIDTH*0.43, alignSelf: 'center'}}
+        placeholder="시/도"
+        placeholderStyle={{color: theme.label, fontSize: 16}}
+        listMode="SCROLLVIEW"
+        />   
+
+        <StyledTextInputs 
+           value={city}
+           onChangeText={text => setCity(removeWhitespace(text))}
+           autoCapitalize="none"
+           placeholder="시/군/구/읍/면/동"
+           autoCorrect={false}
+           textContentType="none" // iOS only
+           underlineColorAndroid="transparent" // Android only
+           style={{width: WIDTH * 0.43, marginBottom: 0, marginTop: 0, marginLeft: 10}}
+           />
+
+</RegionContiner>
 
             <Label>공고 마감 날짜 및 시각</Label>
             <DateContainer onPress={_handleEndDatePress} >
@@ -491,6 +626,62 @@ const RegisterAuction = ({navigation}) => {
            </DateContainer>
             <DateTimePicker visible={endTimeVisible} mode="time" handleConfirm={_setEndTime} handleCancel={_hideEndTimePicker}/>
 
+            <RadioContiner style={{marginBottom: 2}}>
+            <TripleLabel>내용</TripleLabel>
+           </RadioContiner>
+
+           
+          <StyledTextInputs 
+           value={content}
+           onChangeText={text => setContent(text)}
+           autoCapitalize="none"
+           placeholder="추가 사항"
+           autoCorrect={false}
+           textContentType="none" // iOS only
+           underlineColorAndroid="transparent" // Android only
+           style={{height: 100, width: WIDTH * 0.9, marginTop: 2}}
+           multiline
+           />
+          
+          
+
+        </Container>
+            <AdditionContainer></AdditionContainer>
+        <Container>
+          <InfoLabel>추가 정보</InfoLabel>
+        <RadioContiner>
+           <DoubleLabel>평균 성별</DoubleLabel>
+            <DoubleLabel>평균 연령대</DoubleLabel>
+           </RadioContiner>
+            <AddContainer>
+           <DropDownPicker 
+              open={open1}
+              value={selectedAge}
+              items={ages}
+              setOpen={setOpen1}
+              setValue={setSelectedAge}
+              setItems={setAges}
+              containerStyle={{width: WIDTH*0.43, alignSelf: "flex-start"}}
+              placeholder="평균연령대"
+              placeholderStyle={{color: theme.label, fontSize: 16}}
+              listMode="SCROLLVIEW"
+              /> 
+            
+          <DropDownPicker 
+              open={open2}
+              value={selectedSex}
+              items={sexes}
+              setOpen={setOpen2}
+              setValue={setSelectedSex}
+              setItems={setSexes}
+              containerStyle={{width: WIDTH*0.43, alignSelf: "flex-start"}}
+              placeholder="평균성별"
+              placeholderStyle={{color: theme.label, fontSize: 16}}
+              listMode="SCROLLVIEW"
+              />  
+              </AddContainer>
+
+            
         </Container>
         </KeyboardAwareScrollView>
     );
