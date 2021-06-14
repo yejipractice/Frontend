@@ -5,7 +5,7 @@ import {DateTimePicker,  RadioButton} from "../components";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import {removeWhitespace} from "../utils/common";
 import DropDownPicker from "react-native-dropdown-picker";
-import {Dimensions} from "react-native";
+import {Dimensions, Alert} from "react-native";
 import { theme } from '../theme';
 
 const WIDTH = Dimensions.get("screen").width;
@@ -141,6 +141,8 @@ const AdditionContainer = styled.View`
 const RegisterAuction = ({navigation}) => {
   //각 변수들에 대한 state 
     const [title, setTitle] = useState("");
+    const [book, setBook] = useState(''); //String ver.
+    const [end, setEnd] = useState("");
     const [bookDateVisible, setBookDateVisible] = useState(false);
     const [bookDate, setBookDate] = useState("");
     const [bookTime, setBookTime] = useState("");
@@ -158,6 +160,7 @@ const RegisterAuction = ({navigation}) => {
     const [disabled, setDisabled] = useState(true);
     const [uploaded, setUploaded] = useState(false);
     const [content, setContent] = useState('');
+    const [nowTime, setNowTime] = useState("");
     const didMountRef = useRef();
 
     // 지역 드롭다운  
@@ -217,16 +220,45 @@ const RegisterAuction = ({navigation}) => {
           _errorMessage = "예약 날짜를 입력하세요";
         }else if(!bookTime){
           _errorMessage = "예약 시각을 입력하세요";
-        }else if(!meetingType){
+        }else if(parseInt(book)<parseInt(getNowString())) {
+          _errorMessage = "예약 시간을 잘못 입력하였습니다";
+        }
+        else if(!meetingType){
           _errorMessage = "단체 유형을 입력하세요";
         }else if(!foodType){
           _errorMessage = "선호 메뉴을 입력하세요";
         }else if(!numOfPeople){
           _errorMessage = "인원 수를 입력하세요";
+        }else if(numOfPeople.includes(","))
+        {
+          _errorMessage = "인원 수를 제대로 입력하세요";
+        }else if(numOfPeople.includes("."))
+        {
+          _errorMessage = "인원 수를 제대로 입력하세요";
+        }else if (parseInt(numOfPeople)< 1) {
+          _errorMessage = "인원 수를 제대로 입력하세요";
+        } else if(!minPrice){
+          _errorMessage = "선호가격대의 최소 가격을 입력하세요";
+        }else if(minPrice.includes(","))
+        {
+          _errorMessage = "최소 가격을 제대로 입력하세요";
+        }else if(minPrice.includes("."))
+        {
+          _errorMessage = "최소 가격을 제대로 입력하세요";
+        }else if(parseInt(minPrice) <0){
+          _errorMessage = "최소 가격을 제대로 입력하세요";
         }else if(!maxPrice){
           _errorMessage = "선호가격대의 최대 가격을 입력하세요";
-        }else if(!minPrice){
-          _errorMessage = "선호가격대의 최소 가격을 입력하세요";
+        }else if(maxPrice.includes(","))
+        {
+          _errorMessage = "최대 가격을 제대로 입력하세요";
+        }else if(maxPrice.includes("."))
+        {
+          _errorMessage = "최대 가격을 제대로 입력하세요";
+        }else if (parseInt(maxPrice) <0) {
+          _errorMessage = "최대 가격을 제대로 입력하세요";
+        }else if(parseInt(minPrice) > parseInt(maxPrice)) {
+          _errorMessage = "최소 가격과 최대 가격을 제대로 입력하세요";
         }
         else if(!selected){
           _errorMessage = "선호지역을 입력하세요";
@@ -236,6 +268,10 @@ const RegisterAuction = ({navigation}) => {
         }
         else if(!endTime){
           _errorMessage = "공고 마감 시각을 입력하세요";
+        }else if(parseInt(end)<parseInt(getNowString())) {
+          _errorMessage = "공고 마감 시간을 잘못 입력하였습니다";
+        }else if(parseInt(end)>parseInt(book)){
+          _errorMessage = "공고 마감 시간을 예약 시간 이전으로 설정해주세요."
         }
         else {
           _errorMessage = "";
@@ -245,15 +281,24 @@ const RegisterAuction = ({navigation}) => {
       }else {
         didMountRef.current = true;
       }
-    },[title, bookDate,bookTime,endDate,endTime,meetingType,foodType,numOfPeople,minPrice, maxPrice,selected]);
+    },[title, bookDate,bookTime,endDate,endTime,meetingType,foodType,numOfPeople,minPrice, maxPrice,selected,book,end]);
 
     useEffect(()=> {
       setDisabled(!(title && bookDate && bookTime && endDate && endTime && meetingType && foodType && numOfPeople && selected  && maxPrice && minPrice && !errorMessage));
     },[title, bookDate,bookTime,endDate,endTime,meetingType,foodType,numOfPeople,minPrice,maxPrice,errorMessage,selected]);
 
+
+    useEffect(()=> {
+      var _book = bookDate.slice(0,4)+bookDate.slice(6,8)+bookDate.slice(10,12)+bookTime.slice(0,2)+bookTime.slice(4,6);
+      var _end =  endDate.slice(0,4)+endDate.slice(6,8)+endDate.slice(10,12)+endTime.slice(0,2)+endTime.slice(4,6);
+      setBook(_book);
+      setEnd(_end);
+    },[bookTime,bookDate,endDate,endTime]);
+
     //공고 등록 버튼 액션: 공고 등록 후 공고 상세 보여주기 함수 연동 후 스피너 추가
     const _onPress = () => {
       setUploaded(true);
+
       if(!disabled){
         // 서버에 post후
         setTitle('');
@@ -288,6 +333,38 @@ const RegisterAuction = ({navigation}) => {
               style={{marginRight: 10, marginBottom:3, opacity: 1}}/>)
             )});
         },[disabled]);
+
+        const getNowString =() => {
+          var now = new Date();
+          var nowYear = String(now.getFullYear()); 
+          var nowMonth = now.getMonth()+1;
+          if(nowMonth < 10){
+            nowMonth = "0" + String(nowMonth);
+          }else{
+            nowMonth = String(nowMonth);
+          }
+          var nowDate = now.getDate();
+          if(nowDate < 10){
+            nowDate = "0" + String(nowDate);
+          }else {
+            nowDate = String(nowDate);
+          }
+          var nowHour = now.getHours();
+          if(nowHour < 10){
+            nowHour = "0" + String(nowHour);
+          }else {
+            nowHour = String(nowHour);
+          }
+          var nowMinute = now.getMinutes();
+          if(nowMinute < 10){
+            nowMinute = "0" + String(nowMinute);
+          }else {
+            nowMinute = String(nowMinute);
+          }
+          var nowString = nowYear+nowMonth+nowDate+nowHour+nowMinute;
+
+          return nowString;
+        };
 
 
 
