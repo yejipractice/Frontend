@@ -1,8 +1,9 @@
-import React,{useState, useEffect, useRef} from 'react';
+import React,{useState, useEffect, useRef, useContext} from 'react';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import {removeWhitespace, validateEmail} from "../utils/common";
 import {Button, Input} from "../components";
 import styled from "styled-components/native";
+import {UrlContext} from "../contexts";
 
 const Container = styled.View`
     flex: 1;
@@ -34,7 +35,7 @@ const AccountFind = ({navigation}) => {
     const [certification, setCertification] = useState("");
     const [certificated, setCertificated] = useState(false);
     const [disabled, setDisabled] = useState(true);
-
+    const {url} = useContext(UrlContext);
     const didMountRef = useRef();
 
     useEffect(()=> {
@@ -64,24 +65,47 @@ const AccountFind = ({navigation}) => {
         setDisabled(!(email && confirmed && certification));
     },[email, confirmed, errorMessage, certification]);
 
-     // 서버 연동후 이메일 인증 확인 
-     const _handleValidateEmailButtonPress = () => {
-        setConfirmed(true);
+    const handleApi = async () => {
+        const response = await fetch(url+`/member/auth/signup/verification?email=${email}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            });
+
+        const res = await response.json();
+        return res["success"];    
     };
 
-    const _handleAuthButtonPress = () => {
-        // 인증 되었되었으면 true 아니면 false 
-        if(certification != "1234"){
-        setCertificated(false); 
-        setErrorMessage("인증번호가 틀렸습니다. 다시 입력하세요");
-        }else {
-            setCertificated(true);
-            //인증 확인 후 비밀번호 알려준 후 확인 누르면 로그인 창 이동 
-            navigation.navigate("Login"); 
+     // 서버 연동후 이메일 인증 확인 
+     const _handleValidateEmailButtonPress = async() => {
+        const result = await handleApi();
+        if(!result){
+            alert("이메일을 다시 확인하세요.");
+        }else{
+            setConfirmed(true);
         }
-        
-        
-    }
+    };
+
+    const handleKeyApi = async() => {
+        const response = await fetch(url+`/member/auth/signup/verification?email=${email}&key=${certification}`);
+        const res = await response.json();
+        return res["status"];
+    };
+
+    const _handleAuthButtonPress = async() => {
+        const result =  await handleKeyApi();
+        if (result === 500){
+            setCertificated(false);
+            setErrorMessage("인증번호가 틀렸습니다.");
+        }else if (result === 200){
+            setCertificated(true);
+            navigation.navigate("Login");
+        }else {
+            setCertificated(false);
+            setErrorMessage("다시 시도하세요.");
+        }
+    };
 
     return (
         <KeyboardAwareScrollView 

@@ -6,7 +6,7 @@ import {Asset} from "expo-asset";
 import AppLoading from "expo-app-loading";
 import * as Font from "expo-font";
 import Navigation from './navigations';
-import { ProgressProvider } from './contexts/Progress';
+import { ProgressProvider, LoginProvider} from './contexts';
 
 // 이미지,폰트 불러오기 
 const cachImages = images => {
@@ -38,10 +38,12 @@ const App = () => {
 
     return isReady? (
         <ThemeProvider theme={theme}>
+            <LoginProvider>
             <ProgressProvider>
             <StatusBar barStyle="dark-content" />
             <Navigation />
             </ProgressProvider>
+            </LoginProvider>
         </ThemeProvider>
     ) : (
         // 로딩중 화면

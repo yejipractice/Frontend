@@ -5,6 +5,8 @@ import {Input,Button, CheckBoxLetter, IconButton} from "../components";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import {validateEmail,removeWhitespace} from "../utils/common";
 import {images} from "../images";
+import {LoginConsumer, LoginContext, UrlContext, ProgressContext} from "../contexts";
+import {Alert} from "react-native";
 
 const Container = styled.View`
     flex: 1;
@@ -89,6 +91,8 @@ const ButtonText = styled.Text`
 
 
 const Login = ({navigation}) => {
+    const {spinner} = useContext(ProgressContext);
+    const {url} = useContext(UrlContext);
     const [userId, setUserId] = useState("");
     const [password, setPassword] = useState("");
     const [disabled, setDisabled] = useState(true);
@@ -108,9 +112,35 @@ const Login = ({navigation}) => {
         );
     };
 
-    const _handleLoginButtonPress = () => {
+    const handleApi = async () => {
+        const response = await fetch(url+"/member/auth/signin", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: {
+                email: userId,
+                password: password
+            }});
+
+        const res = await response.json();
+        return res["success"];    
+    };
+
+    const _handleLoginButtonPress = async () => {
+        // const result = await handleApi();
+        // if(result){
+        //     dispatch({userId, password,autoLogin});
+        // }else{
+        //     alert("로그인 실패하였습니다. \n아이디, 비밀번호를 다시 확인하세요.");
+        // }
+        
         //연동되면 코드 추가. 스피너 추가, 로그인 후 계정 인증되면 메인으로 이동되도록.  
     };
+
+    // useEffect(()=> {
+    // unmount
+    // },[]);
 
     return (
         <KeyboardAwareScrollView
@@ -142,10 +172,31 @@ const Login = ({navigation}) => {
             <AdditionalLetter>
             <ErrorText>{errorMessage}</ErrorText>
             </AdditionalLetter>
-            
-            <Button title="로그인" onPress={_handleLoginButtonPress} disabled={disabled}
-            containerStyle={{marginTop: 0, marginBottom: 2}}/>
-
+            <LoginConsumer>
+                {({actions}) => (
+                        <Button 
+                        title="로그인" 
+                        onPress={async () => {
+                            try{
+                                spinner.start();
+                            const result = await handleApi();
+                            if (!result) {
+                                alert("로그인 실패!");
+                            }else {
+                                actions.setEmail(userId);
+                                actions.setPassword(password);
+                                actions.setAutoLogin(autoLogin);
+                            }
+                        }catch(e){
+                            Alert.alert("Login Error", e.message);
+                        }finally{
+                            spinner.stop();
+                        }
+                        }} 
+                        disabled={disabled}
+                        containerStyle={{marginTop: 0, marginBottom: 2}}/>
+                )}
+            </LoginConsumer>
             <Letter>
             
             <CheckBoxLetter
@@ -163,7 +214,7 @@ const Login = ({navigation}) => {
            
            <SocialContainer>
                 <QText>SNS 계정 로그인</QText>
-                <SocialBackground color={theme.kakaoColor}>
+            <SocialBackground color={theme.kakaoColor}>
                     <KakaoImage source={images.kakaoLogin} />
                     <ButtonText isKakao={true}>카카오 로그인</ButtonText>
                 </SocialBackground>
