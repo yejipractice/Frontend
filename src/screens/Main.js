@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import styled from "styled-components/native";
 import {IconButton} from "../components";
 import { images } from '../images';
@@ -167,7 +167,7 @@ const Main = ({navigation}) => {
     const [isFocused, setIsFocused] = useState(false);
     const [isUser, setIsUser] = useState(true);
 
-    const _handleNoticePress = () => {};
+    const _handleNoticePress = () => {navigation.navigate("Notice")};
 
     //임시로 
     const _handleSearchPress = () => {}; 
@@ -177,6 +177,7 @@ const Main = ({navigation}) => {
     const _handleStorePress = item => {
         navigation.navigate('StoreDetail', {id: item.id, name: item.storeName})
     };
+
 
     return (
         <>

@@ -47,7 +47,11 @@ const MainTab = () => {
                             focused,
                             name: 'home',
                         }),
+                        unmountOnBlur: true,
                 }}
+                listeners={({ navigation }) => ({
+                    blur: () => navigation.setParams({ screen: undefined }),
+                })}
             />
             <Tab.Screen 
                 name = "경매등록" 

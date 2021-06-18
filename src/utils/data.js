@@ -1,4 +1,4 @@
-
+//임시 데이터
 
 export const popular = [
     {
@@ -212,3 +212,68 @@ export const latest = [
     },
 ];
 
+export const notices =[
+    {
+        id: 0,
+        scr: "",
+        name: "가게0",
+        desc: "<가게0> 업체에서 입찰이 들어왔습니다.\nblablablablabla 하였습니다.",
+        time: 5,
+    },
+    {
+        id: 1,
+        scr: "",
+        name: "닉네임1",
+        desc: "<닉네임1> 사용자의 경매 입찰에 선정되었습니다.\nblablablablabla 하였습니다.",
+        time: 5,
+    },
+    {
+        id: 2,
+        scr: "",
+        name: "가게2",
+        desc: "blablablablabla 하였습니다.\nblablablablabla 하였습니다.",
+        time: 5,
+    },
+    {
+        id: 3,
+        scr: "",
+        name: "가게3",
+        desc: "blablablablabla 하였습니다.\nblablablablabla 하였습니다.",
+        time: 5,
+    },
+    {
+        id: 4,
+        scr: "",
+        name: "가게4",
+        desc: "blablablablabla 하였습니다.\nblablablablabla 하였습니다.",
+        time: 5,
+    },
+    {
+        id: 5,
+        scr: "",
+        name: "가게5",
+        desc: "blablablablabla 하였습니다.\nblablablablabla 하였습니다.",
+        time: 5,
+    },
+    {
+        id: 6,
+        scr: "",
+        name: "가게6",
+        desc: "blablablablabla 하였습니다.\nblablablablabla 하였습니다.",
+        time: 5,
+    },
+    {
+        id: 7,
+        scr: "",
+        name: "가게7",
+        desc: "blablablablabla 하였습니다.\nblablablablabla 하였습니다.",
+        time: 5,
+    },
+    {
+        id: 8,
+        scr: "",
+        name: "가게8",
+        desc: "blablablablabla 하였습니다.\nblablablablabla 하였습니다.",
+        time: 5,
+    },
+];
