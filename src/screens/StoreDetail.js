@@ -56,6 +56,8 @@ const DesContainer = styled.View`
     bottom: 0;
     border-bottom-right-radius:10px;
     border-bottom-left-radius:10px;
+    padding-top: 4%;
+    padding-bottom: 4%;
 `;
 
 const FirstInfo = styled.View`
@@ -100,7 +102,6 @@ const Title = styled.Text`
     font-size: 30px;
     font-weight: bold;
     color: ${({theme}) => theme.background};
-    margin-top: 5%;
 `;
 
 const DesText = styled.Text`
@@ -119,30 +120,33 @@ const StarContainer = styled.View`
     top: 0;
 `;
 
+const ReviewButton = styled.TouchableOpacity`
 
-const StoreImage = ({item: {id, src, des}, onPress, isStar,theme}) => {
+`;
+
+const StoreImage = ({item: {id, src, des}, onStarPress, isStar,theme, onReviewPress}) => {
     return (
         <>
             <StyledImage source={{uri: src}} />
             <StarContainer>
                 {isStar? 
                 (
-                    <MaterialCommunityIcons name="star" size={40} onPress={onPress} 
-              style={{marginLeft: 15, marginTop: 5, opacity: 0.7, color: theme.starColor}}/>
+                    <MaterialCommunityIcons name="star" size={40} onPress={onStarPress} color="yellow"
+              style={{marginLeft: 15, marginTop: 5, opacity: 0.7}}/>
                 ) 
                 : (
-                    <MaterialCommunityIcons name="star-outline" size={40} onPress={onPress} 
-              style={{marginLeft: 15, marginTop: 5, opacity: 0.7, color: theme.starColor}}/>
+                    <MaterialCommunityIcons name="star-outline" size={40} onPress={onStarPress} color="yellow"
+              style={{marginLeft: 15, marginTop: 5, opacity: 0.7}}/>
                 )}
             </StarContainer>
             <DesContainer>
                 <DesTextBox>
                     <Title>가게 이름</Title>
-                    <Title>리뷰 별점</Title>
+                    <ReviewButton onPress={onReviewPress}><Title>리뷰 별점</Title></ReviewButton>
                 </DesTextBox>
                 <DesTextBox>
                     <DesText>한식</DesText>
-                    <DesText>리뷰 수</DesText>
+                    <ReviewButton onPress={onReviewPress}><DesText>리뷰 수</DesText></ReviewButton>
                 </DesTextBox>
             </DesContainer>
         </>
@@ -168,6 +172,8 @@ const StoreDetail = ({navigation, route}) => {
 
     const _onStarPress = () => {setIsStar(!isStar)};
 
+    const _onReviewPress = () => {navigation.navigate("Review",{id: id})};
+
     useLayoutEffect(()=> {
         navigation.setOptions({
             headerRight: () => (
@@ -187,7 +193,7 @@ const StoreDetail = ({navigation, route}) => {
            ref={carouselRef}
            data={photos}
            renderItem={({item}) => (
-                <StoreImage item={item} onPress={_onStarPress} isStar={isStar} theme={theme}/>
+                <StoreImage item={item} onReviewPress={_onReviewPress} onStarPress={_onStarPress} isStar={isStar} theme={theme}/>
             )}
             sliderWidth={WIDTH}
             itemWidth={WIDTH}

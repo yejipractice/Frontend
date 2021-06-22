@@ -10,5 +10,7 @@ import Mypage from "./Mypage";
 import StoreInfo from "./StoreInfo";
 import StoreDetail from "./StoreDetail";
 import Message from "./Message";
+import Notice from "./Notice";
+import Review from "./Review";
 
-export {Message, Login, Mode, Signup, Main, AccountFind, RegisterAuction,Auction,Store,Mypage, StoreDetail, StoreInfo};
+export {Review, Message, Login, Mode, Notice, Signup, Main, AccountFind, RegisterAuction,Auction,Store,Mypage, StoreDetail, StoreInfo};
