@@ -16,5 +16,11 @@ import Review from "./Review";
 import StoreInfoChange from "./StoreInfoChange";
 import UserInfo from "./UserInfo";
 import UserInfoChange from "./UserInfoChange";
+import AuctionFinished from "./AuctionFinished";
+import AuctionBid from './AuctionBid';
+import AuctionDetail from './AuctionDetail';
 
-export {UserInfoChange ,UserInfo, Mypage_User, Mypage_Store, Review, StoreInfoChange, Message, Login, Mode, Notice, Signup, Main, AccountFind, RegisterAuction,Auction,Store, StoreDetail, StoreInfo};
+export {
+    AuctionDetail, AuctionBid, AuctionFinished, UserInfoChange, UserInfo, Mypage_User, Mypage_Store, Review, StoreInfoChange,
+    Message, Login, Mode, Notice, Signup, Main, AccountFind, RegisterAuction, Auction, Store, StoreDetail, StoreInfo
+};

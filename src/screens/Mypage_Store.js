@@ -1,11 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { withDecay } from 'react-native-reanimated';
 import styled from "styled-components/native";
-import MypageButton from '../components/MypageButton';
-import ProfileImage from '../components/ProfileImage';
-import SmallButton from '../components/SmallButton';
+import { MypageButton, ProfileImage, SmallButton, Image } from '../components'
 
 const Container = styled.View`
-    background-color: ${({theme})=> theme.background};
+    background-color: ${({ theme }) => theme.background};
     flex: 1;
     padding: 0 50px;
 `;
@@ -26,7 +25,7 @@ const InfoContainer = styled.View`
 const ProfileContainer = styled.View`
     flex-direction: row;
     align-self: flex-start;
-    background-color: ${({theme})=> theme.background};
+    background-color: ${({ theme }) => theme.background};
     align-items:center;
     justify-content: center;
     margin-top: 30px;
@@ -44,41 +43,49 @@ const Username = styled.Text`
 `;
 
 const LogoutContainer = styled.View`
+    flex-direction: row;
     align-items: flex-end;
     justify-content: flex-start;
-    margin-right: 20px;
 `;
 
-const Mypage_Store = ( {navigation} ) => {
+const Mypage_Store = ({ navigation }) => {
+
+    const [document, setDocument] = useState('');
+
     return (
         <Container>
-            
+
             <InfoContainer>
                 <ProfileContainer>
-                <ProfileButton onPress={() => {
-                    navigation.navigate("StoreInfo");
-                }}>
-                    <ProfileImage />
-                </ProfileButton>
-                <ProfileButton onPress={() => {
-                    navigation.navigate("StoreInfo");
-                }}>
-                    <Username>업체 이름</Username>
-                </ProfileButton>
+                    <ProfileButton onPress={() => {
+                        navigation.navigate("StoreInfo");
+                    }}>
+                        <ProfileImage />
+                    </ProfileButton>
+                    <ProfileButton onPress={() => {
+                        navigation.navigate("StoreInfo");
+                    }}>
+                        <Username>업체 이름</Username>
+                    </ProfileButton>
                 </ProfileContainer>
                 <LogoutContainer>
-                     <SmallButton title="로그아웃" onPress={ () => {} } containerStyle={{marginTop: 0}} />
+                    <Image title="서류등록"
+                        url={document}
+                        onChangeImage={url => setDocument(url)}
+                        containerStyle={{ width: '70%', }}
+                    />
+                    <SmallButton title="로그아웃" onPress={() => { }} containerStyle={{ width: '30%', }} />
                 </LogoutContainer>
-               
+
             </InfoContainer>
-            
+
             <IconContainer>
                 <MypageButton title='입찰내역' name='description' />
                 <MypageButton title='업체관리' name='home-work' />
                 <MypageButton title='리뷰관리' name='thumb-up' />
             </IconContainer>
             <IconContainer>
-                <MypageButton title='로그분석' name='insert-chart' /> 
+                <MypageButton title='로그분석' name='insert-chart' />
                 <MypageButton title='채팅관리' name='chat' />
                 <MypageButton title='즐겨찾기' name='star' />
             </IconContainer>
@@ -86,4 +93,4 @@ const Mypage_Store = ( {navigation} ) => {
     );
 };
 
-export default Mypage_Store; 
+export default Mypage_Store;
