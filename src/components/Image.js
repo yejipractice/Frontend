@@ -72,7 +72,7 @@ Image.defaultProps = {
 }
 
 Image.propTypes = {
-  label: PropTypes.string.isRequired,
+  label: PropTypes.string,
   onChangeImage: PropTypes.func,
   uri: PropTypes.string,
 }

@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import styled from "styled-components/native";
-import { StyleSheet,Text, View} from "react-native";
-import {ProfileImage, InfoText,ToggleButton} from '../components';
+import {StyleSheet, Text, View} from "react-native";
+import {ProfileImage, InfoText,ToggleButton, RadioButton} from '../components';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { MaterialIcons } from '@expo/vector-icons';
 
@@ -42,6 +42,14 @@ const RowContainer = styled.View`
     margin-bottom: 5px;
 `;
 
+const RadioTitle = styled.Text`
+    font-size: 18px;
+    font-weight: bold;
+    margin-right: 7px;
+    width: 20%;
+    align-self: center;
+`;
+
 const CenterContainer = styled.View`
     justify-content: center;
     align-items: center;
@@ -49,7 +57,14 @@ const CenterContainer = styled.View`
     margin-bottom: 5%;
 `;
 
-const  StoreInfo = ({navigation}) => {
+const AdditionalContainer = styled.View`
+    flex: 1;
+    flex-direction: row;
+    align-items: flex-start;
+    margin-top: 6px;
+`;
+
+const  UesrInfo = ({navigation}) => {
 
     // 임의로 설정
     const address = "장소 위치";
@@ -57,25 +72,24 @@ const  StoreInfo = ({navigation}) => {
     const userName = "닉네임이름";
     const email = "이메일주소";
     const password = "비밀번호 비공개";
-    const photo = null;
+    const age = "나이";
+    const gender = "female";
     const [isNoticed, setIsNoticed] = useState(false);
 
     return (
         <Container>
             <KeyboardAwareScrollView
                 extraScrollHeight={20}>
-
             <InfoChangeButton 
-                    onPress={() =>{navigation.navigate("StoreInfoChange");
+                    onPress={() =>{navigation.navigate("UserInfoChange");
                 }}>
                     <InfoChangeText>내 정보 수정하기</InfoChangeText>
                 </InfoChangeButton>
 
-                {/* 사진 불러오기 */}
-                <ProfileImage url={photo} />
+                <ProfileImage />
 
                 <CenterContainer>
-                    <RowContainer>
+                <RowContainer>
                         <MaterialIcons name="location-on" size={23}/>
                         <Text style={styles.info}>{address}</Text>
                     </RowContainer>
@@ -87,10 +101,25 @@ const  StoreInfo = ({navigation}) => {
 
                 <InfoContainer>
                     <InfoText label="닉네임" content={userName}/>
-                    <InfoText label="이메일" content={email} />
-                    <InfoText label="비밀번호" content={password} isPassword/>
-                    <InfoText label="서류" 
-                    content={ photo === null ? "서류 등록 필요" : "등록됨" }/>
+                    <InfoText label="이메일" content={email}/>
+                    <InfoText label="비밀번호" content={password}/>
+                    <InfoText label="나이" content={age}/>
+                    <RowContainer>
+                        <AdditionalContainer>
+                        <RadioTitle>성별</RadioTitle>
+                        <RadioButton 
+                            label="여자"
+                            status={(gender==="female"? "checked" : "unchecked")}
+                            containerStyle={{ marginBottom: 0, marginLeft: 0, marginRight: 0}}
+                            onPress={()=>{}}
+                        />
+                        <RadioButton 
+                            label="남자"
+                            status={(gender==="male"? "checked" : "unchecked")}
+                            containerStyle={{marginBottom:0, marginLeft: 0, marginRight: 0}}
+                            onPress={()=>{}}
+                        /></AdditionalContainer>
+                    </RowContainer>
                 </InfoContainer>
                 
                 <View style={styles.hr}/>
@@ -98,7 +127,7 @@ const  StoreInfo = ({navigation}) => {
                 <SettingContainer>
                     <RowContainer>
                         <MaterialIcons name="settings" size={35}/>
-                        <Text style={ styles.setting}>환경설정</Text>
+                        <Text style={styles.setting}> 환경설정</Text>
                     </RowContainer>
                     <SettingContainer>
                         <ToggleButton
@@ -107,13 +136,12 @@ const  StoreInfo = ({navigation}) => {
                             onValueChange={() => setIsNoticed(previousState => !previousState)}/>
                     </SettingContainer>
                 </SettingContainer>
-                
-                {/* 회원탈퇴 구현 필요 */}
+
                 <InfoChangeButton 
-                    onPress={() =>{}}
-                    >
+                    onPress={() =>{}}>
                     <Text style={styles.delete}>회원탈퇴</Text>
                 </InfoChangeButton>
+
                 </KeyboardAwareScrollView>
             </Container>
         
@@ -144,4 +172,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default StoreInfo;
+export default UesrInfo; 

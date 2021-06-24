@@ -1,10 +1,11 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import styled from "styled-components/native";
 import {IconButton} from "../components";
 import { images } from '../images';
 import {FlatList, ScrollView} from "react-native";
 import {popular, recomendedStore} from "../utils/data";
-
+import {MaterialCommunityIcons} from "@expo/vector-icons";
+import {ThemeContext} from "styled-components";
 
 const Header = styled.View`
     height: 12%;
@@ -62,9 +63,10 @@ const LatestView = styled.View`
 `;
 
 const Desc = styled.Text`
-  font-size: 18px;
+  font-size: ${({size}) => size? size : 18}px;
   font-weight: bold;
   color: ${({theme})=> theme.text};
+  margin-right:  ${({marginRight}) => marginRight? marginRight : 0}px;
 `;  
 
 const StyledImage = styled.Image`
@@ -95,6 +97,10 @@ const ItemContainer = styled.TouchableOpacity`
     width: 120;
     padding-top: 10;
     align-items: center;
+`;
+const ReviewContatiner = styled.View`
+  flex-direction: row;
+  align-items: center;
 `;
 
 const RowItemContainer = styled.TouchableOpacity`
@@ -146,7 +152,7 @@ const Item = ({item: {id, userType, count, foodType, price, src}, onPress, lates
     );
 };
 
-const Store = ({item: {id, storeName, score, reviews, foodType, src}, onPress}) => {
+const Store = ({item: {id, storeName, score, reviews, foodType, src}, onPress, theme}) => {
     return (
         <ItemContainer onPress={onPress} >
             <ImageContainer>
@@ -154,7 +160,11 @@ const Store = ({item: {id, storeName, score, reviews, foodType, src}, onPress}) 
             </ImageContainer>
             <DescContainer>
                 <Desc>{storeName}</Desc>
-                <Desc>{score}({reviews})</Desc>
+                <ReviewContatiner>
+                    <MaterialCommunityIcons name="star" size={25} style={{color: theme.starColor, marginRight: 2}}/>
+                    <Desc marginRight={2}>{score}</Desc>
+                    <Desc size={15}>({reviews})</Desc>
+                </ReviewContatiner>
                 <Desc>{foodType}</Desc>
             </DescContainer>
         </ItemContainer> 
@@ -163,11 +173,13 @@ const Store = ({item: {id, storeName, score, reviews, foodType, src}, onPress}) 
 
 
 const Main = ({navigation}) => {
+    const theme = useContext(ThemeContext);
+
     const [input, setInput] = useState("");
     const [isFocused, setIsFocused] = useState(false);
     const [isUser, setIsUser] = useState(true);
 
-    const _handleNoticePress = () => {};
+    const _handleNoticePress = () => {navigation.navigate("Notice")};
 
     //임시로 
     const _handleSearchPress = () => {}; 
@@ -177,6 +189,7 @@ const Main = ({navigation}) => {
     const _handleStorePress = item => {
         navigation.navigate('StoreDetail', {id: item.id, name: item.storeName})
     };
+
 
     return (
         <>
@@ -223,7 +236,7 @@ const Main = ({navigation}) => {
             keyExtractor={item => item['id'].toString()}
             data={recomendedStore}
             renderItem={({item}) => (
-                <Store item={item} onPress={()=> _handleStorePress(item)} />
+                <Store item={item} theme={theme} onPress={()=> _handleStorePress(item)} />
             )} />
             </>
          ) 

@@ -9,7 +9,7 @@ const Container = styled.View`
     width:100%;
     height: 100%;
     justify-content: center;
-    background-color: ${({theme})=> theme.spinnerBackground};
+    background-color: ${({theme})=> theme.spinnerBakcground};
 `;
 
 const Spinner = () => {

@@ -49,21 +49,21 @@ const LogoutContainer = styled.View`
     margin-right: 20px;
 `;
 
-const Mypage = ( {navigation} ) => {
+const Mypage_User = ( {navigation} ) => {
     return (
         <Container>
             
             <InfoContainer>
                 <ProfileContainer>
                 <ProfileButton onPress={() => {
-                    navigation.navigate("StoreInfo");
+                    navigation.navigate("UserInfo");
                 }}>
                     <ProfileImage />
                 </ProfileButton>
                 <ProfileButton onPress={() => {
-                    navigation.navigate("StoreInfo");
+                    navigation.navigate("UserInfo");
                 }}>
-                    <Username>업체 이름</Username>
+                    <Username>사용자 이름</Username>
                 </ProfileButton>
                 </ProfileContainer>
                 <LogoutContainer>
@@ -73,12 +73,12 @@ const Mypage = ( {navigation} ) => {
             </InfoContainer>
             
             <IconContainer>
-                <MypageButton title='입찰내역' name='description' />
-                <MypageButton title='업체관리' name='home-work' />
+                <MypageButton title='이용내역' name='list-alt' />
                 <MypageButton title='리뷰관리' name='thumb-up' />
+                <MypageButton title='공고관리' name='description' />
             </IconContainer>
             <IconContainer>
-                <MypageButton title='로그분석' name='insert-chart' /> 
+                <MypageButton title='결제관리' name='payment' /> 
                 <MypageButton title='채팅관리' name='chat' />
                 <MypageButton title='즐겨찾기' name='star' />
             </IconContainer>
@@ -86,4 +86,4 @@ const Mypage = ( {navigation} ) => {
     );
 };
 
-export default Mypage; 
+export default Mypage_User; 
