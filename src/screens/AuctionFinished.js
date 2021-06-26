@@ -26,11 +26,11 @@ const DropBoxesContainer = styled.View`
     background-color: ${({theme})=> theme.storeButton};
 `;
 
-const Auction = () => {
+const AuctionFinished = () => {
     const theme = useContext(ThemeContext);
 
     const [open1, setOpen1] = useState(false);
-    const [selected1, setSelected1] = useState(null);
+    const [selected1, setSelected1] = useState("");
     const [list1, setList1] = useState([
         {label: "정렬기준1", value: "정렬기준1"},
         {label: "정렬기준2", value: "정렬기준2"},
@@ -38,7 +38,7 @@ const Auction = () => {
     ]);
 
     const [open2, setOpen2] = useState(false);
-    const [selected2, setSelected2] = useState(null);
+    const [selected2, setSelected2] = useState("");
     const [list2, setList2] = useState([
         {label: "정렬기준1", value: "정렬기준1"},
         {label: "정렬기준2", value: "정렬기준2"},
@@ -46,7 +46,7 @@ const Auction = () => {
     ]);
 
     const [open3, setOpen3] = useState(false);
-    const [selected3, setSelected3] = useState(null);
+    const [selected3, setSelected3] = useState("");
     const [list3, setList3] = useState([
         {label: "정렬기준1", value: "정렬기준1"},
         {label: "정렬기준2", value: "정렬기준2"},
@@ -55,7 +55,7 @@ const Auction = () => {
 
     return (
         <Container>
-            <DropBoxesContainer>
+             <DropBoxesContainer>
                 <DropDownPicker
                 open={open1}
                 value={selected1}
@@ -63,7 +63,7 @@ const Auction = () => {
                 setOpen={setOpen1}
                 setValue={setSelected1}
                 setItems={setList1}
-                containerStyle={{width: WIDTH*0.28, alignSelf: 'center'}}
+                containerStyle={{width: WIDTH*0.28}}
                 placeholder="정렬기준1"
                 placeholderStyle={{color: theme.text, fontSize: 14, fontWeight: "bold"}}
                 listMode="SCROLLVIEW" />
@@ -75,7 +75,7 @@ const Auction = () => {
                 setOpen={setOpen2}
                 setValue={setSelected2}
                 setItems={setList2}
-                containerStyle={{width: WIDTH*0.28, alignSelf: 'center'}}
+                containerStyle={{width: WIDTH*0.28}}
                 placeholder="정렬기준2"
                 placeholderStyle={{color: theme.text, fontSize: 14, fontWeight: "bold"}}
                 listMode="SCROLLVIEW" />
@@ -87,16 +87,16 @@ const Auction = () => {
                 setOpen={setOpen3}
                 setValue={setSelected3}
                 setItems={setList3}
-                containerStyle={{width: WIDTH*0.28, alignSelf: 'center'}}
+                containerStyle={{width: WIDTH*0.28}}
                 placeholder="정렬기준3"
                 placeholderStyle={{color: theme.text, fontSize: 14, fontWeight: "bold"}}
                 listMode="SCROLLVIEW" />
             </DropBoxesContainer>
             <AuctionsContainer>
-            <Text style={{fontSize: 30}}>Auction Screen</Text>
+            <Text style={{fontSize: 30}}>AuctionFinished Screen</Text>
             </AuctionsContainer>
         </Container>
     );
 };
 
-export default Auction; 
+export default AuctionFinished; 
