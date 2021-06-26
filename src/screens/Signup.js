@@ -1,8 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
+import { Alert } from 'react-native';
 import styled from "styled-components/native";
-import { Input,Button,Image, RadioButton } from '../components';
+import { Input,Button, RadioButton } from '../components';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { validateEmail, removeWhitespace, validatePassword } from '../utils/common';
+import { __asyncGenerator } from 'tslib';
+import {ProgressContext} from "../contexts";
 
 
 const Container = styled.View`
@@ -54,16 +57,19 @@ const RadioTitle = styled.Text`
 
 const Signup = ({ navigation, route }) => {
 
+    const {spinner} = useContext(ProgressContext);
+
+
     //별명, 업체명
     const [userId, setuserId] = useState('');
+
     //아이디인 이메일
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [passwordConfirm, setPasswordConfirm] = useState('');
     const [disabled, setDisabled] = useState(true);
     const [age, setAge] = useState("");
-    const [isMan, setIsMan] = useState(false); 
-    const [isWoman, setIsWoman] = useState(false);
+    const [gender, setGender] = useState("");
 
     const [errorMessage, setErrorMessage] = useState('');
     const [emailErrorMessage, setEmailErrorMessage] = useState("");
@@ -72,20 +78,22 @@ const Signup = ({ navigation, route }) => {
     const [pressBeforeEmail, setPressBeforeEmail] = useState(false);
     const [isEmailValidated, setIsEmailValidated] = useState(false);
     
-     //이메일 인증버튼 클릭 여부
-     const [emailConfirmPress, setEmailConfirmPress] = useState(false);
+    //이메일 인증버튼 클릭 여부
+    const [emailConfirmPress, setEmailConfirmPress] = useState(false);
 
     //이메일 인증번호
     const [emailConfirmCode, setEmailConfirmCode] = useState("");
     const [emailCodePress, setEmailCodePress] = useState(false);
-    const [pressBeforCode, setPressBeforeCode] = useState(false);
-
 
     //서버를 통해 받아온 값 (임의) 
     //이메일 중복 확인 결과
     const [isSameEmail, setIsSameEmail] = useState(true);
+
     //이메일 인증 확인 결과
     const [isConfirmedEmail, setIsConfirmedEmail] = useState(false);
+
+    //이메일 인증 전송<>확인
+    const [isConfirmedSend, setIsConfirmSend] = useState(true);
 
 
     const userIdRef =useRef();
@@ -95,6 +103,7 @@ const Signup = ({ navigation, route }) => {
     const didMountRef = useRef();
     const ageRef = useRef();
     const emailMountRef = useRef();
+
 
     useEffect(() => {
 
@@ -106,7 +115,7 @@ const Signup = ({ navigation, route }) => {
             else if (!emailConfirmPress && !isSameEmail)
             {
                 _errorMessage = "이메일을 인증하세요.";
-            }else if(!isSameEmail && !pressBeforCode) 
+            }else if(!isSameEmail ) 
             {
                 _errorMessage = "이메일 인증번호를 확인하세요. ";
             }
@@ -121,7 +130,7 @@ const Signup = ({ navigation, route }) => {
                 _errorMessage = "비밀번호를 확인하세요.";
             }
             else if(route.params.mode === "User"){
-                if(isMan===false && isWoman==false){
+                if(!gender){
                     _errorMessage = "성별을 입력하세요.";
                 }
                 if(!age){
@@ -143,7 +152,7 @@ const Signup = ({ navigation, route }) => {
             didMountRef.current = true;
             }
         
-    }, [email, password, passwordConfirm, userId, emailConfirmPress,isMan, isWoman,age,isSameEmail, pressBeforCode]);
+    }, [email, password, passwordConfirm, userId, emailConfirmPress,gender,age,isSameEmail]);
 
     useEffect(() => {
         
@@ -160,7 +169,7 @@ const Signup = ({ navigation, route }) => {
             else if(isSameEmail){
                 _emailErrorMessage = "중복된 이메일입니다. ";
             }
-            else if(!isSameEmail && !pressBeforCode){
+            else if(!isSameEmail ){
                 _emailErrorMessage="사용 가능한 이메일입니다. ";
             }
             else if(!emailConfirmCode){
@@ -178,46 +187,216 @@ const Signup = ({ navigation, route }) => {
         }else {
             emailMountRef.current = true;
         }
-    },[pressBeforeEmail,email,isSameEmail, isConfirmedEmail, emailConfirmCode, emailCodePress, isEmailValidated, pressBeforCode]);
+    },[pressBeforeEmail,email,isSameEmail, isConfirmedEmail, emailConfirmCode, emailCodePress, isEmailValidated]);
 
         useEffect(() => {
             setDisabled(            
                 !(userId && email && password && passwordConfirm && !errorMessage &&isEmailValidated && !emailErrorMessage)
             );
             if(route.params.mode==="User"){
-                if(isMan===false && isWoman==false){
+                if(!gender){
                     setDisabled(true);
                 }
             }
-        }, [userId, email, password, passwordConfirm, errorMessage, isEmailValidated, isMan, isWoman,age, emailErrorMessage]);
+        }, [userId, email, password, passwordConfirm, errorMessage, isEmailValidated, gender,age, emailErrorMessage]);
+        
+        // 이메일 중복확인 
+        const _handleEmailButtonPress = async() => {
+            let url = 'http://192.168.113.1:8000/member/auth/signup?email='+`${email}`;
+            try{
+                spinner.start();
 
-        const _handleEmailButtonPress = () => {
-            if(!isSameEmail){
-                setEmailConfirmPress(true);
-            }else{
-                setPressBeforeEmail(true);
-                if(email){
-                    setIsEmailValidated(true);
-                    //중복 확인 코드 
-                    // setIsSameEmail(true);
-                    setIsSameEmail(false);
+                const result =  await getApi(url);
+                if(!isSameEmail){ 
+                    setEmailConfirmPress(true);
+                }else{
+                    setPressBeforeEmail(true);
+                    if(email){
+                        setIsEmailValidated(true);
+                        //중복 확인 코드 
+                        if (result){
+                            setIsSameEmail(false);
+                            setEmailConfirmPress(true);
+                            setEmailErrorMessage("");
+                            
+                        }else{
+                            setIsSameEmail(true);
+                            setEmailErrorMessage("중복된 이메일입니다.");
+                        }
+                    }
                 }
+            }catch(e){
+                    console.log("Error", e.message);
+            }finally{
+                spinner.stop();
+            }
+                  
+        };
+        // 이메일 키값 전송
+        const _handleEmailVaildateSend = async() => {
+            try{
+                spinner.start();
+            
+                const result =  await postemailApi();
+                if(!result){
+                    alert("이메일을 다시 확인하세요.");
+                }else{
+                    alert("인증번호가 전송되었습니다.");
+                    setIsConfirmSend();
+                }
+        
+            }catch(e){
+                    console.log("Error", e.message);
+            }finally{
+                spinner.stop();
+            }
+           
+        }
+
+        // 이메일 인증 키값 확인
+        const _handleEmailVaildatePress = async() => {
+            let url = 'http://192.168.113.1:8000/member/auth/signup?email='+`${email}&key=${emailConfirmCode}`;
+            try{
+                spinner.start();
+            
+                setPressBeforeCode(true);
+                    const result = await getApi(url);
+                    if(emailConfirmCode)
+                    {    
+                        if(result){
+                            setEmailCodePress(true);
+                            setIsConfirmedEmail(true)
+                        }
+                        else{
+                            setIsConfirmedEmail(false)
+                            alert("이메일을 다시 확인하세요.");
+                        }
+                    }
+            
+            }catch(e){
+                    console.log("Error", e.message);
+            }finally{
+                spinner.stop();
+            }
+                
+        };
+
+        // 회원가입 처리
+        const _handleSignupPress = async() => {
+            try{
+                spinner.start();
+
+                const result =  await postApi();
+
+                if(result){
+                    Alert.alert("","회원가입이 되었습니다.",[ { text:"확인", onPress: () => navigation.navigate("Login") }] ); 
+                }
+                else{
+                    alert("다시 시도해주세요.");
+                }
+        
+            }catch(e){
+                    console.log("Error", e.message);
+            }finally{
+                spinner.stop();
             }
            
         };
-        //서버 연동 후 이메일 인증 
 
-        const _handleEmailVaildatePress = () => {
-                setPressBeforeCode(true);
-                if(emailConfirmCode)
-                {
-                    setEmailCodePress(true);
-                    //이메일 인증 코드
-                    //setIsConfirmedEmail(false);
-                    setIsConfirmedEmail(true);
+
+        // 이메일 키값 전송 api
+        const postemailApi = async () => {
+            let url = 'http://192.168.113.1:8000/member/auth/signup/verification?email='+`${email}`;
+            console.log(url);
+            
+            let options = {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json'
+                },
+            };
+            try {
+                let response = await fetch(url, options);
+                let res = await response.json();
+
+                console.log(res);
+                return res["success"];
+
+              } catch (error) {
+                console.error(error);
+              }
+
+        }
+
+        // 회원가입 api
+        const postApi = async () => {
+            let url = 'http://192.168.113.1:8000/member/auth/signup'; 
+            let Info;
+
+            if(route.params.mode === 'User'){
+                Info = {
+                    age: parseInt(age),
+                    gender: gender,
+                    signUserDto: {
+                        email : email,
+                        name : userId,
+                        password : password,
+                      },
+                    userType: "CUSTOMER",
                 }
-               
-        };
+
+            }
+            else if(route.params.mode === 'Store'){
+                Info = {
+                    signUserDto: {
+                        email : email,
+                        name : userId,
+                        password : password,
+                      },
+                    userType: "STORE",
+                }
+            }
+
+            let options = {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify( Info ),
+            
+            };
+            console.log(JSON.stringify( Info ));
+            try {
+                let response = await fetch(url, options);
+                let res = await response.json();
+
+                console.log(res);
+                return res["success"];
+                
+                
+              } catch (error) {
+                console.error(error);
+              }
+
+        }
+
+        // 서버 get 처리
+        const getApi = async (url) => {
+            
+            console.log(url);
+            try {
+                let response = await fetch(url);
+                let res = await response.json();
+                console.log(res);
+                return res["success"];
+
+              } catch (error) {
+                console.error(error);
+              }
+           
+        }
 
     return (
         <KeyboardAwareScrollView
@@ -233,7 +412,7 @@ const Signup = ({ navigation, route }) => {
                 placeholder="이메일을 입력하세요"
                 returnKeyType="next"
                 hasButton
-                buttonTitle={isSameEmail? "중복확인" : "인증"}
+                buttonTitle="중복확인"
                 onPress={_handleEmailButtonPress}
                 completed={emailConfirmPress? true : false}
             />
@@ -248,8 +427,8 @@ const Signup = ({ navigation, route }) => {
             placeholder="인증번호를 입력하세요"
             returnKeyType="next"
             hasButton
-            buttonTitle="인증확인"
-            onPress={_handleEmailVaildatePress}
+            buttonTitle={ isConfirmedSend ? "인증확인" : "인증전송"}
+            onPress={ isConfirmedSend ? _handleEmailVaildatePress : _handleEmailVaildateSend}
             completed={isConfirmedEmail? true : false}
             />}
 
@@ -301,20 +480,16 @@ const Signup = ({ navigation, route }) => {
                 <RadioView>
                         <RadioButton
                             label="남자"
-                            value={isMan}
-                            status={ isMan? 'checked' : 'unchecked' }
+                            status={ gender === 'male' ? 'checked' : 'unchecked' }
                             onPress={()=>{
-                                setIsMan(!isMan);
-                                setIsWoman(false);
+                                setGender('male');
                             }}
                         />
                         <RadioButton
                             label="여자"
-                            value={isWoman}
-                            status={ isWoman? 'checked' : 'unchecked' }
+                            status={ gender === 'female'? 'checked' : 'unchecked' }
                             onPress={()=>{
-                                setIsWoman(!isWoman);
-                                setIsMan(false);
+                                setGender('female');
                             }}
                         />
                     </RadioView>
@@ -324,13 +499,10 @@ const Signup = ({ navigation, route }) => {
             <ErrorText>{errorMessage}</ErrorText>
             <Button
                 title="회원가입"
-                onPress={() => {
-                    navigation.navigate("Login"); 
-                    // 서버 연동 이후 스피너 적용
-                }}
+                onPress={_handleSignupPress}
                 disabled={disabled}
             />
-
+            
         </Container>
         </KeyboardAwareScrollView>
     );
