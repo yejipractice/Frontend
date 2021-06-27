@@ -58,4 +58,5 @@ export const theme = {
     kakaoColor: color.kakao,
     naverColor: color.naver,
     kakaoTextColor: color.kakaoText,
+    opacityTextColor: color.opacityDark,
 };

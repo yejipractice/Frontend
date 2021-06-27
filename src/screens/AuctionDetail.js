@@ -85,16 +85,18 @@ const ButtonContainer = styled.View`
 
 `;
 
-const AuctionDetail = ({ navigation }) => {
+const AuctionDetail = ({ navigation, route}) => {
 
     const [isStar, setIsStar] = useState(false);
     const _onStarPress = () => { setIsStar(!isStar) };
 
     const _onMessagePress = () => { navigation.navigate("Message") };
+    
+    const AuctionId = route.params.id;
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            headerTitle: <Title>공고 제목</Title>,
+            headerTitle: "",
             headerRight: () => (
                 (<MaterialCommunityIcons name="send" size={35} onPress={_onMessagePress}
                     style={{ marginRight: 15, marginBottom: 3, marginTop: 3, opacity: 0.7 }} />)
@@ -110,7 +112,7 @@ const AuctionDetail = ({ navigation }) => {
             >
                 <Header>
                     <View style={styles.name}>
-                        <Title>공고 제목</Title>
+                        <Title>공고 제목{AuctionId}</Title>
                         <Text>닉네임</Text>
                     </View>
                     <Endtime>
