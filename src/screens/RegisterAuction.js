@@ -151,8 +151,7 @@ const RegisterAuction = ({navigation}) => {
     const [endDate, setEndDate] = useState("");
     const [endTime, setEndTime] = useState("");
     const [endTimeVisible, setEndTimeVisible] = useState(false);
-    const [meetingType, setMeetingType] = useState("");
-    const [foodType, setFoodType] = useState("");
+    const [meetingType, setMeetingType] = useState(null);
     const [numOfPeople, setNumOfPeople] = useState("");
     const [maxPrice, setMaxPrice] = useState("");
     const [minPrice, setMinPrice] = useState("");
@@ -160,8 +159,8 @@ const RegisterAuction = ({navigation}) => {
     const [disabled, setDisabled] = useState(true);
     const [uploaded, setUploaded] = useState(false);
     const [content, setContent] = useState('');
-    const [nowTime, setNowTime] = useState("");
     const didMountRef = useRef();
+    const [foodType, setFoodType] = useState([]);
 
     // 지역 드롭다운  
     const [open, setOpen] = useState(false);
@@ -223,9 +222,7 @@ const RegisterAuction = ({navigation}) => {
         }else if(parseInt(book)<parseInt(getNowString())) {
           _errorMessage = "예약 시간을 잘못 입력하였습니다";
         }
-        else if(!meetingType){
-          _errorMessage = "단체 유형을 입력하세요";
-        }else if(!foodType){
+      else if(foodType.length == 0){
           _errorMessage = "선호 메뉴을 입력하세요";
         }else if(!numOfPeople){
           _errorMessage = "인원 수를 입력하세요";
@@ -281,11 +278,11 @@ const RegisterAuction = ({navigation}) => {
       }else {
         didMountRef.current = true;
       }
-    },[title, bookDate,bookTime,endDate,endTime,meetingType,foodType,numOfPeople,minPrice, maxPrice,selected,book,end]);
+    },[title, bookDate,bookTime,endDate,endTime,foodType,numOfPeople,minPrice, maxPrice,selected,book,end]);
 
     useEffect(()=> {
-      setDisabled(!(title && bookDate && bookTime && endDate && endTime && meetingType && foodType && numOfPeople && selected  && maxPrice && minPrice && !errorMessage));
-    },[title, bookDate,bookTime,endDate,endTime,meetingType,foodType,numOfPeople,minPrice,maxPrice,errorMessage,selected]);
+      setDisabled(!(title && bookDate && bookTime && endDate && endTime && foodType.length!=0 && numOfPeople && selected  && maxPrice && minPrice && !errorMessage));
+    },[title, bookDate,bookTime,endDate,endTime,foodType,numOfPeople,minPrice,maxPrice,errorMessage,selected]);
 
 
     useEffect(()=> {
@@ -307,7 +304,7 @@ const RegisterAuction = ({navigation}) => {
         setEndDate("");
         setEndTime("");
         setMeetingType("");
-        setFoodType("");
+        setFoodType([]);
         setNumOfPeople("");
         setSelected("");
         setSelectedAge("");
@@ -554,67 +551,83 @@ const RegisterAuction = ({navigation}) => {
             <RadioContiner>
             <RadioButton 
             label="한식"
-            value={(foodType==="한식")}
-            status={(foodType==="한식"? "checked" : "unchecked")}
+            value={(foodType.includes("한식"))}
+            status={(foodType.includes("한식")? "checked" : "unchecked")}
             containerStyle={{ marginLeft: 0, marginRight: 0}}
             onPress={() => {
-                if(foodType==="한식"){
-                    setFoodType("");
+                if(foodType.includes("한식")){
+                  let array = foodType.filter((el) => el !=="한식");
+                  setFoodType(array);
                 }else {
-                    setFoodType("한식");
+                  let array = foodType.slice();
+                  array.push("한식");
+                  setFoodType(array)
                 }
             }}
             />
             <RadioButton 
             label="양식"
-            value={(foodType==="양식")}
-            status={(foodType==="양식"? "checked" : "unchecked")}
+            value={(foodType.includes("양식"))}
+            status={(foodType.includes("양식")? "checked" : "unchecked")}
             containerStyle={{ marginLeft: 0, marginRight: 0}}
             onPress={() => {
-                if(foodType==="양식"){
-                    setFoodType("");
-                }else {
-                    setFoodType("양식");
-                }
+              if(foodType.includes("양식")){
+                let array = foodType.filter((el) => el !=="양식");
+                setFoodType(array);
+              }else {
+                let array = foodType.slice();
+                array.push("양식");
+                setFoodType(array)
+              }
             }}
             />
            <RadioButton 
             label="중식"
-            value={(foodType==="중식")}
-            status={(foodType==="중식"? "checked" : "unchecked")}
+            value={(foodType.includes("중식"))}
+            status={(foodType.includes("중식")? "checked" : "unchecked")}
             containerStyle={{ marginLeft: 0, marginRight: 0}}
             onPress={() => {
-                if(foodType==="중식"){
-                    setFoodType("");
-                }else {
-                    setFoodType("중식");
-                }
+              if(foodType.includes("중식")){
+                let array = foodType.filter((el) => el !=="중식");
+                setFoodType(array);
+              }else {
+                let array = foodType.slice();
+                array.push("중식");
+                setFoodType(array)
+              }
             }}
             />
             <RadioButton 
             label="일식"
-            value={(foodType==="일식")}
-            status={(foodType==="일식"? "checked" : "unchecked")}
+            value={(foodType.includes("일식"))}
+            status={(foodType.includes("일식")? "checked" : "unchecked")}
             containerStyle={{ marginLeft: 0, marginRight: 0}}
             onPress={() => {
-                if(foodType==="일식"){
-                    setFoodType("");
-                }else {
-                    setFoodType("일식");
-                }
+              if(foodType.includes("일식")){
+                let array = foodType.filter((el) => el !=="일식");
+                setFoodType(array);
+              }else {
+                let array = foodType.slice();
+                array.push("일식");
+                setFoodType(array)
+              }
             }}
             />
             <RadioButton 
             label="기타"
-            value={(foodType==="기타")}
-            status={(foodType==="기타"? "checked" : "unchecked")}
+            value={(foodType.includes("기타"))}
+            status={(foodType.includes("기타")? "checked" : "unchecked")}
             containerStyle={{ marginLeft: 0, marginRight: 0}}
             onPress={() => {
-                if(foodType==="기타"){
-                    setFoodType("");
-                }else {
-                    setFoodType("기타");
-                }
+              if(foodType.includes("기타")){
+                let array = foodType.filter((el) => el !=="기타");
+                setFoodType(array);
+              }else {
+                let array = foodType.slice();
+                array.push("기타");
+                setFoodType(array)
+                console.log(foodType);
+              }
             }}
             />
             </RadioContiner>

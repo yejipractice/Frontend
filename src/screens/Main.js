@@ -69,7 +69,16 @@ const Desc = styled.Text`
   margin-right:  ${({ marginRight }) => marginRight ? marginRight : 0}px;
 `;
 
-const StyledImage = styled.Image`
+// const StyledImage = styled.Image`
+//     margin-top: 3px;
+//     margin-bottom: 10px;
+//     background-color:${({ theme }) => theme.imageBackground};
+//     height: 80;
+//     width: 80;
+//     border-radius: ${({ rounded }) => (rounded ? 50 : 0)}px;
+// `;
+
+const StyledImage = styled.View`
     margin-top: 3px;
     margin-bottom: 10px;
     background-color:${({ theme }) => theme.imageBackground};
@@ -126,7 +135,8 @@ const Item = ({ item: { id, userType, count, foodType, price, src }, onPress, la
     return (
         latest ? (
             <RowItemContainer onPress={onPress}>
-                <StyledImage source={{ uri: src }} rounded={true} />
+                {/* <StyledImage source={{ uri: src }} rounded={true} /> */}
+                <StyledImage rounded={true} />
                 <RowDescContainer>
                     <Desc>{userType} {count}명</Desc>
                     <Desc>{foodType}</Desc>
@@ -140,7 +150,8 @@ const Item = ({ item: { id, userType, count, foodType, price, src }, onPress, la
             : (
                 <ItemContainer onPress={onPress} >
                     <ImageContainer>
-                        <StyledImage source={{ uri: src }} rounded={true} />
+                        {/* <StyledImage source={{ uri: src }} rounded={true} /> */}
+                        <StyledImage rounded={true} />
                     </ImageContainer>
                     <DescContainer>
                         <Desc>{userType} {count}명</Desc>
@@ -156,7 +167,8 @@ const Store = ({ item: { id, storeName, score, reviews, foodType, src }, onPress
     return (
         <ItemContainer onPress={onPress} >
             <ImageContainer>
-                <StyledImage source={{ uri: src }} rounded={false} />
+                {/* <StyledImage source={{ uri: src }} rounded={false} /> */}
+                <StyledImage />
             </ImageContainer>
             <DescContainer>
                 <Desc>{storeName}</Desc>

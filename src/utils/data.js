@@ -403,3 +403,62 @@ export const AuctionList = [
         registerTime: "2021/07/01 12:30PM",
     },
 ];
+
+export const StoreList = [
+    {
+        url: "",
+        id: 0,
+        name: "냠냠 치킨",
+        ment: "치킨 냠냠 드세요",
+        distance: 300,
+        score: 4.5,
+    },
+    {
+        url: "",
+        id: 1,
+        name: "냠냠 피자",
+        ment: "피자 냠냠 드세요",
+        distance: 500,
+        score: 4.3,
+    },
+    {
+        url: "",
+        id: 2,
+        name: "도넛츠 도넛",
+        ment: "도넛 꽂아 드세요",
+        distance: 1000,
+        score: 4.0,
+    },
+    {
+        url: "",
+        id: 3,
+        name: "꼬기나라",
+        ment: "찹찹 구워 드세요",
+        distance: 900,
+        score: 4.8,
+    },
+    {
+        url: "",
+        id: 4,
+        name: "이번엔 뭐 먹을래",
+        ment: "먹고 싶은 것들 다 드세요",
+        distance: 100,
+        score: 5.0,
+    },
+    {
+        url: "",
+        id: 5,
+        name: "웩웩 감튀",
+        ment: "감튀 먹고 웩하세요",
+        distance: 300,
+        score: 3.0,
+    },
+    {
+        url: "",
+        id: 6,
+        name: "김치찌개 최고",
+        ment: "후루룩 드세요",
+        distance: 1200,
+        score: 4.7,
+    },
+];

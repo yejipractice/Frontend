@@ -5,6 +5,7 @@ import { Spinner } from '../components';
 import { ProgressContext } from '../contexts';
 import MainStack from "./MainStack";
 import MainTab from './MainTab';
+import {SafeAreaView} from "react-native";
 
 
 
@@ -15,6 +16,8 @@ const Navigation = () => {
     const {user} = useContext(LoginContext);
 
     return (
+        <>
+        <SafeAreaView />
         <LoginProvider>
         <NavigationContainer>
             <MainTab />
@@ -22,6 +25,7 @@ const Navigation = () => {
             {inProgress&&<Spinner />}
         </NavigationContainer>
         </LoginProvider>
+        </>
     );
 };
 
