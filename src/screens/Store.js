@@ -150,7 +150,7 @@ const Item = ({item: {url, id, name, ment, distance, score}, onPress, onStarPres
     );
 };
 
-const Store = () => {
+const Store = ({navigation}) => {
     const theme = useContext(ThemeContext);
 
     const [sort,setSort] = useState(0);
@@ -190,7 +190,7 @@ const Store = () => {
                 bottom: 10,
                 right: 5,
             }}>
-            <MapButton>
+            <MapButton onPress={()=> navigation.navigate("StoreMap")}>
                 <MapText>지도로 보기</MapText>
             </MapButton>
             </View>

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { withDecay } from 'react-native-reanimated';
 import styled from "styled-components/native";
 import { MypageButton, ProfileImage, SmallButton, Image } from '../components'
+import {LoginContext} from "../contexts";
 
 const Container = styled.View`
     background-color: ${({ theme }) => theme.background};
@@ -49,7 +50,7 @@ const LogoutContainer = styled.View`
 `;
 
 const Mypage_Store = ({ navigation }) => {
-
+    const {setSuccess} = useContext(LoginContext);
     const [document, setDocument] = useState('');
 
     return (
@@ -74,7 +75,7 @@ const Mypage_Store = ({ navigation }) => {
                         onChangeImage={url => setDocument(url)}
                         containerStyle={{ width: '70%', }}
                     />
-                    <SmallButton title="로그아웃" onPress={() => { }} containerStyle={{ width: '30%', }} />
+                    <SmallButton title="로그아웃" onPress={() => { setSuccess(false)}} containerStyle={{ width: '30%', }} />
                 </LogoutContainer>
 
             </InfoContainer>
