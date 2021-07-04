@@ -13,6 +13,7 @@ const color={
     naver: "#03c75a",
     kakaoText: "#181600",
     mapButton: "rgba(0,149,255,0.7)",
+    transparent: "rgba(32,46,83,0)",
 };
 
 export const theme = {
@@ -61,4 +62,5 @@ export const theme = {
     kakaoTextColor: color.kakaoText,
     opacityTextColor: color.opacityDark,
     mapButtonColor: color.mapButton,
+    transparentColor: color.transparent,
 };

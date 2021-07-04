@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "dinig-together",
+    "name": "Dinig-together",
     "slug": "dinig-together",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -17,13 +17,29 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "config": {
+        "googleMapsApiKey": "AIzaSyCpzahjEor-ycuD_tuk7RehWRDS6nyCJyI"
+      },
+      "supportsTablet": false,
+      "bundleIdentifier": "com.DiningTogether",
+      "buildNumber": "1.0.0",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "The app accesses to photo library to upload your profile photo when you are signing up or updatinh the profile."
+      }
     },
     "android": {
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCu5NZAAzLftXmdHgW0OHN22uxq3EuYQpM"
+        }
+      },
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.DiningTogether.DiningTogether",
+      "versionCode": 1,
+      "permissions": ["CAMERA"]
     },
     "web": {
       "favicon": "./assets/favicon.png"
