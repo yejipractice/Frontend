@@ -13,12 +13,15 @@ const StoreListStack = ({navigation, route}) => {
     return (
         <Stack.Navigator
         screenOptions={{
-
+            
         }}>
             <Stack.Screen name="StoreList" component={StoreListTab} options={{headerShown: false}}/>
             <Stack.Screen name="StoreDetailStack" component={StoreDetailStack}
                 options={{headerShown: false}} />
-            <Stack.Screen name="StoreMap" component={StoreMap} options={{headerTitle: " "}} />
+            <Stack.Screen name="StoreMap" component={StoreMap} 
+            options={{
+                headerTitle: " ",
+                headerTransparent: true}} />
         </Stack.Navigator>
     );
 };

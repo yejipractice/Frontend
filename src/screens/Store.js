@@ -1,11 +1,12 @@
 import React, {useState, useEffect, useContext} from 'react';
 import styled from "styled-components/native";
-import {Text, Dimensions, FlatList, View, ScrollView} from "react-native";
+import {Text, Dimensions, FlatList, View, ScrollView, Alert} from "react-native";
 import { IconButton } from "../components";
 import { images } from '../images';
 import { ThemeContext } from "styled-components";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {StoreList} from "../utils/data";
+import * as Location from "expo-location";
 
 const HEIGHT = Dimensions.get("screen").width;
 
@@ -155,20 +156,39 @@ const Store = ({navigation}) => {
 
     const [sort,setSort] = useState(0);
     const [isStar, setIsStar] = useState(false);
+    const [loc, setLoc] = useState(null);
+    const [lati, setLati] = useState(0);
+    const [longi, setLongi] = useState(0);
 
     const _onStorePress = item => {};
     const _onStarPress = () => {setIsStar(!isStar);}
 
+    const getLocation = async () => {
+        let {status} = await Location.requestForegroundPermissionsAsync();
+        if (status=="granted") {
+            let location = await Location.getCurrentPositionAsync({}); 
+            setLoc(location);
+            setLati(location.coords.latitude);
+            setLongi(location.coords.longitude);
+            console.log(location.coords);
+        }
+        return loc;
+    };
+
+    useEffect(() => {
+        getLocation();
+    }, []);
+
     return (
         <Container>
             <ButtonsContainer>
-                <ButtonBox onPress={() => setSort(1)} checked={sort==1}>
+                <ButtonBox onPress={() => setSort(1)} checked={sort===1}>
                     <ButtonText>정렬기준1</ButtonText>
                 </ButtonBox>
-                <ButtonBox onPress={() => setSort(2)} checked={sort==2}>
+                <ButtonBox onPress={() => setSort(2)} checked={sort===2}>
                     <ButtonText>정렬기준2</ButtonText>
                 </ButtonBox>
-                <ButtonBox onPress={() => setSort(3)} checked={sort==3}>
+                <ButtonBox onPress={() => setSort(3)} checked={sort===3}>
                     <ButtonText>정렬기준3</ButtonText>
                 </ButtonBox>
             </ButtonsContainer>
@@ -190,7 +210,16 @@ const Store = ({navigation}) => {
                 bottom: 10,
                 right: 5,
             }}>
-            <MapButton onPress={()=> navigation.navigate("StoreMap")}>
+            <MapButton 
+            onPress={async ()=> {
+                try {
+                    const res = await getLocation();
+                    console.log(res)
+                    navigation.navigate("StoreMap", {longi: longi, lati: lati});
+                }catch(e) {
+                    Alert.alert("Location Error", e.message);
+                }
+            }}>
                 <MapText>지도로 보기</MapText>
             </MapButton>
             </View>
