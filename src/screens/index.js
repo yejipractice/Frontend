@@ -19,7 +19,7 @@ import UserInfoChange from "./UserInfoChange";
 import AuctionFinished from "./AuctionFinished";
 import AuctionBid from './AuctionBid';
 import AuctionDetail from './AuctionDetail';
-import StoreMap from './StroeMap';
+import StoreMap from './StoreMap';
 
 export {
     AuctionDetail, AuctionBid, AuctionFinished, UserInfoChange, UserInfo, Mypage_User, Mypage_Store, Review, StoreInfoChange,
