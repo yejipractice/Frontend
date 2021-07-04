@@ -193,8 +193,7 @@ const Main = ({ navigation }) => {
 
     const _handleNoticePress = () => { navigation.navigate("Notice") };
 
-    //임시로 
-    const _handleSearchPress = () => { };
+    const _handleSearchPress = () => { navigation.navigate("SearchTab", {input: input}) };
 
     const _handleItemPress = item => {
         navigation.navigate('AuctionDetail', { id: item.id })

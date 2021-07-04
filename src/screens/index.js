@@ -20,8 +20,10 @@ import AuctionFinished from "./AuctionFinished";
 import AuctionBid from './AuctionBid';
 import AuctionDetail from './AuctionDetail';
 import StoreMap from './StoreMap';
+import SearchStore from "./SearchStore"
+import SearchAuction from './SearchAuction';
 
 export {
     AuctionDetail, AuctionBid, AuctionFinished, UserInfoChange, UserInfo, Mypage_User, Mypage_Store, Review, StoreInfoChange,
-    Message, Login, Mode, Notice, Signup, Main, AccountFind, RegisterAuction, Auction, Store, StoreDetail, StoreInfo, StoreMap,
+    SearchAuction, SearchStore, Message, Login, Mode, Notice, Signup, Main, AccountFind, RegisterAuction, Auction, Store, StoreDetail, StoreInfo, StoreMap,
 };
