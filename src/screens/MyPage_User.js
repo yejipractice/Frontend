@@ -1,8 +1,9 @@
-import React from 'react';
+import React,{useContext} from 'react';
 import styled from "styled-components/native";
 import MypageButton from '../components/MypageButton';
 import ProfileImage from '../components/ProfileImage';
 import SmallButton from '../components/SmallButton';
+import {LoginContext} from "../contexts";
 
 const Container = styled.View`
     background-color: ${({theme})=> theme.background};
@@ -49,36 +50,38 @@ const LogoutContainer = styled.View`
     margin-right: 20px;
 `;
 
-const Mypage = ( {navigation} ) => {
+const Mypage_User = ( {navigation} ) => {
+    const {setSuccess} = useContext(LoginContext);
+
     return (
         <Container>
             
             <InfoContainer>
                 <ProfileContainer>
                 <ProfileButton onPress={() => {
-                    navigation.navigate("StoreInfo");
+                    navigation.navigate("UserInfo");
                 }}>
                     <ProfileImage />
                 </ProfileButton>
                 <ProfileButton onPress={() => {
-                    navigation.navigate("StoreInfo");
+                    navigation.navigate("UserInfo");
                 }}>
-                    <Username>업체 이름</Username>
+                    <Username>사용자 이름</Username>
                 </ProfileButton>
                 </ProfileContainer>
                 <LogoutContainer>
-                     <SmallButton title="로그아웃" onPress={ () => {} } containerStyle={{marginTop: 0}} />
+                     <SmallButton title="로그아웃" onPress={ () => {setSuccess(false)} } containerStyle={{marginTop: 0}} />
                 </LogoutContainer>
                
             </InfoContainer>
             
             <IconContainer>
-                <MypageButton title='입찰내역' name='description' />
-                <MypageButton title='업체관리' name='home-work' />
+                <MypageButton title='이용내역' name='list-alt' />
                 <MypageButton title='리뷰관리' name='thumb-up' />
+                <MypageButton title='공고관리' name='description' />
             </IconContainer>
             <IconContainer>
-                <MypageButton title='로그분석' name='insert-chart' /> 
+                <MypageButton title='결제관리' name='payment' /> 
                 <MypageButton title='채팅관리' name='chat' />
                 <MypageButton title='즐겨찾기' name='star' />
             </IconContainer>
@@ -86,4 +89,4 @@ const Mypage = ( {navigation} ) => {
     );
 };
 
-export default Mypage; 
+export default Mypage_User; 

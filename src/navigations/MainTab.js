@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{useState} from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Main, Auction, Store, Mypage} from '../screens';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -6,6 +6,9 @@ import { theme } from '../theme';
 import MypageStack from './MypageStack';
 import RegisterAuctionStack from "./RegisterAuctionStack";
 import MainStack from './MainStack';
+import AuctionListTab from './AuctionListTab';
+import AuctionListStack from './AuctionListStack';
+import StoreListStack from './StoreListStack';
 
 const Tab = createBottomTabNavigator();
 
@@ -19,7 +22,9 @@ const TabBarIcon = ({ focused, name }) => {
     );
 };
 
-const MainTab = () => {
+const MainTab = ({navigation}) => {
+    
+
     return(
         <Tab.Navigator
             initialRouteName="홈"
@@ -47,7 +52,11 @@ const MainTab = () => {
                             focused,
                             name: 'home',
                         }),
+                        unmountOnBlur: true,
                 }}
+                listeners={({ navigation }) => ({
+                    blur: () => navigation.setParams({ screen: undefined }),
+                })}
             />
             <Tab.Screen 
                 name = "경매등록" 
@@ -58,30 +67,41 @@ const MainTab = () => {
                             focused,
                             name: 'control-point',
                         }),
-                    
+                        unmountOnBlur: true,
                 }}
+                listeners={({ navigation }) => ({
+                    blur: () => navigation.setParams({ screen: undefined }),
+                })}
             />
             <Tab.Screen 
                 name = "경매" 
-                component={Auction} 
+                component={AuctionListStack} 
                 options={{
                     tabBarIcon: ({ focused }) =>
                         TabBarIcon({
                             focused,
                             name: 'thumbs-up-down',
                         }),
+                        unmountOnBlur: true,
                 }}
+                listeners={({ navigation }) => ({
+                    blur: () => navigation.setParams({ screen: undefined }),
+                })}
             />
             <Tab.Screen 
                 name = "업체" 
-                component={Store} 
+                component={StoreListStack} 
                 options={{
                     tabBarIcon: ({ focused }) =>
                         TabBarIcon({
                             focused,
                             name: 'local-restaurant',
                         }),
+                        unmountOnBlur: true,
                 }}
+                listeners={({ navigation }) => ({
+                    blur: () => navigation.setParams({ screen: undefined }),
+                })}
             />
             <Tab.Screen 
                 name = "마이페이지" 
@@ -92,7 +112,11 @@ const MainTab = () => {
                             focused,
                             name: 'person',
                         }),
+                        unmountOnBlur: true,
                 }}
+                listeners={({ navigation }) => ({
+                    blur: () => navigation.setParams({ screen: undefined }),
+                })}
             />
 
         </Tab.Navigator>
