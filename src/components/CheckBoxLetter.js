@@ -13,8 +13,7 @@ const Container = styled.TouchableOpacity`
 `;
 
 const Title = styled.Text`
-    height: 30px;
-    line-height: 30px;
+    line-height: 23px;
     font-size: 16px
     font-weight: bold;
     color: ${({theme})=> theme.text};

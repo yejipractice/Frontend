@@ -8,6 +8,10 @@ const color={
     lightGrey: "#f2f2f2",
     opacityDark: "rgba(32,46,83,0.5)",
     yellow: "#ffff00",
+    opacity: "rgba(0,149,255,0.5)",
+    kakao: "#ffeb00",
+    naver: "#03c75a",
+    kakaoText: "#181600",
 };
 
 export const theme = {
@@ -46,4 +50,13 @@ export const theme = {
     opacityBackground: color.opacityDark,
 
     starColor: color.yellow,
+    imageButtonIcon: color.white,
+    imageButtonBackground: color.grey,
+    buttonDisabled: color.grey,
+    opacityColor: color.opacity,
+
+    kakaoColor: color.kakao,
+    naverColor: color.naver,
+    kakaoTextColor: color.kakaoText,
+    opacityTextColor: color.opacityDark,
 };
