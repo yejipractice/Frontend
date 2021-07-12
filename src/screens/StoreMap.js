@@ -42,6 +42,18 @@ const ItemContainer = styled.TouchableOpacity`
     background-color: ${({theme})=> theme.background}
 `;
 
+const CurrentLocContainer = styled.TouchableOpacity`
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50px;
+    border-width: 1px;
+`;
+
 const StyledImage = styled.View`
     background-color:${({ theme }) => theme.imageBackground};
     height: 60;
@@ -147,6 +159,12 @@ const StoreMap = ({navigation, route}) => {
 
     const [isStar, setIsStar] = useState(false);
     const [sort, setSort] = useState(0);
+    const [region, setRegion] = useState({
+        longitude: longi,
+        latitude: lati,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+    });
 
     const _onStorePress = item => {};
 
@@ -162,22 +180,28 @@ const StoreMap = ({navigation, route}) => {
         style={{
             width: WIDTH,
             height: HEIGHT*0.4,
-            zIndex: 0,
         }}
-        region={{
+        initialRegion={{
             longitude: longi,
             latitude: lati,
             latitudeDelta: 0.01,
             longitudeDelta: 0.01,
         }}
-        provider={PROVIDER_GOOGLE}>
-        <Marker
-            coordinate={{
-                latitude: lati,
-                longitude: longi,
-            }}
-            pinColor={"blue"} />
+        region={region}
+        onRegionChangeComplete={(r) => setRegion(r)}
+        provider={PROVIDER_GOOGLE}
+        showsUserLocation={true}
+        loadingEnabled={true}
+        >
         </MapView>
+        <CurrentLocContainer onPress={()=> setRegion({
+             longitude: longi,
+             latitude: lati,
+             latitudeDelta: 0.01,
+             longitudeDelta: 0.01,
+        })}>
+            <MaterialCommunityIcons name="map-marker" size={30} color="black"/>
+        </CurrentLocContainer>
         <SortButtonContainer>
             <FlatList
             showsHorizontalScrollIndicator={false}

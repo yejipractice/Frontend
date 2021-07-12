@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {StatusBar, Image} from "react-native";
 import {ThemeProvider} from "styled-components/native";
 import {theme} from "./theme";
@@ -7,6 +7,7 @@ import AppLoading from "expo-app-loading";
 import * as Font from "expo-font";
 import Navigation from './navigations';
 import { ProgressProvider, LoginProvider} from './contexts';
+
 
 // 이미지,폰트 불러오기 
 const cachImages = images => {
