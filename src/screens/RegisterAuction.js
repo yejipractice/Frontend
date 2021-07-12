@@ -5,7 +5,7 @@ import {DateTimePicker,  RadioButton} from "../components";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import {removeWhitespace} from "../utils/common";
 import DropDownPicker from "react-native-dropdown-picker";
-import {Dimensions, Alert} from "react-native";
+import {Dimensions} from "react-native";
 import { theme } from '../theme';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import * as Location from "expo-location";
