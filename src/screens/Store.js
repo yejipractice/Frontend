@@ -160,7 +160,9 @@ const Store = ({navigation}) => {
     const [lati, setLati] = useState(0);
     const [longi, setLongi] = useState(0);
 
-    const _onStorePress = item => {};
+    const _onStorePress = item => {
+        navigation.navigate('StoreDetailStack', { id: item.id, name: item.storeName });
+    };
     const _onStarPress = () => {setIsStar(!isStar);}
 
     const getLocation = async () => {

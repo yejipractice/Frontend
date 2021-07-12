@@ -53,6 +53,7 @@ const SearchTab = ({navigation, route}) => {
     const [input, setInput] = useState(route.params.input);
     const [isFocused, setIsFocused] = useState(false);
 
+    //다시 검색 
     const _handleSearchPress = () => { };
 
     return (

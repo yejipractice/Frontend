@@ -166,7 +166,9 @@ const StoreMap = ({navigation, route}) => {
         longitudeDelta: 0.01,
     });
 
-    const _onStorePress = item => {};
+    const _onStorePress = item => {
+        navigation.navigate('StoreDetailStack', { id: item.id, name: item.storeName });
+    };
 
     const ButtonPress = item => {
         setSort(item['id']);

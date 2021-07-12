@@ -103,6 +103,7 @@ const AuctionDetail = ({ navigation, route}) => {
             )
         });
     }, []);
+    
 
     return (
 
@@ -175,11 +176,11 @@ const AuctionDetail = ({ navigation, route}) => {
                     </View>
                 </InfoContainer>
 
-                {/* Store만 ButtonContainer가 보이도록 구현 필요 */}
+                {/* Store만 ButtonContainer가 보이도록 구현 필요 이미 참여했으면 수정으로 바꾸기..? */}
                 <ButtonContainer>
                     <Button
                         title="cancel"
-                        containerStyle={{ width: '50%', backgroundColor: theme.buttonDisabled }}
+                        containerStyle={{ width: '50%', backgroundColor: theme.buttonDisabled}}
                         onPress={() => {
                             navigation.navigate("Auction");
                         }}

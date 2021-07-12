@@ -123,7 +123,7 @@ const SearchStore = ({navigation}) => {
     const [isStar, setIsStar] = useState(false);
    
 
-    const _onStorePress = item => {};
+    const _onStorePress = item => {navigation.navigate("StoreDetail", {id: item['id']})};
     const _onStarPress = () => {setIsStar(!isStar);}
 
     return (
