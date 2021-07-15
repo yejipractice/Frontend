@@ -1,11 +1,16 @@
 import React, {useState, useEffect} from 'react';
 import styled from "styled-components/native";
-import {View, Modal, StyleSheet, TouchableOpacity, Alert} from "react-native";
+import {View, Dimensions, StyleSheet, TouchableOpacity, Alert} from "react-native";
 import {ProfileImage, InfoText, Button, RadioButton} from '../components';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { removeWhitespace, validatePassword } from '../utils/common';
 import Postcode from '@actbase/react-daum-postcode';
+import * as Location from "expo-location";
+import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
+import {MaterialCommunityIcons} from "@expo/vector-icons";
 
+const WIDTH = Dimensions.get("screen").width;
+const HEIGHT = Dimensions.get("screen").height;
 
 const Container = styled.View`
     flex: 1;
@@ -39,6 +44,22 @@ const RadioTitle = styled.Text`
     align-self: center;
 `;
 
+const MapContainer = styled.View`
+  justify-content: center;
+  align-items: center;
+`;
+
+const CurrentButton = styled.TouchableOpacity`
+width: 40px;
+height: 40px;
+position: absolute;
+top: 10px;
+right: 13%;
+justify-content: center;
+align-items: center;
+border-radius: 50px;
+border-width: 1px;
+`;
 
 
 
@@ -46,22 +67,80 @@ const  UserInfoChange = () => {
 
     // 임의로 설정, 연동 후 기존 설정값 등록
     const [Photo, setPhoto] = useState(null);
-    const [address, setAddress] = useState('');
-    const [addressDetail, setAddressDetail] = useState('');
-    const [phoneNumber,setPhoneNumber] = useState('');
     const [userName, setuserName] = useState('안녕하세요');
     const [password, setPassword] = useState('');
     const [age, setAge] = useState('23');
     const [gender, setGender] = useState('female');
-
     // 닉네임 중복확인, 핸드폰 인증
     const [isNameCheck, setNameCheck] = useState(false);
     const [isPhoneCheck, setPhoneCheck] = useState(false);
     const [isPassword, setIsPassword] = useState(false);
 
-    const [isModal, setModal] = useState(false);
+      //현재 위치
+  const [loc, setLoc] = useState(null); //선택 지역 
+  const [lati, setLati] = useState(37.535887);
+  const [longi, setLongi] = useState(126.984063);
+  const [region, setRegion] = useState({
+    longitude: longi,
+    latitude: lati,
+    latitudeDelta: 0.3,
+    longitudeDelta: 0.3,
+});
+const [selectedLocation, setSelectedLocation] = useState(null);
 
-
+    //현재 위치 
+    const getLocation = async () => {
+        let {status} = await Location.requestForegroundPermissionsAsync();
+        if (status=="granted") {
+            let location = await Location.getCurrentPositionAsync({}); 
+            setLati(location.coords.latitude);
+            setLongi(location.coords.longitude);
+        }
+        return loc;
+    };
+  
+    const convertKoreanLocation = async(res) => {
+      let result = "";
+      if (res.localityInfo.administrative.length >= 4){
+        let gu = res.localityInfo.administrative[3].name;
+        if (gu[gu.length-1]==="구"){
+          result = `${res.principalSubdivision} ${res.localityInfo.administrative[2].name} ${res.localityInfo.administrative[3].name}`;
+        }else {
+          result = `${res.principalSubdivision} ${res.localityInfo.administrative[2].name}`;
+        }
+      }else{
+        result = `${res.principalSubdivision} ${res.localityInfo.administrative[2].name}`;
+      }
+  
+      return result;
+    };
+  
+    const getKoreanLocation = async (lat, lng, api) => {
+      let response = await fetch(api);
+      let res = await response.json();
+      let result = convertKoreanLocation(res);
+      return result;
+    };
+  
+    const getGeocodeAsync = async (location) => {
+      let geocode = await Location.reverseGeocodeAsync(location);
+      let region = geocode[0]["region"]
+      let city = geocode[0]["city"]
+      let street = geocode[0]["street"];
+  
+      let selectedLatitude = location["latitude"];
+      let selectedLongitude = location["longitude"];
+      let aapi = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${selectedLatitude}&longitude=${selectedLongitude}&localityLanguage=ko`;
+      
+      let res = await getKoreanLocation(selectedLatitude, selectedLongitude, aapi);
+      setLoc(res);
+  
+  
+    };
+  
+    useEffect(() => {
+      const result = getLocation();
+    }, []);
 
     const _handleChangeButtonPress = () => {
         if (!userName) {
@@ -86,7 +165,10 @@ const  UserInfoChange = () => {
             Alert.alert('','나이를 입력해주세요');
             return; 
         }
-        
+        if(!loc){
+            Alert.alert('','지역을 입력해주세요');
+            return; 
+        }
     
 
      };
@@ -103,9 +185,7 @@ const  UserInfoChange = () => {
                 onChangeImage={url => setPhoto(url)}
                 showButton />
 
-                {/* 주소 검색 후 상세 주소 입력 가능 */}
                 <InfoContainer>
-
                     <InfoText
                         label="닉네임"
                         value={userName}
@@ -115,7 +195,9 @@ const  UserInfoChange = () => {
                         isChanged
                         showButton
                         title="적용"
-                        
+                        onPress={()=> {
+                            setNameCheck(true);
+                        }}  
                         />
                     <InfoText label="이메일" content="이메일주소"/>
                     <InfoText
@@ -132,7 +214,6 @@ const  UserInfoChange = () => {
                         onPress={()=> {
                             setIsPassword(true);
                             setPassword(password);
-                            editable=false;
                         }}                 
                         />
 
@@ -161,7 +242,49 @@ const  UserInfoChange = () => {
                                 onPress={() => setGender('male')}
                             />
                     </RowContainer>
+                        
+                <InfoText
+                        label="지역"
+                        value= {(selectedLocation && loc !== null)? String(loc) : ""}
+                        placeholder="지역이 선택되지 않았습니다."
+                        returnKeyType= "done"
+                        isChanged
+                        editable={false}
+                        />
                 </InfoContainer>
+                <MapContainer>
+                <MapView 
+                style={{
+                    width: WIDTH*0.8,
+                    height: HEIGHT*0.2,
+                }}
+                initialRegion={{
+                    longitude: longi,
+                    latitude: lati,
+                    latitudeDelta: 0.5,
+                    longitudeDelta: 0.5,
+                }}
+                region={region}
+                onRegionChangeComplete={(r) => setRegion(r)}
+                provider={PROVIDER_GOOGLE}
+                showsUserLocation={true}
+                loadingEnabled={true}>
+                    <Marker
+                    coordinate={region}
+                    pinColor="blue"
+                    onPress={() => {setSelectedLocation(region); getGeocodeAsync(region);}}
+                    />
+                </MapView>
+                <CurrentButton onPress= {()=> setRegion({
+                            longitude: longi,
+                            latitude: lati,
+                            latitudeDelta: 0.01,
+                            longitudeDelta: 0.01, })}>
+                <MaterialCommunityIcons name="map-marker" size={30} color="black"/>
+                </CurrentButton>
+                </MapContainer>
+                
+               
                 
                 <CenterContainer>
                     {/* 변경사항 서버 저장 */}

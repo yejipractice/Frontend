@@ -140,7 +140,7 @@ const ReviewManage = ({navigation, route}) => {
         setReviews(reviews.filter(review => review.id !== id));
     };
 
-    
+
     return (
         <FlatList 
             keyExtractor={item => item['id'].toString()}
@@ -154,4 +154,4 @@ const ReviewManage = ({navigation, route}) => {
     );
 };
 
-export default ReviewManage;
+export default ReviewManage; 

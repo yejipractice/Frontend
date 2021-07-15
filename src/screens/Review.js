@@ -114,7 +114,9 @@ const ReviewSet = ({review: {id, date, name, score, ment, src, userSrc}}) => {
 };
 
 const Review = ({navigation, route}) => {
+   
     
+
     return (
         <KeyboardAwareScrollView
         extraScrollHeight={20}>

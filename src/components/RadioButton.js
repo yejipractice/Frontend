@@ -24,13 +24,13 @@ const Button = ({ label, value, status, onPress, containerStyle }) => {
 
   return (
     <Container style={containerStyle}>
-      <Label>{label}</Label>
       <RadioButton
         value={value}
         status={status}
         onPress={onPress}
         color={theme.titleColor}
      />
+      <Label>{label}</Label>
     </Container>
   );
 };

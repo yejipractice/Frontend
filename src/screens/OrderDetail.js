@@ -85,7 +85,7 @@ const OrderDetail = ({navigation, route,}) => {
             <List>
                 <Image source={{uri: Order.src}}/>
                 <StoreContainer>
-                    <DescText title>{order.name}</DescText>
+                    <DescText title>업체명{route.params.name}</DescText>
                     <DescText>인원수 {order.number}명</DescText>
                     <DescText>가격 {order.bidPrice}원</DescText>
                     <DescText title>메뉴</DescText>
@@ -95,14 +95,14 @@ const OrderDetail = ({navigation, route,}) => {
                             <DescText key={item.id}>{item.price}원</DescText>
                         </MenuContainer>
                     )}  
-                    
+
                 </StoreContainer>
-                
+
                 <ChangeContainer>
-                    <ChangeText>가게 전화</ChangeText>
-                    <ChangeText onPress={() => {navigation.navigate("StoreDetail",{ id: Order.id });}}>가게 상세</ChangeText>
+                    <ChangeText>업체 전화</ChangeText>
+                    <ChangeText onPress={() => {navigation.navigate("StoreDetail",{ id: Order.id });}}>업체 상세</ChangeText>
                 </ChangeContainer>
-        
+
             </List>
         </Container>
     );
@@ -114,7 +114,7 @@ const Order = [
         id : 0,
         date: "2021-04-27 오후 4시",
         src: "",
-        name: "가게이름",
+        name: "업체이름",
         number : 5,
         bidPrice: 50000,
         menu: [
@@ -130,10 +130,10 @@ const Order = [
                 menuname : "공기밥",
                 price : 1000,
             },
-            
+
         ],
-        
+
     },
 ]
 
-export default OrderDetail;
+export default OrderDetail; 

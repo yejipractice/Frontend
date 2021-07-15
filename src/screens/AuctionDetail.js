@@ -1,20 +1,24 @@
 import React, { useLayoutEffect, useState } from 'react';
 import styled from "styled-components/native";
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, Dimensions} from "react-native";
 import { Button } from '../components';
 import { theme } from '../theme';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
+const WIDTH = Dimensions.get("screen").width;
+
 const Container = styled.View`
     flex: 1;
     align-items: center;
+    justify-content: center;
     background-color: ${({ theme }) => theme.background};
     padding: 10px 0 0 0;
 
 `;
 
 const Header = styled.View`
+    width: ${WIDTH*0.98};
     height: 12%;
     background-color: ${({ theme }) => theme.background}; 
     flex-direction: row;
@@ -82,35 +86,43 @@ const ButtonContainer = styled.View`
     flex-direction: row;
     flex: 1;
     margin : 15px;
+    align-items: center;
+    justify-content: center;
 
 `;
 
-const AuctionDetail = ({ navigation }) => {
+const AuctionDetail = ({ navigation, route}) => {
 
     const [isStar, setIsStar] = useState(false);
     const _onStarPress = () => { setIsStar(!isStar) };
+    const [isFinished, setIsFinished] = useState(false);
+    const [isUser, setIsUser] = useState(false);
 
-    const _onMessagePress = () => { navigation.navigate("Message") };
+    const _onMessagePress = () => { navigation.navigate("Message" , {name: "닉네임"+AuctionId}) };
+    
+    const AuctionId = route.params.id;
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            headerTitle: <Title>공고 제목</Title>,
+            headerTitle: "",
             headerRight: () => (
-                (<MaterialCommunityIcons name="send" size={35} onPress={_onMessagePress}
-                    style={{ marginRight: 15, marginBottom: 3, marginTop: 3, opacity: 0.7 }} />)
+                !isUser ?(<MaterialCommunityIcons name="send" size={35} onPress={_onMessagePress}
+                    style={{ marginRight: 15, marginBottom: 3, marginTop: 3, opacity: 0.7 }} />) : null
             )
         });
     }, []);
+    
 
     return (
 
         <Container>
             <KeyboardAwareScrollView
                 extraScrollHeight={20}
+                showsVerticalScrollIndicator={false}
             >
                 <Header>
                     <View style={styles.name}>
-                        <Title>공고 제목</Title>
+                        <Title>공고 제목{AuctionId}</Title>
                         <Text>닉네임</Text>
                     </View>
                     <Endtime>
@@ -173,23 +185,19 @@ const AuctionDetail = ({ navigation }) => {
                     </View>
                 </InfoContainer>
 
-                {/* Store만 ButtonContainer가 보이도록 구현 필요 */}
-                <ButtonContainer>
-                    <Button
-                        title="cancel"
-                        containerStyle={{ width: '50%', backgroundColor: theme.buttonDisabled }}
-                        onPress={() => {
-                            navigation.navigate("Auction");
-                        }}
-                    />
-                    <Button
-                        title="참여"
-                        containerStyle={{ width: '50%' }}
-                        onPress={() => {
-                            navigation.navigate("AuctionBid");
-                        }}
-                    />
-                </ButtonContainer>
+                {/* Store만 ButtonContainer가 보이도록 구현 필요 이미 참여했으면 수정으로 바꾸기..? */}
+                {!isFinished &&
+                 (<ButtonContainer>
+                 <Button
+                     title="참여"
+                     containerStyle={{ width: '100%' }}
+                     onPress={() => {
+                         navigation.navigate("AuctionBid");
+                     }}
+                 />
+             </ButtonContainer>)
+                }
+               
             </KeyboardAwareScrollView>
         </Container>
 
