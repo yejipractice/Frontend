@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { withDecay } from 'react-native-reanimated';
 import styled from "styled-components/native";
 import { MypageButton, ProfileImage, SmallButton, Image } from '../components'
 
@@ -80,14 +79,29 @@ const Mypage_Store = ({ navigation }) => {
             </InfoContainer>
 
             <IconContainer>
-                <MypageButton title='입찰내역' name='description' />
-                <MypageButton title='업체관리' name='home-work' />
-                <MypageButton title='리뷰관리' name='thumb-up' />
+                <MypageButton title='입찰내역' name='description'  
+                    onPress={() => {
+                        navigation.navigate("BidManageTab",{ isUser: false });
+                    }} />
+                <MypageButton title='업체관리' name='home-work'  
+                    onPress={() => {
+                        navigation.navigate("StoreManage");
+                    }}/>
+                <MypageButton title='리뷰관리' name='thumb-up' 
+                    onPress={() => {
+                        navigation.navigate("ReviewManage",{ isUser: false });
+                }}/>
             </IconContainer>
             <IconContainer>
                 <MypageButton title='로그분석' name='insert-chart' />
-                <MypageButton title='채팅관리' name='chat' />
-                <MypageButton title='즐겨찾기' name='star' />
+                <MypageButton title='채팅관리' name='chat' 
+                    onPress={() => {
+                        navigation.navigate("ChatManage");
+                }} />
+                <MypageButton title='즐겨찾기' name='star' 
+                    onPress={() => {
+                        navigation.navigate("Bookmark",{ isUser: false });
+                }} />
             </IconContainer>
         </Container>
     );
