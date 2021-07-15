@@ -57,30 +57,10 @@ const StoreListTab = ({navigation, route}) => {
     const [input, setInput] = useState("");
     const [isFocused, setIsFocused] = useState(false);
 
-    const _handleSearchPress = () => { };
+    const _handleSearchPress = () => { navigation.navigate("SearchTab"), {input: input}};
 
     return (
         <>
-        <Container>
-        <InputContainer>
-                    <StyledTextInput
-                        value={input}
-                        isFocused={isFocused}
-                        onChangeText={text => setInput(text)}
-                        onSubmitEditing={_handleSearchPress}
-                        onFocus={() => setIsFocused(true)}
-                        onBlur={() => setIsFocused(false)}
-                        placeholder="검색하세요."
-                        returnKeyType="done"
-                        autoCorrect={false}
-                        textContentType="none" // iOS only
-                        underlineColorAndroid="transparent" // Android only
-                    />
-                    <SearchBox onPress={_handleSearchPress}>
-                        <Icon source={images.Search} />
-                    </SearchBox>
-        </InputContainer>
-        </Container>
         <Tab.Navigator 
         tabBarOptions={{
             labelStyle: {fontSize: 15, fontWeight: "bold"},

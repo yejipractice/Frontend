@@ -13,9 +13,10 @@ const StoreListStack = ({navigation, route}) => {
     return (
         <Stack.Navigator
         screenOptions={{
-            
+            headerTitleAlign: "center",
         }}>
-            <Stack.Screen name="StoreList" component={StoreListTab} options={{headerShown: false}}/>
+            <Stack.Screen name="업체 목록" component={StoreListTab} 
+            options={{headerBackTitle: false, headerTitleAlign: 'left',  headerTitleStyle: {fontSize: 25, fontWeight: 'bold'},}}/>
             <Stack.Screen name="StoreDetailStack" component={StoreDetailStack}
                 options={{headerShown: false}} />
             <Stack.Screen name="StoreMap" component={StoreMap} 

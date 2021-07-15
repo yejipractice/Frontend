@@ -11,7 +11,7 @@ const MypageStack = () => {
 
     return (
         <Stack.Navigator
-            initialRouteName="Mypage_User"
+            initialRouteName="Mypage_Store"
             screenOptions={{
                 headerTitleAlign: "center",
                 cardStyle: { backgroundColor: theme.backgroundColor },
