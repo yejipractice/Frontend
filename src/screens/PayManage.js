@@ -65,4 +65,4 @@ const PayManage = () => {
   );
 };
 
-export default PayManage;
+export default PayManage; 

@@ -34,6 +34,7 @@ const NameTitle = styled.Text`
     font-size: 19px;
     font-weight: bold;
     color: ${({theme})=> theme.text};
+    margin-left: 2%;
 `;
 
 
@@ -70,12 +71,12 @@ const Item = ({item: {id, src, name, menu, desc, bidPrice, date, reviewUploaded}
                         uploaded={reviewUploaded}
                         />
                     <SmallButton 
-                        title="주문상세" 
+                        title="이용상세" 
                         onPress={onUseDetail} 
                         containerStyle={{width: '30%', height: '80%'}}/>
                 </ButtonContainer>
             </TextContainer>
-            
+
         </UseContainer>
     );
 };
@@ -87,11 +88,11 @@ const UseManage = ({navigation}) => {
     const _onReviewPress = () => {
         navigation.navigate("ReviewWrite");
     };
-    
-    const _onUseDetail = () => {
-        navigation.navigate("OrderDetail");
+
+    const _onUseDetail = item => {
+        navigation.navigate("OrderDetail", {name: item['id']});
     };
-    
+
     return (
         <FlatList 
             horizontal={false}
@@ -100,13 +101,13 @@ const UseManage = ({navigation}) => {
             renderItem={({item}) => (
                 <Item item={item} 
                     onReviewPress={_onReviewPress}
-                    onUseDetail={_onUseDetail}
+                    onUseDetail={() => _onUseDetail(item)}
                 />
-                
+
         )}/>                
-        
+
     );
 };
 
 
-export default UseManage;
+export default UseManage; 

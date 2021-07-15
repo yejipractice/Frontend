@@ -75,7 +75,7 @@ const Item = ({item: {id, title, type, count, region, preMenu, prePrice, bookTim
                     <BidResultText color = { bidsuccess ? "green" : "red"}>{ bidsuccess ? "낙찰" : "실패"}</BidResultText>
                     }
                 </TitleContainer>
-                
+
                 <ContentText>단체 유형: {type}({count}명)</ContentText>
                 <ContentText>선호 지역: {region}</ContentText>
                 <ContentText>선호 메뉴: {preMenu}</ContentText>
@@ -110,4 +110,4 @@ const BidManageFinished = ({navigation, route}) => {
     );
 };
 
-export default BidManageFinished; 
+export default BidManageFinished;  

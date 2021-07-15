@@ -11,7 +11,6 @@ const Container = styled.View`
   width: 100%;  
 `;
 
-
 const StyledImage = styled.Image`
   margin-top: 10px;
   width: 100px;
@@ -60,7 +59,6 @@ const Image = ({ title, url, onChangeImage, showImage, containerStyle }) => {
 
   );
 };
-
 Image.defaultProps = {
   onChangeImage: () => { },
 }

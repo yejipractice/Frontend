@@ -88,10 +88,10 @@ const Item = ({item: {id, title, type, count, region, preMenu, prePrice, bookTim
                 <ChangeText onPress={onRemove}>삭제</ChangeText>
             </ChangeContainer>
         </View>
-        
 
-        
-        
+
+
+
     );
 };
 
@@ -109,7 +109,7 @@ const BidManage = ({navigation, route}) => {
             navigation.navigate("RegisterAuction", {id: item['id']});
         else
             navigation.navigate("AuctionBid", {id: item['id']});
-        
+
     };
 
     const _onRemove = id => {
@@ -138,4 +138,4 @@ const BidManage = ({navigation, route}) => {
     );
 };
 
-export default BidManage; 
+export default BidManage;  

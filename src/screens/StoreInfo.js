@@ -65,7 +65,6 @@ const  StoreInfo = ({navigation}) => {
                 {/* 사진 불러오기 */}
                 <ProfileImage url={photo} />
 
-
                 <InfoContainer>
                     <InfoText label="닉네임" content={userName}/>
                     <InfoText label="이메일" content={email} />

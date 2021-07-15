@@ -2,8 +2,8 @@ import React, { useContext, useState } from 'react';
 import { ThemeContext } from "styled-components/native";
 import { createStackNavigator } from '@react-navigation/stack';
 import { Mypage_Store, Mypage_User, StoreInfo, StoreInfoChange, UserInfo, UserInfoChange, StoreManage, ReviewManage
-        ,ChatManage, Bookmark, Message, AuctionDetail, AuctionBid, PayManage, UseManage, ReviewWrite, DocumentRegister,
-        OrderDetail, StoreDetail, RegisterAuction,BidManage  } from "../screens";
+    ,ChatManage, Bookmark, Message, AuctionDetail, AuctionBid, PayManage, UseManage, ReviewWrite, DocumentRegister,
+    OrderDetail, StoreDetail, RegisterAuction,BidManage  } from "../screens";
 import BidManageTab from './BidManageTab';
 
 
@@ -11,7 +11,7 @@ const Stack = createStackNavigator();
 
 const MypageStack = () => {
     const theme = useContext(ThemeContext);
-
+    const [isUser, setIsUset] = useState(false);
     return (
         <Stack.Navigator
             initialRouteName="Mypage_User"
@@ -35,16 +35,17 @@ const MypageStack = () => {
             <Stack.Screen name="Bookmark" component={Bookmark} options={{ headerBackTitle: false, headerTitle: "즐겨찾기", headerTitleAlign: 'center', headerTitleStyle: { fontSize: 20, fontWeight: 'normal' }, }} />
             <Stack.Screen name="Message" component={Message} options={{ headerBackTitle: false, headerTitle: "메세지", headerTitleAlign: 'center', headerTitleStyle: { fontSize: 20, fontWeight: 'normal' }, }} />
             <Stack.Screen name="AuctionDetail" component={AuctionDetail} options={{ headerBackTitle: false, headerTitle: "", headerTitleAlign: 'center', headerTitleStyle: { fontSize: 20, fontWeight: 'normal' }, }} />
-            <Stack.Screen name="BidManageTab" component={BidManageTab} options={{ headerBackTitle: false, headerTitle: "입찰 내역", headerTitleAlign: 'center', headerTitleStyle: { fontSize: 20, fontWeight: 'normal' }, }} />
+            <Stack.Screen name="BidManageTab" component={BidManageTab} options={isUser? { headerBackTitle: false, 
+                headerTitle: "공고 관리", headerTitleAlign: 'center', headerTitleStyle: { fontSize: 20, fontWeight: 'normal' }, } : { headerBackTitle: false, 
+                headerTitle: "입찰 내역", headerTitleAlign: 'center', headerTitleStyle: { fontSize: 20, fontWeight: 'normal' }, }} />
             <Stack.Screen name="AuctionBid" component={AuctionBid} options={{ headerBackTitle: false, headerTitle: "공고 수정", headerTitleAlign: 'center', headerTitleStyle: { fontSize: 20, fontWeight: 'normal' }, }} />
             <Stack.Screen name="PayManage" component={PayManage} options={{ headerBackTitle: false, headerTitle: "결제관리", headerTitleAlign: 'center', headerTitleStyle: { fontSize: 20, fontWeight: 'normal' }, }} />
             <Stack.Screen name="UseManage" component={UseManage} options={{ headerBackTitle: false, headerTitle: "이용내역", headerTitleAlign: 'center', headerTitleStyle: { fontSize: 20, fontWeight: 'normal' }, }} />
             <Stack.Screen name="ReviewWrite" component={ReviewWrite} options={{ headerBackTitle: false, headerTitle: "리뷰쓰기", headerTitleAlign: 'center', headerTitleStyle: { fontSize: 20, fontWeight: 'normal' }, }} />
             <Stack.Screen name="DocumentRegister" component={DocumentRegister} options={{ headerBackTitle: false, headerTitle: "서류 등록", headerTitleAlign: 'center', headerTitleStyle: { fontSize: 20, fontWeight: 'normal' }, }} />
-            <Stack.Screen name="OrderDetail" component={OrderDetail} options={{ headerBackTitle: false, headerTitle: "주문상세", headerTitleAlign: 'center', headerTitleStyle: { fontSize: 20, fontWeight: 'normal' }, }} />
+            <Stack.Screen name="OrderDetail" component={OrderDetail} options={{ headerBackTitle: false, headerTitle: "이용상세", headerTitleAlign: 'center', headerTitleStyle: { fontSize: 20, fontWeight: 'normal' }, }} />
             <Stack.Screen name="StoreDetail" component={StoreDetail} options={{ headerBackTitle: false, headerTitle: "가게상세", headerTitleAlign: 'center', headerTitleStyle: { fontSize: 20, fontWeight: 'normal' }, }} />
             <Stack.Screen name="RegisterAuction" component={RegisterAuction} options={{ headerBackTitle: false, headerTitle: "공고수정", headerTitleAlign: 'center', headerTitleStyle: { fontSize: 20, fontWeight: 'normal' }, }} />
-
         </Stack.Navigator>
     );
 }

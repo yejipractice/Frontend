@@ -1,8 +1,9 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {auctionBookmarks, storeBookmarks} from "../utils/data";
 import styled from "styled-components/native";
 import {FlatList} from 'react-native';
 import {MaterialCommunityIcons} from "@expo/vector-icons";
+
 
 const AlertContainer = styled.TouchableOpacity`
     flex-direction: row;
@@ -75,14 +76,21 @@ const Item = ({item: {id, src, name, menu, type, location}, onPress, onStarPress
 const Bookmark = ({navigation, route}) => {
     const [isUser, setIsUser] = useState(route.params.isUser);
 
-    const [data, setData] = useState(auctionBookmarks);
-    
+    const [data, setData] = useState(storeBookmarks);
+
 
     const _onRemove = id => {
         setData(data.filter(item => item.id !== id));
     };
 
-    
+    useEffect(() => {
+        if(isUser){
+            setData(storeBookmarks);
+        }else{
+            setData(auctionBookmarks);
+        };
+    },[]);
+
     return (
         <FlatList 
             horizontal={false}
@@ -92,14 +100,18 @@ const Bookmark = ({navigation, route}) => {
                 <Item item={item} 
                 onStarPress={() => _onRemove(item['id'])}
                 onPress = {() => {
-                    navigation.navigate("AuctionDetail");
+                    if(!isUser){
+                        navigation.navigate("AuctionDetail", {id: item['id']});
+                    }else {
+                        navigation.navigate("StoreDetail", {id: item['id']});
+                    }
                 }}
                 />
-                
+
         )}/>                
-        
+
     );
 };
 
 
-export default Bookmark;
+export default Bookmark; 
