@@ -102,7 +102,7 @@ const Signup = ({ navigation, route }) => {
     const didMountRef = useRef();
     const ageRef = useRef();
     const emailMountRef = useRef();
-
+     
 
     useEffect(() => {
 

@@ -6,11 +6,13 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { ThemeContext } from 'styled-components/native';
 
 
-const MultipleImage = ({ navigation }) => {
+const MultipleImage = ({ navigation,route }) => {
 
     const theme = useContext(ThemeContext);
 
     const [isUpload, setIsUpload] = useState(false);
+
+    const [type, setType] = useState(route.params.type);
 
     const _getHeaderLoader = () => (
         <ActivityIndicator size={35} 
@@ -38,7 +40,10 @@ const MultipleImage = ({ navigation }) => {
                 })
             }
             setIsUpload(false);
-            navigation.navigate('ReviewWrite', {photos: cPhotos});
+            if(type ==="Review")
+                navigation.navigate('ReviewWrite', {photos: cPhotos});
+            else if(type === "Store")
+                navigation.navigate('StoreBasicChange', {photos: cPhotos});
         })
         .catch((e) => console.log(e));
     };

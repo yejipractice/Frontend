@@ -12,7 +12,6 @@ const Container = styled.View`
 const Label = styled.Text`
   font-size: 18px;
   font-weight: 600;
-  margin-top: 3px;
   margin-right: 5%;
 `;
  
@@ -28,7 +27,7 @@ const ToggleButton = ({label, value, onValueChange}) => {
         ios_backgroundColor="#3e3e3e"
         onValueChange={onValueChange}
         value={value}
-        style={{ transform: [{ scaleX: 1.5 }, { scaleY: 1.3 }] }}
+        style={{ transform: [{ scaleX: 1.2 }, { scaleY: 1.2 }] }}
       />
     </Container>
   );
