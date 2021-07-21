@@ -42,8 +42,6 @@ const RadioTitle = styled.Text`
 
 
 
-
-
 const  UserInfoChange = () => {
 
     // 임의로 설정, 연동 후 기존 설정값 등록
@@ -66,14 +64,6 @@ const  UserInfoChange = () => {
 
 
     const _handleChangeButtonPress = () => {
-        if(!address){
-            Alert.alert('','주소를 입력해주세요');
-            return;
-        }
-        if(!isPhoneCheck){
-            Alert.alert('','전화번호 인증을 해주세요');
-            return;
-        }
         if (!userName) {
             Alert.alert('','닉네임을 입력해주세요');
             return;
@@ -115,47 +105,6 @@ const  UserInfoChange = () => {
 
                 {/* 주소 검색 후 상세 주소 입력 가능 */}
                 <InfoContainer>
-                    <InfoText
-                        label="주소"
-                        value={address}
-                        onChangeText={ text => setAddress(text)}
-                        placeholder="주소"
-                        returnKeyType= "done"
-                        isChanged
-                        showButton
-                        title="검색"
-                        editable={address === '' ? false : true}
-                        onPress={() => {setModal(true); setAddress("");}}
-                    />
-                    <Modal visible={isModal} transparent={true}>
-                        <TouchableOpacity style={styles.background} onPress={() => setModal(false)}/>
-                        <View style={styles.modal}>
-                            <Postcode
-                                style={{  width: 350, height: 450 }}
-                                jsOptions={{ animated: true, hideMapBtn: true }}
-                                onSelected={data => {
-                                setAddress(JSON.stringify(data.address).replace(/\"/g,''));
-                                setModal(false);
-                                }}
-                            />
-                        </View>
-                    </Modal>
-
-                    {/* 전화번호 인증 완료시 disabled 처리 */}
-                    <InfoText
-                        label="전화번호"
-                        value={phoneNumber}
-                        onChangeText={ text => setPhoneNumber(removeWhitespace(text))}
-                        placeholder="전화번호"
-                        returnKeyType= "done"
-                        isChanged
-                        keyboardType="number-pad"
-                        showButton
-                        title="인증"
-                        disabled={ phoneNumber.length === 11 ? false : true}
-                        onPress={()=>{setPhoneCheck(true)}}
-                        />
-                        
 
                     <InfoText
                         label="닉네임"
