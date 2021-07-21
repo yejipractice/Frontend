@@ -5,7 +5,7 @@ import { Input,Button, RadioButton } from '../components';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { validateEmail, removeWhitespace, validatePassword } from '../utils/common';
 import { __asyncGenerator } from 'tslib';
-import {ProgressContext} from "../contexts";
+import {ProgressContext, UrlContext} from "../contexts";
 
 
 const Container = styled.View`
@@ -58,7 +58,7 @@ const RadioTitle = styled.Text`
 const Signup = ({ navigation, route }) => {
 
     const {spinner} = useContext(ProgressContext);
-
+    const {url} = useContext(UrlContext);
 
     //별명, 업체명
     const [userId, setuserId] = useState('');
@@ -102,7 +102,7 @@ const Signup = ({ navigation, route }) => {
     const didMountRef = useRef();
     const ageRef = useRef();
     const emailMountRef = useRef();
-
+     
 
     useEffect(() => {
 
@@ -201,11 +201,11 @@ const Signup = ({ navigation, route }) => {
         
         // 이메일 중복확인 
         const _handleEmailButtonPress = async() => {
-            let url = 'http://192.168.113.1:8000/member/auth/signup?email='+`${email}`;
+            let fixedUrl = url+'/member/auth/signup?email='+`${email}`;
             try{
                 spinner.start();
 
-                const result =  await getApi(url);
+                const result =  await getApi(fixedUrl);
                 if(!isSameEmail){ 
                     setEmailConfirmPress(true);
                 }else{
@@ -240,8 +240,8 @@ const Signup = ({ navigation, route }) => {
                 if(!result){
                     alert("이메일을 다시 확인하세요.");
                 }else{
-                    setIsConfirmSend(true);
                     alert("인증번호가 전송되었습니다.");
+                    setIsConfirmSend(true);
                 }
         
             }catch(e){
@@ -254,12 +254,12 @@ const Signup = ({ navigation, route }) => {
 
         // 이메일 인증 키값 확인
         const _handleEmailVaildatePress = async() => {
-            let url = 'http://192.168.113.1:8000/member/auth/signup/verification?email='+`${email}&key=${emailConfirmCode}`;
+            let fixedUrl = url+'/member/auth/signup/verification?email='+`${email}&key=${emailConfirmCode}`;
             try{
                 spinner.start();
             
                 setEmailCodePress(true);
-                    const result = await getApi(url);
+                    const result = await getApi(fixedUrl);
                     if(emailConfirmCode)
                     {    
                         if(result){
@@ -304,8 +304,8 @@ const Signup = ({ navigation, route }) => {
 
         // 이메일 키값 전송 api
         const postemailApi = async () => {
-            let url = 'http://192.168.113.1:8000/member/auth/signup/verification?email='+`${email}`;
-            console.log(url);
+            let fixedUrl = url+'/member/auth/signup/verification?email='+`${email}`;
+            console.log(fixedUrl);
             
             let options = {
                 method: 'POST',
@@ -315,7 +315,7 @@ const Signup = ({ navigation, route }) => {
                 },
             };
             try {
-                let response = await fetch(url, options);
+                let response = await fetch(fixedUrl, options);
                 let res = await response.json();
 
                 console.log(res);
@@ -329,7 +329,7 @@ const Signup = ({ navigation, route }) => {
 
         // 회원가입 api
         const postApi = async () => {
-            let url = 'http://192.168.113.1:8000/member/auth/signup'; 
+            let fixedUrl = url+'/member/auth/signup'; 
             let Info;
 
             if(route.params.mode === 'User'){
@@ -362,7 +362,7 @@ const Signup = ({ navigation, route }) => {
             };
             console.log(JSON.stringify( Info ));
             try {
-                let response = await fetch(url, options);
+                let response = await fetch(fixedUrl, options);
                 let res = await response.json();
 
                 console.log(res);

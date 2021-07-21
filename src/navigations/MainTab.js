@@ -8,6 +8,7 @@ import RegisterAuctionStack from "./RegisterAuctionStack";
 import MainStack from './MainStack';
 import AuctionListTab from './AuctionListTab';
 import AuctionListStack from './AuctionListStack';
+import StoreListStack from './StoreListStack';
 
 const Tab = createBottomTabNavigator();
 
@@ -89,7 +90,7 @@ const MainTab = ({navigation}) => {
             />
             <Tab.Screen 
                 name = "업체" 
-                component={Store} 
+                component={StoreListStack} 
                 options={{
                     tabBarIcon: ({ focused }) =>
                         TabBarIcon({

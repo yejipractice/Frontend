@@ -83,6 +83,10 @@ const getDateOrTime = ts => {
 const ChatManage = ({navigation}) => {
     const [data, setData] = useState(chatrooms);
 
+    const _handleMessagePress = item => {
+        navigation.navigate("Message", {name: item.name});
+    };
+
     return (
         <FlatList 
             horizontal={false}
@@ -90,14 +94,14 @@ const ChatManage = ({navigation}) => {
             data={data}
             renderItem={({item}) => (
                 <Alert key={item['id'].toString()} item={item} 
-                    onPress = {() => {navigation.navigate("Message");}}
+                    onPress = {() => _handleMessagePress(item)}
                 />
-                
+
         )}/>                
-        
+
     );
 };
 
 
 
-export default ChatManage;
+export default ChatManage; 

@@ -8,6 +8,7 @@ const HEIGHT = Dimensions.get("screen").width;
 const Tab = createMaterialTopTabNavigator();
 
 const BidManageTab = ({route}) => {
+
     return (
         <Tab.Navigator
         tabBarOptions={{
@@ -22,4 +23,4 @@ const BidManageTab = ({route}) => {
     );
 };
 
-export default BidManageTab;
+export default BidManageTab; 

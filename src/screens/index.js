@@ -19,6 +19,9 @@ import UserInfoChange from "./UserInfoChange";
 import AuctionFinished from "./AuctionFinished";
 import AuctionBid from './AuctionBid';
 import AuctionDetail from './AuctionDetail';
+import StoreMap from './StoreMap';
+import SearchStore from "./SearchStore"
+import SearchAuction from './SearchAuction';
 import StoreManage from "./StoreManage";
 import ReviewManage from './ReviewManage';
 import ChatManage from './ChatManage';
@@ -30,9 +33,14 @@ import UseManage from './UseManage'
 import ReviewWrite from './ReviewWrite'
 import DocumentRegister from './DocumentRegister'
 import OrderDetail from './OrderDetail'
+import MultipleImage from "./MultipleImage";
+import BidDetail from "./BidDetail";
+import StoreBasicChange from "./StoreBasicChange";
+import StoreConvChange from './StoreConvChange';
 
 export {
     AuctionDetail, AuctionBid, AuctionFinished, UserInfoChange, UserInfo, Mypage_User, Mypage_Store, Review, StoreInfoChange,
-    Message, Login, Mode, Notice, Signup, Main, AccountFind, RegisterAuction, Auction, Store, StoreDetail, StoreInfo, StoreManage,
-    ReviewManage,ChatManage,Bookmark,BidManage,BidManageFinished,PayManage,UseManage,ReviewWrite,DocumentRegister,OrderDetail
+    SearchAuction, SearchStore, Message, Login, Mode, Notice, Signup, Main, AccountFind, RegisterAuction, Auction, Store, StoreDetail, StoreInfo, StoreMap,
+    ReviewManage, ChatManage, Bookmark, BidManage, BidManageFinished, PayManage, UseManage, OrderDetail, StoreManage, ReviewWrite, DocumentRegister,
+    MultipleImage,BidDetail,StoreBasicChange,StoreConvChange,
 };

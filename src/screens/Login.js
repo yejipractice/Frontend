@@ -5,7 +5,7 @@ import {Input,Button, CheckBoxLetter, IconButton} from "../components";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import {validateEmail,removeWhitespace} from "../utils/common";
 import {images} from "../images";
-import {LoginConsumer, LoginContext, UrlContext, ProgressContext} from "../contexts";
+import {UrlContext, ProgressContext, LoginConsumer, LoginContext} from "../contexts";
 import {Alert} from "react-native";
 
 const Container = styled.View`
@@ -93,6 +93,7 @@ const ButtonText = styled.Text`
 const Login = ({navigation}) => {
     const {spinner} = useContext(ProgressContext);
     const {url} = useContext(UrlContext);
+    const {setSuccess} = useContext(LoginContext);
     const [userId, setUserId] = useState("");
     const [password, setPassword] = useState("");
     const [disabled, setDisabled] = useState(true);
@@ -113,30 +114,36 @@ const Login = ({navigation}) => {
     };
 
     const handleApi = async () => {
-        const response = await fetch(url+"/member/auth/signin", {
-            method: "POST",
+        let fixedUrl = url+"/member/auth/signin";
+
+        let Info = {
+            email : userId,
+            password: password,
+        };
+
+        let options = {
+            method: 'POST',
             headers: {
-                "Content-Type": "application/json"
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
             },
-            body: {
-                email: userId,
-                password: password
-            }});
-
-        const res = await response.json();
-        return res["success"];    
-    };
-
-    const _handleLoginButtonPress = async () => {
-        // const result = await handleApi();
-        // if(result){
-        //     dispatch({userId, password,autoLogin});
-        // }else{
-        //     alert("로그인 실패하였습니다. \n아이디, 비밀번호를 다시 확인하세요.");
-        // }
+            body: JSON.stringify( Info ),
         
-        //연동되면 코드 추가. 스피너 추가, 로그인 후 계정 인증되면 메인으로 이동되도록.  
+        };
+
+        try{
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+            
+            console.log(res);
+            return res["success"];
+        }catch (error) {
+            console.error(error);
+          }
+        
     };
+
+    
 
     // useEffect(()=> {
     // unmount
@@ -162,8 +169,7 @@ const Login = ({navigation}) => {
             ref={passwordRef} 
             label="비밀번호" 
             value={password} 
-            onChangeText={text=> setPassword(removeWhitespace(text))} 
-            onSubmitEditing={_handleLoginButtonPress} 
+            onChangeText={text=> setPassword(removeWhitespace(text))}  
             placeholder="비밀번호를 입력하세요" 
             returnKeyType="done" 
             isPassword 
@@ -172,31 +178,31 @@ const Login = ({navigation}) => {
             <AdditionalLetter>
             <ErrorText>{errorMessage}</ErrorText>
             </AdditionalLetter>
+            
             <LoginConsumer>
-                {({actions}) => (
-                        <Button 
-                        title="로그인" 
-                        onPress={async () => {
-                            try{
-                                spinner.start();
-                            const result = await handleApi();
-                            if (!result) {
-                                alert("로그인 실패!");
-                            }else {
-                                actions.setEmail(userId);
-                                actions.setPassword(password);
-                                actions.setAutoLogin(autoLogin);
-                            }
-                        }catch(e){
-                            Alert.alert("Login Error", e.message);
-                        }finally{
-                            spinner.stop();
+                {({dispatch})=> (
+                    <Button
+                    title="로그인"
+                    onPress={async () => {
+                        try{
+                            spinner.start();
+                        const result = await handleApi();
+                        if (!result) {
+                            alert("로그인 실패! 다시 입력해주세요.");
+                        }else {
+                            setSuccess(true);
                         }
-                        }} 
-                        disabled={disabled}
-                        containerStyle={{marginTop: 0, marginBottom: 2}}/>
-                )}
-            </LoginConsumer>
+                    }catch(e){
+                        Alert.alert("Login Error", e.message);
+                    }finally{
+                        spinner.stop();
+                    }
+                    }} 
+                    disabled={disabled}
+                    containerStyle={{marginTop: 0, marginBottom: 2}}/>
+            )}
+        </LoginConsumer>
+               
             <Letter>
             
             <CheckBoxLetter

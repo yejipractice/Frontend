@@ -50,7 +50,6 @@ const RadioTitle = styled.Text`
     align-self: center;
 `;
 
-
 const AdditionalContainer = styled.View`
     flex: 1;
     flex-direction: row;
@@ -66,6 +65,7 @@ const  UesrInfo = ({navigation}) => {
     const password = "비밀번호 비공개";
     const age = "나이";
     const gender = "female";
+    const address = "땡땡구 행복시 사랑동"
     const [isNoticed, setIsNoticed] = useState(false);
 
     return (
@@ -101,6 +101,7 @@ const  UesrInfo = ({navigation}) => {
                             onPress={()=>{}}
                         /></AdditionalContainer>
                     </RowContainer>
+                    <InfoText label="지역" content={address}/>
                 </InfoContainer>
                 
                 <View style={styles.hr}/>

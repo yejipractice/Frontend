@@ -20,29 +20,6 @@ const StoresConteinter = styled.View`
     margin-top: 20px;
 `;
 
-const ButtonsContainer = styled.View`
-    flex-direction: row;
-    justify-content: space-around;
-    margin-top: 10px;
-`;
-
-const AdditionalBox = styled.View`
-    height: ${HEIGHT*0.2};
-`;
-
-const ButtonBox = styled.TouchableOpacity`
-    background-color: ${({theme, checked})=> checked? theme.titleColor :theme.storeButton};
-    width: 30%;
-    align-items: center;
-    justify-content: center;
-    border-radius: 10px;
-    height: ${HEIGHT*0.075}
-`;
-
-const ButtonText = styled.Text`
-    font-size: 16px;
-    font-weight: bold;
-`;
 
 const ItemContainer = styled.TouchableOpacity`
     flex-direction: row;
@@ -109,17 +86,6 @@ const ScoreText = styled.Text`
     color:${({ theme }) => theme.background};
 `;
 
-const MapButton = styled.TouchableOpacity`
-    background-color:${({ theme }) => theme.mapButtonColor};
-    padding: 15px 15px;
-    border-radius: 30px;
-`;
-
-const MapText = styled.Text`
-    font-size: 20px;
-    font-weight: bold;
-    color:${({ theme }) => theme.background};
-`;
 
 const Item = ({item: {url, id, name, ment, distance, score}, onPress, onStarPress, isStar, theme}) => {
     var sc = Number.parseFloat(score).toFixed(1);
@@ -151,49 +117,17 @@ const Item = ({item: {url, id, name, ment, distance, score}, onPress, onStarPres
     );
 };
 
-const Store = ({navigation}) => {
+const SearchStore = ({navigation}) => {
     const theme = useContext(ThemeContext);
 
-    const [sort,setSort] = useState(0);
     const [isStar, setIsStar] = useState(false);
-    const [loc, setLoc] = useState(null);
-    const [lati, setLati] = useState(0);
-    const [longi, setLongi] = useState(0);
+   
 
-    const _onStorePress = item => {
-        navigation.navigate('StoreDetailStack', { id: item.id, name: item.storeName });
-    };
+    const _onStorePress = item => {navigation.navigate("StoreDetail", {id: item['id']})};
     const _onStarPress = () => {setIsStar(!isStar);}
-
-    const getLocation = async () => {
-        let {status} = await Location.requestForegroundPermissionsAsync();
-        if (status=="granted") {
-            let location = await Location.getCurrentPositionAsync({}); 
-            setLoc(location);
-            setLati(location.coords.latitude);
-            setLongi(location.coords.longitude);
-            console.log(location.coords);
-        }
-        return loc;
-    };
-
-    useEffect(() => {
-        getLocation();
-    }, []);
 
     return (
         <Container>
-            <ButtonsContainer>
-                <ButtonBox onPress={() => setSort(1)} checked={sort===1}>
-                    <ButtonText>정렬기준1</ButtonText>
-                </ButtonBox>
-                <ButtonBox onPress={() => setSort(2)} checked={sort===2}>
-                    <ButtonText>정렬기준2</ButtonText>
-                </ButtonBox>
-                <ButtonBox onPress={() => setSort(3)} checked={sort===3}>
-                    <ButtonText>정렬기준3</ButtonText>
-                </ButtonBox>
-            </ButtonsContainer>
             
             <ScrollView>
             <StoresConteinter>
@@ -205,28 +139,9 @@ const Store = ({navigation}) => {
                     <Item item={item} onPress={()=> _onStorePress(item)} onStarPress={_onStarPress} isStar={isStar} theme={theme}/>
                 )}/>
             </StoresConteinter>
-            <AdditionalBox />
             </ScrollView>
-            <View style={{
-                position: "absolute",
-                bottom: 10,
-                right: 5,
-            }}>
-            <MapButton 
-            onPress={async ()=> {
-                try {
-                    const res = await getLocation();
-                    console.log(res)
-                    navigation.navigate("StoreMap", {longi: longi, lati: lati});
-                }catch(e) {
-                    Alert.alert("Location Error", e.message);
-                }
-            }}>
-                <MapText>지도로 보기</MapText>
-            </MapButton>
-            </View>
         </Container>
     );
 };
 
-export default Store; 
+export default SearchStore; 

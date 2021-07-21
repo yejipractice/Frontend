@@ -35,7 +35,6 @@ const ErrorText = styled.Text`
 const StoreInfoChange = () => {
     // 임의로 설정, 연동 후 기존 설정값 등록
     const [Photo, setPhoto] = useState(null);
-    const [phoneNumber, setPhoneNumber] = useState('');
     const [userName, setuserName] = useState('');
     const [password, setPassword] = useState('');
 
@@ -56,10 +55,7 @@ const StoreInfoChange = () => {
                     _errorMessage = "비밀번호를 입력하세요.";
                 } else if (!validatePassword(password)) {
                     _errorMessage = "비밀번호 조건을 확인하세요.";
-                } else if (!phoneNumber) {
-                    _errorMessage = "전화번호를 입력하세요.";
-                }
-                else {
+                }else {
                     _errorMessage = "";
                 }
             }
@@ -67,7 +63,7 @@ const StoreInfoChange = () => {
         } else {
             didMountRef.current = true;
         }
-    }, [userName, password, phoneNumber, uploaded]);
+    }, [userName, password, uploaded]);
 
     const _handleChangeButtonPress = () => {
         setUploaded(true);
@@ -106,16 +102,6 @@ const StoreInfoChange = () => {
                         isChanged
                         isPassword
 
-                    />
-
-                    <InfoText
-                        label="전화번호"
-                        value={phoneNumber}
-                        onChangeText={text => setPhoneNumber(removeWhitespace(text))}
-                        placeholder="전화번호"
-                        returnKeyType="done"
-                        isChanged
-                        keyboardType="number-pad"
                     />
                     <ErrorText>{errorMessage}</ErrorText>
                 </InfoContainer>

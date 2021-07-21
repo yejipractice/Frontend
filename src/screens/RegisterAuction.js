@@ -1,14 +1,17 @@
-import React, {useLayoutEffect, useState, useEffect, useRef} from 'react';
+import React, {useLayoutEffect, useState, useEffect, useRef, useContext} from 'react';
 import styled from "styled-components/native";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
 import {DateTimePicker,  RadioButton} from "../components";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import {removeWhitespace} from "../utils/common";
 import DropDownPicker from "react-native-dropdown-picker";
-import {Dimensions, Alert} from "react-native";
+import {Dimensions} from "react-native";
 import { theme } from '../theme';
+import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
+import * as Location from "expo-location";
 
 const WIDTH = Dimensions.get("screen").width;
+const HEIGHT = Dimensions.get("screen").height;
 
 const Container = styled.View`
     flex: 1;
@@ -136,6 +139,22 @@ const AdditionContainer = styled.View`
   height: 1px;
 `;
 
+const MapContainer = styled.View`
+  justify-content: center;
+  align-items: center;
+`;
+
+const CurrentButton = styled.TouchableOpacity`
+width: 40px;
+height: 40px;
+position: absolute;
+top: 10px;
+right: 10px;
+justify-content: center;
+align-items: center;
+border-radius: 50px;
+border-width: 1px;
+`;
 
 
 const RegisterAuction = ({navigation}) => {
@@ -151,8 +170,7 @@ const RegisterAuction = ({navigation}) => {
     const [endDate, setEndDate] = useState("");
     const [endTime, setEndTime] = useState("");
     const [endTimeVisible, setEndTimeVisible] = useState(false);
-    const [meetingType, setMeetingType] = useState("");
-    const [foodType, setFoodType] = useState("");
+    const [meetingType, setMeetingType] = useState(null);
     const [numOfPeople, setNumOfPeople] = useState("");
     const [maxPrice, setMaxPrice] = useState("");
     const [minPrice, setMinPrice] = useState("");
@@ -160,32 +178,8 @@ const RegisterAuction = ({navigation}) => {
     const [disabled, setDisabled] = useState(true);
     const [uploaded, setUploaded] = useState(false);
     const [content, setContent] = useState('');
-    const [nowTime, setNowTime] = useState("");
     const didMountRef = useRef();
-
-    // 지역 드롭다운  
-    const [open, setOpen] = useState(false);
-    const [selected, setSelected] = useState(""); // 선택된 지역(시,도)
-    const [city, setCity] = useState(""); // 상세 지역
-    const [cities, setCities] = useState([
-      {label: "서울특별시", value: "서울특별시"},
-      {label: "부산광역시", value: "부산광역시"},
-      {label: "대구광역시", value: "대구광역시"},
-      {label: "인천광역시", value: "인천광역시"},
-      {label: "광주광역시", value: "광주광역시"},
-      {label: "대전광역시", value: "대전광역시"},
-      {label: "울산광역시", value: "울산광역시"},
-      {label: "세종특별자치시", value: "세종특별자치시"},
-      {label: "강원도", value: "강원도"},
-      {label: "경기도", value: "경기도"},
-      {label: "충청북도", value: "충청북도"},
-      {label: "충청남도", value: "충청남도"},
-      {label: "전라북도", value: "전라북도"},
-      {label: "전라남도", value: "전라남도"},
-      {label: "경상북도", value: "경상북도"},
-      {label: "경상남도", value: "경상남도"},
-      {label: "제주특별자치도", value: "제주특별자치도"},
-    ]);
+    const [foodType, setFoodType] = useState([]);
 
     // 나이 드롭다운  
     const [open1, setOpen1] = useState(false);
@@ -210,6 +204,72 @@ const RegisterAuction = ({navigation}) => {
       {label: "반반", value: "반반"},
     ]); 
 
+  //현재 위치
+  const [loc, setLoc] = useState(null); //선택 지역 
+  const [lati, setLati] = useState(37.535887);
+  const [longi, setLongi] = useState(126.984063);
+  const [region, setRegion] = useState({
+    longitude: longi,
+    latitude: lati,
+    latitudeDelta: 0.3,
+    longitudeDelta: 0.3,
+});
+const [selectedLocation, setSelectedLocation] = useState(null);
+
+    //현재 위치 
+    const getLocation = async () => {
+      let {status} = await Location.requestForegroundPermissionsAsync();
+      if (status=="granted") {
+          let location = await Location.getCurrentPositionAsync({}); 
+          setLati(location.coords.latitude);
+          setLongi(location.coords.longitude);
+      }
+      return loc;
+  };
+
+  const convertKoreanLocation = async(res) => {
+    let result = "";
+    if (res.localityInfo.administrative.length >= 4){
+      let gu = res.localityInfo.administrative[3].name;
+      if (gu[gu.length-1]==="구"){
+        result = `${res.principalSubdivision} ${res.localityInfo.administrative[2].name} ${res.localityInfo.administrative[3].name}`;
+      }else {
+        result = `${res.principalSubdivision} ${res.localityInfo.administrative[2].name}`;
+      }
+    }else{
+      result = `${res.principalSubdivision} ${res.localityInfo.administrative[2].name}`;
+    }
+
+    return result;
+  };
+
+  const getKoreanLocation = async (lat, lng, api) => {
+    let response = await fetch(api);
+    let res = await response.json();
+    let result = convertKoreanLocation(res);
+    return result;
+  };
+
+  const getGeocodeAsync = async (location) => {
+    let geocode = await Location.reverseGeocodeAsync(location);
+    let region = geocode[0]["region"]
+    let city = geocode[0]["city"]
+    let street = geocode[0]["street"];
+
+    let selectedLatitude = location["latitude"];
+    let selectedLongitude = location["longitude"];
+    let aapi = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${selectedLatitude}&longitude=${selectedLongitude}&localityLanguage=ko`;
+    
+    let res = await getKoreanLocation(selectedLatitude, selectedLongitude, aapi);
+    setLoc(res);
+
+
+  };
+
+  useEffect(() => {
+    const result = getLocation();
+  }, []);
+
     //에러 메세지 설정 
     useEffect(() => {
       if(didMountRef.current) {
@@ -223,9 +283,7 @@ const RegisterAuction = ({navigation}) => {
         }else if(parseInt(book)<parseInt(getNowString())) {
           _errorMessage = "예약 시간을 잘못 입력하였습니다";
         }
-        else if(!meetingType){
-          _errorMessage = "단체 유형을 입력하세요";
-        }else if(!foodType){
+      else if(foodType.length == 0){
           _errorMessage = "선호 메뉴을 입력하세요";
         }else if(!numOfPeople){
           _errorMessage = "인원 수를 입력하세요";
@@ -260,7 +318,7 @@ const RegisterAuction = ({navigation}) => {
         }else if(parseInt(minPrice) > parseInt(maxPrice)) {
           _errorMessage = "최소 가격과 최대 가격을 제대로 입력하세요";
         }
-        else if(!selected){
+        else if(!selectedLocation){
           _errorMessage = "선호지역을 입력하세요";
         }
         else if(!endDate){
@@ -281,11 +339,11 @@ const RegisterAuction = ({navigation}) => {
       }else {
         didMountRef.current = true;
       }
-    },[title, bookDate,bookTime,endDate,endTime,meetingType,foodType,numOfPeople,minPrice, maxPrice,selected,book,end]);
+    },[title, bookDate,bookTime,endDate,endTime,foodType,numOfPeople,minPrice, maxPrice,selectedLocation,book,end]);
 
     useEffect(()=> {
-      setDisabled(!(title && bookDate && bookTime && endDate && endTime && meetingType && foodType && numOfPeople && selected  && maxPrice && minPrice && !errorMessage));
-    },[title, bookDate,bookTime,endDate,endTime,meetingType,foodType,numOfPeople,minPrice,maxPrice,errorMessage,selected]);
+      setDisabled(!(title && bookDate && bookTime && endDate && endTime && foodType.length!=0 && numOfPeople && selectedLocation && maxPrice && minPrice && !errorMessage));
+    },[title, bookDate,bookTime,endDate,endTime,foodType,numOfPeople,minPrice,maxPrice,errorMessage,selectedLocation]);
 
 
     useEffect(()=> {
@@ -307,7 +365,7 @@ const RegisterAuction = ({navigation}) => {
         setEndDate("");
         setEndTime("");
         setMeetingType("");
-        setFoodType("");
+        setFoodType([]);
         setNumOfPeople("");
         setSelected("");
         setSelectedAge("");
@@ -554,67 +612,83 @@ const RegisterAuction = ({navigation}) => {
             <RadioContiner>
             <RadioButton 
             label="한식"
-            value={(foodType==="한식")}
-            status={(foodType==="한식"? "checked" : "unchecked")}
+            value={(foodType.includes("한식"))}
+            status={(foodType.includes("한식")? "checked" : "unchecked")}
             containerStyle={{ marginLeft: 0, marginRight: 0}}
             onPress={() => {
-                if(foodType==="한식"){
-                    setFoodType("");
+                if(foodType.includes("한식")){
+                  let array = foodType.filter((el) => el !=="한식");
+                  setFoodType(array);
                 }else {
-                    setFoodType("한식");
+                  let array = foodType.slice();
+                  array.push("한식");
+                  setFoodType(array)
                 }
             }}
             />
             <RadioButton 
             label="양식"
-            value={(foodType==="양식")}
-            status={(foodType==="양식"? "checked" : "unchecked")}
+            value={(foodType.includes("양식"))}
+            status={(foodType.includes("양식")? "checked" : "unchecked")}
             containerStyle={{ marginLeft: 0, marginRight: 0}}
             onPress={() => {
-                if(foodType==="양식"){
-                    setFoodType("");
-                }else {
-                    setFoodType("양식");
-                }
+              if(foodType.includes("양식")){
+                let array = foodType.filter((el) => el !=="양식");
+                setFoodType(array);
+              }else {
+                let array = foodType.slice();
+                array.push("양식");
+                setFoodType(array)
+              }
             }}
             />
            <RadioButton 
             label="중식"
-            value={(foodType==="중식")}
-            status={(foodType==="중식"? "checked" : "unchecked")}
+            value={(foodType.includes("중식"))}
+            status={(foodType.includes("중식")? "checked" : "unchecked")}
             containerStyle={{ marginLeft: 0, marginRight: 0}}
             onPress={() => {
-                if(foodType==="중식"){
-                    setFoodType("");
-                }else {
-                    setFoodType("중식");
-                }
+              if(foodType.includes("중식")){
+                let array = foodType.filter((el) => el !=="중식");
+                setFoodType(array);
+              }else {
+                let array = foodType.slice();
+                array.push("중식");
+                setFoodType(array)
+              }
             }}
             />
             <RadioButton 
             label="일식"
-            value={(foodType==="일식")}
-            status={(foodType==="일식"? "checked" : "unchecked")}
+            value={(foodType.includes("일식"))}
+            status={(foodType.includes("일식")? "checked" : "unchecked")}
             containerStyle={{ marginLeft: 0, marginRight: 0}}
             onPress={() => {
-                if(foodType==="일식"){
-                    setFoodType("");
-                }else {
-                    setFoodType("일식");
-                }
+              if(foodType.includes("일식")){
+                let array = foodType.filter((el) => el !=="일식");
+                setFoodType(array);
+              }else {
+                let array = foodType.slice();
+                array.push("일식");
+                setFoodType(array)
+              }
             }}
             />
             <RadioButton 
             label="기타"
-            value={(foodType==="기타")}
-            status={(foodType==="기타"? "checked" : "unchecked")}
+            value={(foodType.includes("기타"))}
+            status={(foodType.includes("기타")? "checked" : "unchecked")}
             containerStyle={{ marginLeft: 0, marginRight: 0}}
             onPress={() => {
-                if(foodType==="기타"){
-                    setFoodType("");
-                }else {
-                    setFoodType("기타");
-                }
+              if(foodType.includes("기타")){
+                let array = foodType.filter((el) => el !=="기타");
+                setFoodType(array);
+              }else {
+                let array = foodType.slice();
+                array.push("기타");
+                setFoodType(array)
+                console.log(foodType);
+              }
             }}
             />
             </RadioContiner>
@@ -665,32 +739,41 @@ const RegisterAuction = ({navigation}) => {
             <TripleLabel>선호 지역</TripleLabel>
         </RadioContiner>
 
- <RegionContiner>
-        <DropDownPicker 
-        open={open}
-        value={selected}
-        items={cities}
-        setOpen={setOpen}
-        setValue={setSelected}
-        setItems={setCities}
-        containerStyle={{width: WIDTH*0.43, alignSelf: 'center'}}
-        placeholder="시/도"
-        placeholderStyle={{color: theme.label, fontSize: 16}}
-        listMode="SCROLLVIEW"
-        />   
+<MapContainer>
+<MapView 
+  style={{
+    width: WIDTH*0.9,
+    height: HEIGHT*0.2,
+  }}
+  initialRegion={{
+    longitude: longi,
+    latitude: lati,
+    latitudeDelta: 0.5,
+    longitudeDelta: 0.5,
+  }}
+  region={region}
+  onRegionChangeComplete={(r) => setRegion(r)}
+  provider={PROVIDER_GOOGLE}
+  showsUserLocation={true}
+  loadingEnabled={true}>
+    <Marker
+      coordinate={region}
+      pinColor="blue"
+      onPress={() => {setSelectedLocation(region); getGeocodeAsync(region);}}
+    />
+</MapView>
+<CurrentButton onPress= {()=> setRegion({
+             longitude: longi,
+             latitude: lati,
+             latitudeDelta: 0.01,
+             longitudeDelta: 0.01, })}>
+<MaterialCommunityIcons name="map-marker" size={30} color="black"/>
+</CurrentButton>
+</MapContainer>
+<Label style={{width: WIDTH*0.9, borderRadius: 5, borderWidth: 1, paddingLeft: 5, marginTop: 5, paddingTop: 10, paddingBottom: 10}}>
+  {(selectedLocation && loc !== null)? String(loc) : "지역이 선택되지 않았습니다."}</Label>
 
-        <StyledTextInputs 
-           value={city}
-           onChangeText={text => setCity(removeWhitespace(text))}
-           autoCapitalize="none"
-           placeholder="시/군/구/읍/면/동"
-           autoCorrect={false}
-           textContentType="none" // iOS only
-           underlineColorAndroid="transparent" // Android only
-           style={{width: WIDTH * 0.43, marginBottom: 0, marginTop: 0, marginLeft: 10}}
-           />
 
-</RegionContiner>
 
             <Label>공고 마감 날짜 및 시각</Label>
             <DateContainer onPress={_handleEndDatePress} >

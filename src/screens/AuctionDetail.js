@@ -1,20 +1,25 @@
 import React, { useLayoutEffect, useState } from 'react';
 import styled from "styled-components/native";
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, Dimensions, TouchableOpacity} from "react-native";
 import { Button } from '../components';
 import { theme } from '../theme';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { BidstoreList } from '../utils/data';
+
+const WIDTH = Dimensions.get("screen").width;
 
 const Container = styled.View`
     flex: 1;
     align-items: center;
+    justify-content: center;
     background-color: ${({ theme }) => theme.background};
     padding: 10px 0 0 0;
 
 `;
 
 const Header = styled.View`
+    width: ${WIDTH*0.98};
     height: 12%;
     background-color: ${({ theme }) => theme.background}; 
     flex-direction: row;
@@ -42,7 +47,7 @@ const InfoContainer = styled.View`
     justify-content: center;
     alignItems: center;
     flex-direction:column;
-    margin : 15px;
+    margin : 5%;
     border-radius: 10px;
     border: 1px solid black;
 `;
@@ -82,35 +87,44 @@ const ButtonContainer = styled.View`
     flex-direction: row;
     flex: 1;
     margin : 15px;
+    align-items: center;
+    justify-content: center;
 
 `;
 
-const AuctionDetail = ({ navigation }) => {
+const AuctionDetail = ({ navigation, route}) => {
 
     const [isStar, setIsStar] = useState(false);
     const _onStarPress = () => { setIsStar(!isStar) };
+    const [isFinished, setIsFinished] = useState(false);
+    const [isUser, setIsUser] = useState(false);
 
-    const _onMessagePress = () => { navigation.navigate("Message") };
+
+    const _onMessagePress = () => { navigation.navigate("Message" , {name: "닉네임"+AuctionId}) };
+    
+    const AuctionId = route.params.id;
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            headerTitle: <Title>공고 제목</Title>,
+            headerTitle: "",
             headerRight: () => (
-                (<MaterialCommunityIcons name="send" size={35} onPress={_onMessagePress}
-                    style={{ marginRight: 15, marginBottom: 3, marginTop: 3, opacity: 0.7 }} />)
+                !isUser ?(<MaterialCommunityIcons name="send" size={35} onPress={_onMessagePress}
+                    style={{ marginRight: 15, marginBottom: 3, marginTop: 3, opacity: 0.7 }} />) : null
             )
         });
     }, []);
+    
 
     return (
 
         <Container>
             <KeyboardAwareScrollView
                 extraScrollHeight={20}
+                showsVerticalScrollIndicator={false}
             >
                 <Header>
                     <View style={styles.name}>
-                        <Title>공고 제목</Title>
+                        <Title>공고 제목{AuctionId}</Title>
                         <Text>닉네임</Text>
                     </View>
                     <Endtime>
@@ -151,45 +165,37 @@ const AuctionDetail = ({ navigation }) => {
                     </RowItemContainer>
                 </InfoContainer>
 
-                {/* 후에 입찰한 가게가 있을 시, 가게 수만큼 출력하도록 구현 필요  */}
+
                 <InfoContainer flex={3}>
                     <RowItemContainer>
                         <DescTitle size={20} >입찰현황</DescTitle>
                     </RowItemContainer>
-                    <View style={styles.row}>
-                        <Store><Desc>가게이름1</Desc></Store>
-                        <Store><Desc>추천메뉴1</Desc></Store>
-                        <Store><Desc>000000원</Desc></Store>
-                    </View>
-                    <View style={styles.row}>
-                        <Store><Desc>가게이름1</Desc></Store>
-                        <Store><Desc>추천메뉴1</Desc></Store>
-                        <Store><Desc>000000원</Desc></Store>
-                    </View>
-                    <View style={styles.row}>
-                        <Store><Desc>가게이름1</Desc></Store>
-                        <Store><Desc>추천메뉴1</Desc></Store>
-                        <Store><Desc>000000원</Desc></Store>
-                    </View>
+
+                    {BidstoreList.map(item => (
+                        <TouchableOpacity style={styles.row}
+                            onPress={() => {
+                                navigation.navigate("BidDetail", {id: item.id})
+                            }}>
+                            <Store><Desc>{item.name}</Desc></Store>
+                            <Store><Desc>{item.menu}</Desc></Store>
+                            <Store><Desc>{item.price}원</Desc></Store>
+                        </TouchableOpacity>
+                    ))} 
                 </InfoContainer>
 
-                {/* Store만 ButtonContainer가 보이도록 구현 필요 */}
-                <ButtonContainer>
-                    <Button
-                        title="cancel"
-                        containerStyle={{ width: '50%', backgroundColor: theme.buttonDisabled }}
-                        onPress={() => {
-                            navigation.navigate("Auction");
-                        }}
-                    />
-                    <Button
-                        title="참여"
-                        containerStyle={{ width: '50%' }}
-                        onPress={() => {
-                            navigation.navigate("AuctionBid");
-                        }}
-                    />
-                </ButtonContainer>
+                {/* Store만 ButtonContainer가 보이도록 구현 필요 이미 참여했으면 수정으로 바꾸기..? */}
+                {!isFinished &&
+                 (<ButtonContainer>
+                 <Button
+                     title="참여"
+                     containerStyle={{ width: '100%' }}
+                     onPress={() => {
+                         navigation.navigate("AuctionBid");
+                     }}
+                 />
+             </ButtonContainer>)
+                }
+               
             </KeyboardAwareScrollView>
         </Container>
 
@@ -205,5 +211,7 @@ const styles = StyleSheet.create({
         marginBottom: 3,
     },
 });
+
+
 
 export default AuctionDetail;

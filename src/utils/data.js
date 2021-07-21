@@ -335,6 +335,134 @@ export const Reviews = [
     },
 ];
 
+export const AuctionList = [
+    {
+        id: 0,
+        title: "맛있는 회식 장소 구해요1",
+        type: "사내 회식",
+        count: 5,
+        region: "서울시",
+        preMenu: "한식",
+        prePrice: 100000,
+        bookTime: "2021/07/01 12:30PM",
+        registerTime: "2021/07/01 12:30PM",
+    },
+    {
+        id: 1,
+        title: "맛있는 회식 장소 구해요2",
+        type: "사내 회식",
+        count: 5,
+        region: "서울시",
+        preMenu: "한식",
+        prePrice: 100000,
+        bookTime: "2021/07/01 12:30PM",
+        registerTime: "2021/07/01 12:30PM",
+    },
+    {
+        id: 2,
+        title: "맛있는 회식 장소 구해요3",
+        type: "사내 회식",
+        count: 5,
+        region: "서울시",
+        preMenu: "한식",
+        prePrice: 100000,
+        bookTime: "2021/07/01 12:30PM",
+        registerTime: "2021/07/01 12:30PM",
+    },
+    {
+        id: 3,
+        title: "맛있는 회식 장소 구해요4",
+        type: "사내 회식",
+        count: 5,
+        region: "서울시",
+        preMenu: "한식",
+        prePrice: 100000,
+        bookTime: "2021/07/01 12:30PM",
+        registerTime: "2021/07/01 12:30PM",
+    },
+    {
+        id: 4,
+        title: "맛있는 회식 장소 구해요5",
+        type: "사내 회식",
+        count: 5,
+        region: "서울시",
+        preMenu: "한식",
+        prePrice: 100000,
+        bookTime: "2021/07/01 12:30PM",
+        registerTime: "2021/07/01 12:30PM",
+    },
+    {
+        id: 5,
+        title: "맛있는 회식 장소 구해요6",
+        type: "사내 회식",
+        count: 5,
+        region: "서울시",
+        preMenu: "한식",
+        prePrice: 100000,
+        bookTime: "2021/07/01 12:30PM",
+        registerTime: "2021/07/01 12:30PM",
+    },
+];
+
+export const StoreList = [
+    {
+        url: "",
+        id: 0,
+        name: "냠냠 치킨",
+        ment: "치킨 냠냠 드세요",
+        distance: 300,
+        score: 4.5,
+    },
+    {
+        url: "",
+        id: 1,
+        name: "냠냠 피자",
+        ment: "피자 냠냠 드세요",
+        distance: 500,
+        score: 4.3,
+    },
+    {
+        url: "",
+        id: 2,
+        name: "도넛츠 도넛",
+        ment: "도넛 꽂아 드세요",
+        distance: 1000,
+        score: 4.0,
+    },
+    {
+        url: "",
+        id: 3,
+        name: "꼬기나라",
+        ment: "찹찹 구워 드세요",
+        distance: 900,
+        score: 4.8,
+    },
+    {
+        url: "",
+        id: 4,
+        name: "이번엔 뭐 먹을래",
+        ment: "먹고 싶은 것들 다 드세요",
+        distance: 100,
+        score: 5.0,
+    },
+    {
+        url: "",
+        id: 5,
+        name: "웩웩 감튀",
+        ment: "감튀 먹고 웩하세요",
+        distance: 300,
+        score: 3.0,
+    },
+    {
+        url: "",
+        id: 6,
+        name: "김치찌개 최고",
+        ment: "후루룩 드세요",
+        distance: 1200,
+        score: 4.7,
+    },
+];
+
 export const chatrooms =[
     {
         id: 0,
@@ -357,7 +485,7 @@ export const chatrooms =[
         desc: "네 감사합니다.",
         time: '2021-07-03T22:19:20+09:00',
     },
-    
+
 ];
 
 export const messages =[
@@ -453,80 +581,6 @@ export const storeBookmarks =[
     },
 ];
 
-export const AuctionList = [
-    {
-        id: 0,
-        title: "맛있는 회식 장소 구해요1",
-        type: "사내 회식",
-        count: 5,
-        region: "서울시",
-        preMenu: "한식",
-        prePrice: 100000,
-        bookTime: "2021/07/01 12:30PM",
-        registerTime: "2021/07/01 12:30PM",
-        bidsuccess: false,
-    },
-    {
-        id: 1,
-        title: "맛있는 회식 장소 구해요2",
-        type: "사내 회식",
-        count: 5,
-        region: "서울시",
-        preMenu: "한식",
-        prePrice: 100000,
-        bookTime: "2021/07/01 12:30PM",
-        registerTime: "2021/07/01 12:30PM",
-        bidsuccess: true,
-    },
-    {
-        id: 2,
-        title: "맛있는 회식 장소 구해요3",
-        type: "사내 회식",
-        count: 5,
-        region: "서울시",
-        preMenu: "한식",
-        prePrice: 100000,
-        bookTime: "2021/07/01 12:30PM",
-        registerTime: "2021/07/01 12:30PM",
-        bidsuccess: false,
-    },
-    {
-        id: 3,
-        title: "맛있는 회식 장소 구해요4",
-        type: "사내 회식",
-        count: 5,
-        region: "서울시",
-        preMenu: "한식",
-        prePrice: 100000,
-        bookTime: "2021/07/01 12:30PM",
-        registerTime: "2021/07/01 12:30PM",
-        bidsuccess: true,
-    },
-    {
-        id: 4,
-        title: "맛있는 회식 장소 구해요5",
-        type: "사내 회식",
-        count: 5,
-        region: "서울시",
-        preMenu: "한식",
-        prePrice: 100000,
-        bookTime: "2021/07/01 12:30PM",
-        registerTime: "2021/07/01 12:30PM",
-        bidsuccess: false,
-    },
-    {
-        id: 5,
-        title: "맛있는 회식 장소 구해요6",
-        type: "사내 회식",
-        count: 5,
-        region: "서울시",
-        preMenu: "한식",
-        prePrice: 100000,
-        bookTime: "2021/07/01 12:30PM",
-        registerTime: "2021/07/01 12:30PM",
-        bidsuccess: false,
-    },
-];
 
 export const UseList = [
     {
@@ -583,4 +637,28 @@ export const UseList = [
         bidPrice: 150000,
         reviewUploaded : false,
     },
-];
+]; 
+
+export const BidstoreList = [
+    {
+        id: 1,
+        name: "가게이름1",
+        menu: "추천메뉴1",
+        price: 100000,
+        detail: "정말 맛있어요. "
+    },
+    {
+        id: 2,
+        name: "가게이름2",
+        menu: "추천메뉴2",
+        price: 150000,
+        detail: "추천합니다"
+    },
+    {
+        id: 3,
+        name: "가게이름3",
+        menu: "추천메뉴3",
+        price: 200000,
+        detail : "어서오세요"
+    },
+]

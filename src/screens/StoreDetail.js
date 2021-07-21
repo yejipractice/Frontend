@@ -10,6 +10,7 @@ const Container = styled.View`
     flex: 1;
     justify-content: flex-start;
     align-items: center;
+    background-color:${({theme}) => theme.background};
 `;
 
 const HEIGHT = Math.round(Dimensions.get("window").height * 0.4);
@@ -99,13 +100,13 @@ const InfoTextContainer = styled.View`
 `;
 
 const Title = styled.Text`
-    font-size: 30px;
+    font-size: 25px;
     font-weight: bold;
     color: ${({theme}) => theme.background};
 `;
 
 const DesText = styled.Text`
-    font-size: 20px;
+    font-size: 17px;
     font-weight: bold;
     opacity: 0.6;
     color: ${({theme}) => theme.background};
@@ -124,7 +125,7 @@ const ReviewButton = styled.TouchableOpacity`
 
 `;
 
-const StoreImage = ({item: {id, src, des}, onStarPress, isStar,theme, onReviewPress}) => {
+const StoreImage = ({item: {id, src, des}, onStarPress, isStar,theme, onReviewPress, storeId}) => {
     return (
         <>
             <StyledImage source={{uri: src}} />
@@ -141,7 +142,7 @@ const StoreImage = ({item: {id, src, des}, onStarPress, isStar,theme, onReviewPr
             </StarContainer>
             <DesContainer>
                 <DesTextBox>
-                    <Title>가게 이름</Title>
+                    <Title>가게 이름{storeId}</Title>
                     <ReviewButton onPress={onReviewPress}><Title>리뷰 별점</Title></ReviewButton>
                 </DesTextBox>
                 <DesTextBox>
@@ -158,7 +159,8 @@ const StoreDetail = ({navigation, route}) => {
 
     const carouselRef = useRef();
     const [indexSelected, setIndexSelected] = useState(0);
-    
+    const [isUser, setIsUset] = useState(true);
+
     const onSelect = indexSelected => {
         setIndexSelected(indexSelected);
     };
@@ -168,19 +170,22 @@ const StoreDetail = ({navigation, route}) => {
 
     const [isStar, setIsStar] = useState(false);
     
-    const _onMessagePress = () => {navigation.navigate("Message")};
+    const _onMessagePress = () => {navigation.navigate("Message", {name: "가게 이름"+id})};
 
     const _onStarPress = () => {setIsStar(!isStar)};
 
     const _onReviewPress = () => {navigation.navigate("Review",{id: id})};
 
-    useLayoutEffect(()=> {
+    useLayoutEffect(() => {
         navigation.setOptions({
+            headerTitle: "",
             headerRight: () => (
-              (<MaterialCommunityIcons name="send" size={35} onPress={_onMessagePress} 
-              style={{marginRight: 15, marginBottom:3, marginTop: 3, opacity: 0.7}}/>)
-            )});
-        },[]);
+                isUser ?(<MaterialCommunityIcons name="send" size={35} onPress={_onMessagePress}
+                    style={{ marginRight: 15, marginBottom: 3, marginTop: 3, opacity: 0.7 }} />) : null
+            )
+        });
+    }, []);
+    
    
      return (
         <KeyboardAwareScrollView
@@ -193,7 +198,7 @@ const StoreDetail = ({navigation, route}) => {
            ref={carouselRef}
            data={photos}
            renderItem={({item}) => (
-                <StoreImage item={item} onReviewPress={_onReviewPress} onStarPress={_onStarPress} isStar={isStar} theme={theme}/>
+                <StoreImage item={item} onReviewPress={_onReviewPress} onStarPress={_onStarPress} isStar={isStar} theme={theme} storeId={id}/>
             )}
             sliderWidth={WIDTH}
             itemWidth={WIDTH}
