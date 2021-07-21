@@ -638,3 +638,27 @@ export const UseList = [
         reviewUploaded : false,
     },
 ]; 
+
+export const BidstoreList = [
+    {
+        id: 1,
+        name: "가게이름1",
+        menu: "추천메뉴1",
+        price: 100000,
+        detail: "정말 맛있어요. "
+    },
+    {
+        id: 2,
+        name: "가게이름2",
+        menu: "추천메뉴2",
+        price: 150000,
+        detail: "추천합니다"
+    },
+    {
+        id: 3,
+        name: "가게이름3",
+        menu: "추천메뉴3",
+        price: 200000,
+        detail : "어서오세요"
+    },
+]; 
