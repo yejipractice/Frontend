@@ -100,7 +100,7 @@ const ReviewWrite = ({navigation, route}) => {
     }
 
     const _onPhotoPress = () => {
-        navigation.navigate("MultipleImage");
+        navigation.navigate("MultipleImage",{type: "Review"});
     }
 
     const _onStarPress = () => {

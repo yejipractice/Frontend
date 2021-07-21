@@ -35,10 +35,12 @@ import DocumentRegister from './DocumentRegister'
 import OrderDetail from './OrderDetail'
 import MultipleImage from "./MultipleImage";
 import BidDetail from "./BidDetail";
+import StoreBasicChange from "./StoreBasicChange";
+import StoreConvChange from './StoreConvChange';
 
 export {
     AuctionDetail, AuctionBid, AuctionFinished, UserInfoChange, UserInfo, Mypage_User, Mypage_Store, Review, StoreInfoChange,
     SearchAuction, SearchStore, Message, Login, Mode, Notice, Signup, Main, AccountFind, RegisterAuction, Auction, Store, StoreDetail, StoreInfo, StoreMap,
     ReviewManage, ChatManage, Bookmark, BidManage, BidManageFinished, PayManage, UseManage, OrderDetail, StoreManage, ReviewWrite, DocumentRegister,
-    MultipleImage,BidDetail
+    MultipleImage,BidDetail,StoreBasicChange,StoreConvChange,
 };

@@ -3,7 +3,7 @@ import { ThemeContext } from "styled-components/native";
 import { createStackNavigator } from '@react-navigation/stack';
 import { Mypage_Store, Mypage_User, StoreInfo, StoreInfoChange, UserInfo, UserInfoChange, StoreManage, ReviewManage
     ,ChatManage, Bookmark, Message, AuctionDetail, AuctionBid, PayManage, UseManage, ReviewWrite, DocumentRegister,
-    OrderDetail, StoreDetail, RegisterAuction, MutipleImage  } from "../screens";
+    OrderDetail, StoreDetail, RegisterAuction, MultipleImage, StoreConvChange, StoreBasicChange  } from "../screens";
 import BidManageTab from './BidManageTab';
 
 
@@ -47,9 +47,11 @@ const MypageStack = () => {
             <Stack.Screen name="StoreDetail" component={StoreDetail} options={{ headerBackTitle: false, headerTitle: "가게상세", headerTitleAlign: 'center', headerTitleStyle: { fontSize: 20, fontWeight: 'normal' }, }} />
             <Stack.Screen name="RegisterAuction" component={RegisterAuction} options={{ headerBackTitle: false, headerTitle: "공고수정", headerTitleAlign: 'center', headerTitleStyle: { fontSize: 20, fontWeight: 'normal' }, }} />
             <Stack.Screen name="MultipleImage" component={MultipleImage} options={{ headerTitle: "",headerBackTitle: false, }} />        
-       
+            <Stack.Screen name="StoreBasicChange" component={StoreBasicChange} options={{ headerTitle: "업체 기본정보 수정", headerBackTitle: false,}} initialParams={[]} />
+            <Stack.Screen name="StoreConvChange" component={StoreConvChange} options={{ headerTitle: "업체 편의정보 수정",headerBackTitle: false, }} />
+
         </Stack.Navigator>
-    );
+    );   
 }
 
 export default MypageStack;

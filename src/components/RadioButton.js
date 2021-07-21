@@ -7,7 +7,7 @@ const Container = styled.View`
   flex-direction: row;
   margin-left: 5px;
   margin-right: 5px;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   align-items: center;
   justify-content: center;
   `;
@@ -24,13 +24,14 @@ const Button = ({ label, value, status, onPress, containerStyle }) => {
 
   return (
     <Container style={containerStyle}>
+        <Label>{label}</Label>
       <RadioButton
         value={value}
         status={status}
         onPress={onPress}
         color={theme.titleColor}
      />
-      <Label>{label}</Label>
+     
     </Container>
   );
 };

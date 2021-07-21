@@ -12,6 +12,8 @@ import MypageButton from "./MypageButton";
 import ProfileImage from "./ProfileImage";
 import InfoText from "./InfoText";
 import ToggleButton from "./ToggleButton";
+import ManageText from "./ManageText";
 
 
-export {ToggleButton, InfoText, ProfileImage, MypageButton, DateTimePicker, Spinner, ModeButton, Image, SmallButton, RadioButton,IconButton ,Input,Button, CheckBoxLetter};
+export {ToggleButton, InfoText, ProfileImage, MypageButton, DateTimePicker, Spinner, ModeButton, Image,
+    SmallButton, RadioButton,IconButton ,Input,Button, CheckBoxLetter, ManageText};
