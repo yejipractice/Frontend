@@ -31,7 +31,13 @@ const RowItemContainer = styled.View`
     border-bottom-width: ${({ border }) => border ? border : 1}px;
     border-color: ${({ theme }) => theme.label};
     margin: 5px 0 5px 0;
+`;
 
+const TypeContainer = styled.View`
+    position: absolute;
+    height: 200px;
+    left: 30px;
+    bottom: 45px;
 `;
 
 const StyledTextInput = styled.TextInput.attrs(({ theme }) => ({
@@ -63,9 +69,9 @@ const ErrorText = styled.Text`
     align-items: flex-start;
     width: 100%;
     height: 20px;
-    margin-bottom: 10px;
     line-height: 20px;
     color: ${({ theme }) => theme.errorText};
+    margin-left: 10px;
 `;
 const TimeContainer = styled.TouchableOpacity`
     background-color: ${({theme})=> theme.background}
@@ -120,7 +126,7 @@ const StoreBasicChange = ({ navigation, route }) => {
       {label: "양식", value: "양식"},
       {label: "기타", value: "기타"},
     ]); 
-    
+
     // 주소 팝업창
     const [isAddressModal, setIsAddressModal] = useState(false);
 
@@ -131,7 +137,7 @@ const StoreBasicChange = ({ navigation, route }) => {
 
     const didMountRef = useRef();
 
-    
+
     // 업체 사진 불러오기
     const _onPhotoPress = () => {
         navigation.navigate("MultipleImage", {type: "Store"});
@@ -198,14 +204,14 @@ const StoreBasicChange = ({ navigation, route }) => {
     };
 
     const _setOpenTime = time => {
-     
+
         let h = time.getHours();
         let m = time.getMinutes();
 
         if(h < 10){
           h = "0"+h;
         }
-        
+
         if(m< 10){
           m = "0"+m;
         }
@@ -225,11 +231,11 @@ const StoreBasicChange = ({ navigation, route }) => {
     const _setCloseTime = time => {
         let h = time.getHours();
         let m = time.getMinutes();
-        
+
         if(h < 10){
           h = "0"+h;
         }
-        
+
         if(m< 10){
           m = "0"+m;
         }
@@ -260,9 +266,11 @@ const StoreBasicChange = ({ navigation, route }) => {
             <KeyboardAwareScrollView
                 extraScrollHeight={20}
             >
+                {uploaded && disabled && <ErrorText>{errorMessage}</ErrorText>}
                 {/* 업체 기본정보 */}
                 <View style={{marginLeft: 10}}>
                     <DescTitle size={23}>업체 기본정보</DescTitle>
+               
                 </View>
                 <InfoContainer>
                     <ManageText 
@@ -300,7 +308,7 @@ const StoreBasicChange = ({ navigation, route }) => {
                         </View>
                     </Modal>
                     </RowItemContainer>
-                    
+
                     <RowItemContainer>
                         <DescTitle>영업시간</DescTitle>
                     <TimeContainer onPress={_handleOpenTimePress} >
@@ -321,15 +329,20 @@ const StoreBasicChange = ({ navigation, route }) => {
                         <DescTitle>업체 사진</DescTitle>
                         <SmallButton 
                             title="사진첨부" 
-                            containerStyle ={{width: '25%', marginTop: '3%'}}
+                            containerStyle ={{width: '30%', marginTop: '3%'}}
                             onPress={_onPhotoPress}
                         />
-                        
+
                     </RowItemContainer>
 
-                    <View style={{zIndex: 999}}>
+                    
                     <RowItemContainer>
                         <DescTitle>업체 유형</DescTitle>
+                        <View style={{height: HEIGHT*0.05}} />
+                    </RowItemContainer>
+              
+                </InfoContainer>
+                <TypeContainer>
                         <DropDownPicker 
                                 open={open}
                                 value={selectedType}
@@ -341,16 +354,10 @@ const StoreBasicChange = ({ navigation, route }) => {
                                 placeholder="업체 유형"
                                 placeholderStyle={{color: theme.label, fontSize: 16}}
                                 listMode="SCROLLVIEW"
+                                maxHeight={150}
                             />  
-                    </RowItemContainer>
-                    </View>
-                    
-                    
-                </InfoContainer>
-                <View style={{marginLeft: '5%'}}>
-                    {uploaded && disabled && <ErrorText>{errorMessage}</ErrorText>}
-                </View>
-                
+                </TypeContainer>
+                <View style={{height: 150}} />
             </KeyboardAwareScrollView>
         </Container>
 
@@ -376,4 +383,4 @@ const styles = StyleSheet.create({
       }
 });
 
-export default StoreBasicChange;
+export default StoreBasicChange; 
