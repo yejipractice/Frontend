@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import styled from "styled-components/native";
 import {View, Dimensions, StyleSheet, TouchableOpacity, Alert} from "react-native";
 import {ProfileImage, InfoText, Button, RadioButton} from '../components';
@@ -61,6 +61,15 @@ border-radius: 50px;
 border-width: 1px;
 `;
 
+const ErrorText = styled.Text`
+    align-items: flex-start;
+    width: 100%;
+    height: 20px;
+    margin-top: 10px;
+    line-height: 20px;
+    color: ${({ theme }) => theme.errorText};
+`;
+
 
 
 const  UserInfoChange = () => {
@@ -71,11 +80,12 @@ const  UserInfoChange = () => {
     const [password, setPassword] = useState('');
     const [age, setAge] = useState('23');
     const [gender, setGender] = useState('female');
-    // 닉네임 중복확인, 핸드폰 인증
-    const [isNameCheck, setNameCheck] = useState(false);
-    const [isPhoneCheck, setPhoneCheck] = useState(false);
-    const [isPassword, setIsPassword] = useState(false);
+    
+    const [errorMessage, setErrorMessage] = useState("");
+    const [uploaded, setUploaded] = useState(false);
 
+    const didMountRef = useRef();
+    
       //현재 위치
   const [loc, setLoc] = useState(null); //선택 지역 
   const [lati, setLati] = useState(37.535887);
@@ -138,40 +148,40 @@ const [selectedLocation, setSelectedLocation] = useState(null);
   
     };
   
+     //에러 메세지 설정 
+     useEffect(() => {
+        if (didMountRef.current) {
+            let _errorMessage = "";
+            if (uploaded) {
+                _errorMessage = "정보를 입력해주세요";
+                if (!userName) {
+                    _errorMessage = "닉네임을 입력하세요.";
+                } else if (!password) {
+                    _errorMessage = "비밀번호를 입력하세요.";
+                } else if (!validatePassword(password)) {
+                    _errorMessage = "비밀번호 조건을 확인하세요.";
+                } else if (!age) {
+                    _errorMessage = "나이를 입력하세요.";
+                }else if (!loc) {
+                    _errorMessage = "지역을 입력해주세요.";
+                }
+                else {
+                    _errorMessage = "";
+                }
+            }
+            setErrorMessage(_errorMessage);
+        } else {
+            didMountRef.current = true;
+        }
+    }, [userName, password, age, loc, uploaded]);
+    
+    const _handleChangeButtonPress = () => {
+        setUploaded(true);
+    };
+
     useEffect(() => {
       const result = getLocation();
     }, []);
-
-    const _handleChangeButtonPress = () => {
-        if (!userName) {
-            Alert.alert('','닉네임을 입력해주세요');
-            return;
-        }
-        if(!isNameCheck){
-            Alert.alert('','닉네임 중복확인을 해주세요');
-            return;
-        }
-        if(!password){
-            Alert.alert('','비밀번호를 설정해주세요');
-            return;
-        }
-        if(password){
-            if(!isPassword){
-                Alert.alert('','비밀번호를 설정해주세요');
-                return; 
-            }
-        }
-        if(!age){
-            Alert.alert('','나이를 입력해주세요');
-            return; 
-        }
-        if(!loc){
-            Alert.alert('','지역을 입력해주세요');
-            return; 
-        }
-    
-
-     };
 
     return (
         <Container>
@@ -193,11 +203,7 @@ const [selectedLocation, setSelectedLocation] = useState(null);
                         placeholder="닉네임"
                         returnKeyType= "done"
                         isChanged
-                        showButton
-                        title="적용"
-                        onPress={()=> {
-                            setNameCheck(true);
-                        }}  
+                        title="적용" 
                         />
                     <InfoText label="이메일" content="이메일주소"/>
                     <InfoText
@@ -207,14 +213,9 @@ const [selectedLocation, setSelectedLocation] = useState(null);
                         placeholder="특문, 숫자, 영문 포함 8자-16자"
                         returnKeyType= "done"
                         isChanged
-                        isPassword
-                        showButton                                
+                        isPassword                               
                         title="변경"
-                        disabled={validatePassword(password) ? false : true}
-                        onPress={()=> {
-                            setIsPassword(true);
-                            setPassword(password);
-                        }}                 
+                        disabled={validatePassword(password) ? false : true}             
                         />
 
                     <InfoText
@@ -283,8 +284,6 @@ const [selectedLocation, setSelectedLocation] = useState(null);
                 <MaterialCommunityIcons name="map-marker" size={30} color="black"/>
                 </CurrentButton>
                 </MapContainer>
-                
-               
                 
                 <CenterContainer>
                     {/* 변경사항 서버 저장 */}

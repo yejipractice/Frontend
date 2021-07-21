@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from "styled-components/native";
-import { MypageButton, ProfileImage, SmallButton, Image } from '../components'
+import { MypageButton, ProfileImage, SmallButton } from '../components'
 
 const Container = styled.View`
     background-color: ${({ theme }) => theme.background};
@@ -44,7 +44,7 @@ const Username = styled.Text`
 const LogoutContainer = styled.View`
     flex-direction: row;
     align-items: flex-end;
-    justify-content: flex-start;
+    justify-content: space-between;
 `;
 
 const Mypage_Store = ({ navigation }) => {
@@ -53,7 +53,6 @@ const Mypage_Store = ({ navigation }) => {
 
     return (
         <Container>
-
             <InfoContainer>
                 <ProfileContainer>
                     <ProfileButton onPress={() => {
@@ -68,10 +67,9 @@ const Mypage_Store = ({ navigation }) => {
                     </ProfileButton>
                 </ProfileContainer>
                 <LogoutContainer>
-                    <Image title="서류등록"
-                        url={document}
-                        onChangeImage={url => setDocument(url)}
-                        containerStyle={{ width: '70%', }}
+                <SmallButton title="서류등록"
+                        containerStyle={{ width: '30%' }}
+                        onPress={() => {navigation.navigate("DocumentRegister")}}
                     />
                     <SmallButton title="로그아웃" onPress={() => { }} containerStyle={{ width: '30%', }} />
                 </LogoutContainer>
