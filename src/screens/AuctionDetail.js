@@ -1,10 +1,11 @@
 import React, { useLayoutEffect, useState } from 'react';
 import styled from "styled-components/native";
-import { Text, View, StyleSheet, Dimensions} from "react-native";
+import { Text, View, StyleSheet, Dimensions, TouchableOpacity} from "react-native";
 import { Button } from '../components';
 import { theme } from '../theme';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { BidstoreList } from '../utils/data';
 
 const WIDTH = Dimensions.get("screen").width;
 
@@ -46,7 +47,7 @@ const InfoContainer = styled.View`
     justify-content: center;
     alignItems: center;
     flex-direction:column;
-    margin : 15px;
+    margin : 5%;
     border-radius: 10px;
     border: 1px solid black;
 `;
@@ -97,6 +98,7 @@ const AuctionDetail = ({ navigation, route}) => {
     const _onStarPress = () => { setIsStar(!isStar) };
     const [isFinished, setIsFinished] = useState(false);
     const [isUser, setIsUser] = useState(false);
+
 
     const _onMessagePress = () => { navigation.navigate("Message" , {name: "닉네임"+AuctionId}) };
     
@@ -163,26 +165,22 @@ const AuctionDetail = ({ navigation, route}) => {
                     </RowItemContainer>
                 </InfoContainer>
 
-                {/* 후에 입찰한 가게가 있을 시, 가게 수만큼 출력하도록 구현 필요  */}
+
                 <InfoContainer flex={3}>
                     <RowItemContainer>
                         <DescTitle size={20} >입찰현황</DescTitle>
                     </RowItemContainer>
-                    <View style={styles.row}>
-                        <Store><Desc>가게이름1</Desc></Store>
-                        <Store><Desc>추천메뉴1</Desc></Store>
-                        <Store><Desc>000000원</Desc></Store>
-                    </View>
-                    <View style={styles.row}>
-                        <Store><Desc>가게이름1</Desc></Store>
-                        <Store><Desc>추천메뉴1</Desc></Store>
-                        <Store><Desc>000000원</Desc></Store>
-                    </View>
-                    <View style={styles.row}>
-                        <Store><Desc>가게이름1</Desc></Store>
-                        <Store><Desc>추천메뉴1</Desc></Store>
-                        <Store><Desc>000000원</Desc></Store>
-                    </View>
+
+                    {BidstoreList.map(item => (
+                        <TouchableOpacity style={styles.row}
+                            onPress={() => {
+                                navigation.navigate("BidDetail", {id: item.id})
+                            }}>
+                            <Store><Desc>{item.name}</Desc></Store>
+                            <Store><Desc>{item.menu}</Desc></Store>
+                            <Store><Desc>{item.price}원</Desc></Store>
+                        </TouchableOpacity>
+                    ))} 
                 </InfoContainer>
 
                 {/* Store만 ButtonContainer가 보이도록 구현 필요 이미 참여했으면 수정으로 바꾸기..? */}
@@ -213,5 +211,7 @@ const styles = StyleSheet.create({
         marginBottom: 3,
     },
 });
+
+
 
 export default AuctionDetail;

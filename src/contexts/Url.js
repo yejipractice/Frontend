@@ -1,7 +1,7 @@
 import React, {createContext} from 'react';
 
 const UrlContext = createContext({
-   url: "http://172.16.101.201:63203",
+   url: "http://49.50.167.119:8000",
 });
 
 const UrlProvider = ({children}) => {
