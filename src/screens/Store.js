@@ -7,6 +7,7 @@ import { ThemeContext } from "styled-components";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {StoreList} from "../utils/data";
 import * as Location from "expo-location";
+import {LoginContext} from "../contexts";
 
 const HEIGHT = Dimensions.get("screen").width;
 
@@ -153,6 +154,7 @@ const Item = ({item: {url, id, name, ment, distance, score}, onPress, onStarPres
 
 const Store = ({navigation}) => {
     const theme = useContext(ThemeContext);
+    const {allow} = useContext(LoginContext);
 
     const [sort,setSort] = useState(0);
     const [isStar, setIsStar] = useState(false);
@@ -166,20 +168,12 @@ const Store = ({navigation}) => {
     const _onStarPress = () => {setIsStar(!isStar);}
 
     const getLocation = async () => {
-        let {status} = await Location.requestForegroundPermissionsAsync();
-        if (status=="granted") {
             let location = await Location.getCurrentPositionAsync({}); 
             setLoc(location);
             setLati(location.coords.latitude);
             setLongi(location.coords.longitude);
-            console.log(location.coords);
-        }
         return loc;
     };
-
-    useEffect(() => {
-        getLocation();
-    }, []);
 
     return (
         <Container>
@@ -215,11 +209,15 @@ const Store = ({navigation}) => {
             <MapButton 
             onPress={async ()=> {
                 try {
-                    const res = await getLocation();
-                    console.log(res)
-                    navigation.navigate("StoreMap", {longi: longi, lati: lati});
+                    if(allow) {
+                        const res = await getLocation();
+                        console.log(res)
+                        navigation.navigate("StoreMap", {longi: longi, lati: lati});
+                    }else{
+                        Alert.alert("Location Permission Error","위치 정보를 허용해주세요.");
+                    }
                 }catch(e) {
-                    Alert.alert("Location Error", e.message);
+                    Alert.alert("Error", e.message);
                 }
             }}>
                 <MapText>지도로 보기</MapText>

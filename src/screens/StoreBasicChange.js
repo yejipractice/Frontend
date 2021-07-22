@@ -1,12 +1,15 @@
-import React, { useState,useEffect,useRef, useLayoutEffect } from 'react';
+import React, { useState,useEffect,useRef, useLayoutEffect, useContext } from 'react';
 import styled from "styled-components/native";
-import { Dimensions, Modal, View, StyleSheet,TouchableOpacity } from "react-native";
+import { Dimensions, Modal, View, StyleSheet,TouchableOpacity, Alert } from "react-native";
 import { DateTimePicker, SmallButton, ManageText } from '../components';
 import { theme } from '../theme';
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Postcode from '@actbase/react-daum-postcode';
 import DropDownPicker from "react-native-dropdown-picker";
+import * as Location from "expo-location";
+import {LoginContext} from "../contexts";
+
 
 const WIDTH = Dimensions.get("screen").width;
 const HEIGHT = Dimensions.get("screen").height;
@@ -91,6 +94,8 @@ const ButtonTitle = styled.Text`
 
 const StoreBasicChange = ({ navigation, route }) => {
 
+    const {allow} = useContext(LoginContext);
+    const [allowLoc, setAllowLoc] = useState(allow);
     // 업체 기본정보
     const [phoneNumber, setPhoneNumber] = useState('028888888');
     const [address, setAddress] = useState('');
@@ -104,7 +109,6 @@ const StoreBasicChange = ({ navigation, route }) => {
     const [opening, setOpening] = useState('');
     const [closing, setClosing] = useState('');
 
-
     // 업체 사진들
     const [photos, setPhotos] = useState();
 
@@ -115,6 +119,17 @@ const StoreBasicChange = ({ navigation, route }) => {
         }
       }, [route.params.photos, photos]);
 
+      // 권한 허용 여부 창이 안 떠서 사용 못하는 중 
+      const _getLocPer = async () => {
+        try{
+            const {status} = await Location.requestForegroundPermissionsAsync();
+            if(status === "granted"){
+                setAllowLoc(true);
+            };
+        }catch (e) {
+            console.log(e);
+        };
+      };
 
     // 업체유형 드롭다운 
     const [open, setOpen] = useState(false);
@@ -142,6 +157,12 @@ const StoreBasicChange = ({ navigation, route }) => {
     const _onPhotoPress = () => {
         navigation.navigate("MultipleImage", {type: "Store"});
     }
+
+    const _getLL = async(address) => {
+        Location.setGoogleApiKey("AIzaSyBPYCpA668yc46wX23TWIZpQQUj08AzWms");
+        let res =  await Location.geocodeAsync(address);
+        console.log(res); // 서버에 보낼 위도 경도
+    };
 
 
     //에러 메세지 설정 
@@ -291,7 +312,14 @@ const StoreBasicChange = ({ navigation, route }) => {
                                 editable={address === '' ? false : true}
                             />
                             <SmallButton title="검색" containerStyle={{width: '20%', marginLeft:10}}
-                                onPress={() => {setIsAddressModal(true); setAddress("");}}
+                                onPress={() => {
+                                    if(allowLoc){
+                                        setIsAddressModal(true); 
+                                        setAddress("");
+                                    }else {
+                                        Alert.alert("Location Permission Error","위치 정보를 허용해주세요.");
+                                    }
+                                    }}
                             />
                         </View>
                     <Modal visible={isAddressModal} transparent={true}>
@@ -301,8 +329,10 @@ const StoreBasicChange = ({ navigation, route }) => {
                                 style={{  width: 350, height: 450 }}
                                 jsOptions={{ animated: true, hideMapBtn: true }}
                                 onSelected={data => {
-                                setAddress(JSON.stringify(data.address).replace(/\"/g,''));
+                                let ad = JSON.stringify(data.address).replace(/\"/g,'');
+                                setAddress(ad);
                                 setIsAddressModal(false);
+                                _getLL(ad);
                                 }}
                             />
                         </View>
