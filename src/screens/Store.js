@@ -152,7 +152,7 @@ const Item = ({item: {url, id, name, ment, distance, score}, onPress, onStarPres
     );
 };
 
-const Store = ({navigation}) => {
+const Store = ({navigation, route}) => {
     const theme = useContext(ThemeContext);
     const {allow} = useContext(LoginContext);
 
@@ -161,6 +161,11 @@ const Store = ({navigation}) => {
     const [loc, setLoc] = useState(null);
     const [lati, setLati] = useState(0);
     const [longi, setLongi] = useState(0);
+    const {menu} = route.params;
+
+    useEffect(()=> {
+        // data 정렬 
+    }, [sort, menu]);
 
     const _onStorePress = item => {
         navigation.navigate('StoreDetailStack', { id: item.id, name: item.storeName });
@@ -179,13 +184,13 @@ const Store = ({navigation}) => {
         <Container>
             <ButtonsContainer>
                 <ButtonBox onPress={() => setSort(1)} checked={sort===1}>
-                    <ButtonText>정렬기준1</ButtonText>
+                    <ButtonText>거리순</ButtonText>
                 </ButtonBox>
                 <ButtonBox onPress={() => setSort(2)} checked={sort===2}>
-                    <ButtonText>정렬기준2</ButtonText>
+                    <ButtonText>별점순</ButtonText>
                 </ButtonBox>
                 <ButtonBox onPress={() => setSort(3)} checked={sort===3}>
-                    <ButtonText>정렬기준3</ButtonText>
+                    <ButtonText>리뷰순</ButtonText>
                 </ButtonBox>
             </ButtonsContainer>
             
