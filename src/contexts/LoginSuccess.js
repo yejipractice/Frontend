@@ -6,10 +6,14 @@ const LoginContext = createContext({
     allow: false,
     mode: null,
     doc: false,
+    token: null,
+    autoLogin: false,
     setSuccess: () => {},
     setAllow: () => {},
     setMode: () => {},
     setDoc: () => {},
+    setToken: () => {},
+    setAutoLogin: () => {},
 });
 
 const LoginProvider = ({children}) => {
@@ -17,21 +21,28 @@ const LoginProvider = ({children}) => {
     const [allow, setAllow] = useState(false);
     const [mode, setMode] = useState(null);
     const [doc, setDoc] = useState(false);
+    const [token, setToken] = useState(null);
+    const [autoLogin, setAutoLogin] = useState(false);
 
     const value = {
-        success,
+        success, //로그인 성공 여부
         setSuccess,
-        allow,
+        allow, // 위치 권한 허용 여부
         setAllow,
-        mode,
+        mode, // 사용자 or 업체
         setMode,
-        doc,
+        doc, // 업체 서류 등록 여부
         setDoc,
+        token, 
+        setToken,
+        autoLogin,
+        setAutoLogin,
     };
 
-    const setData = (success,allow,mode,doc) => {
+    const setData = (token, autoLogin,allow,mode,doc) => {
         let data = {
-            success: success,
+            token: token,
+            autoLogin: autoLogin,
             allow: allow,
             mode: mode,
             doc: doc,
@@ -41,8 +52,8 @@ const LoginProvider = ({children}) => {
     };
 
     useEffect(() => {
-        setData(success, allow, mode, doc);
-    },[success, allow, mode, doc]);
+        setData(token, autoLogin, allow, mode, doc);
+    },[token, autoLogin, allow, mode, doc]);
 
     return (
         <LoginContext.Provider value={value}>
