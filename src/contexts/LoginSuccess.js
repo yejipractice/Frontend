@@ -1,4 +1,5 @@
-import React,{createContext, useState} from 'react';
+import React,{createContext, useState, useEffect} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginContext = createContext({
     success: false,
@@ -27,6 +28,21 @@ const LoginProvider = ({children}) => {
         doc,
         setDoc,
     };
+
+    const setData = (success,allow,mode,doc) => {
+        let data = {
+            success: success,
+            allow: allow,
+            mode: mode,
+            doc: doc,
+        };
+        AsyncStorage.setItem('user_infomation', JSON.stringify(data));
+        console.log(JSON.stringify(data))
+    };
+
+    useEffect(() => {
+        setData(success, allow, mode, doc);
+    },[success, allow, mode, doc]);
 
     return (
         <LoginContext.Provider value={value}>
