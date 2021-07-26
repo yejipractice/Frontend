@@ -9,7 +9,7 @@ import {Dimensions, Alert} from "react-native";
 import { theme } from '../theme';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import * as Location from "expo-location";
-import {LoginContext} from "../contexts";
+import {LoginContext, UrlContext, ProgressContext} from "../contexts";
 
 const WIDTH = Dimensions.get("screen").width;
 const HEIGHT = Dimensions.get("screen").height;
@@ -160,6 +160,9 @@ border-width: 1px;
 
 const RegisterAuction = ({navigation}) => {
   const {allow} = useContext(LoginContext);
+  const {url} = useContext(UrlContext);
+  const {spinner} = useContext(ProgressContext);
+
   //각 변수들에 대한 state 
     const [title, setTitle] = useState("");
     const [book, setBook] = useState(''); //String ver.
@@ -182,6 +185,8 @@ const RegisterAuction = ({navigation}) => {
     const [content, setContent] = useState('');
     const didMountRef = useRef();
     const [foodType, setFoodType] = useState([]);
+    const [bookFullData,setBookFullData] = useState("");
+    const [endFullData, setEndFullData] = useState("");
 
     // 나이 드롭다운  
     const [open1, setOpen1] = useState(false);
@@ -271,6 +276,40 @@ const [selectedLocation, setSelectedLocation] = useState(null);
     const result = getLocation();
   }, []);
 
+  const handleApi = async () => {
+    let fixedUrl = url+"/auction";
+
+    let Info = {
+      content: content,
+      deadline: endFullData,
+      maxPrice: maxPrice,
+      minPrice: minPrice,
+      reservation: bookFullData,
+      storeType: JSON.stringify(foodType),
+      title: title,
+      userType: meetingType,
+    };
+
+    let options = {
+      method: 'POST',
+      headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+      },
+      body: JSON.stringify( Info ),
+  };
+
+  try{
+    let response = await fetch(fixedUrl, options);
+    let res = await response.json();
+    
+    console.log(res);
+    return res["success"];
+  }catch (error) {
+    console.error(error);
+  }
+  };
+
     //에러 메세지 설정 
     useEffect(() => {
       if(didMountRef.current) {
@@ -355,31 +394,43 @@ const [selectedLocation, setSelectedLocation] = useState(null);
     },[bookTime,bookDate,endDate,endTime]);
 
     //공고 등록 버튼 액션: 공고 등록 후 공고 상세 보여주기 함수 연동 후 스피너 추가
-    const _onPress = () => {
-      setUploaded(true);
-
-      if(!disabled){
-        // 서버에 post후
-        setTitle('');
-        setBookDate("");
-        setBookTime("");
-        setEndDate("");
-        setEndTime("");
-        setMeetingType("");
-        setFoodType([]);
-        setNumOfPeople("");
-        setSelected("");
-        setSelectedAge("");
-        setSelectedSex("");
-        setContent("");
-        setCity("");
-        setMinPrice("");
-        setMaxPrice("");
-        setErrorMessage("아래 정보를 입력해주세요");
-        setDisabled(true);
-        setUploaded(false);
-        //임의로 메인보내기 원래는 공고 상세로 이동. 
-        navigation.navigate("Main");
+    const _onPress = async () => {
+      try{
+        spinner.start();
+        const result = await handleApi();
+        if (!result) {
+          alert("오류가 발생하였습니다. 잠시후 다시 시도해주세요.");
+        }else {
+          setUploaded(true);
+          if(!disabled){
+            setTitle('');
+            setBookDate("");
+            setBookTime("");
+            setEndDate("");
+            setEndTime("");
+            setMeetingType("");
+            setFoodType([]);
+            setNumOfPeople("");
+            setSelected("");
+            setSelectedAge("");
+            setSelectedSex("");
+            setContent("");
+            setSelectedLocation("");
+            setMinPrice("");
+            setMaxPrice("");
+            setErrorMessage("아래 정보를 입력해주세요");
+            setDisabled(true);
+            setUploaded(false);
+            //임의로 메인보내기 원래는 공고 상세로 이동. 
+            navigation.navigate("Main");
+          }else {
+            alert("오류가 발생하였습니다. 잠시후 다시 시도해주세요.");
+          };
+        }
+      }catch(e){
+        Alert.alert("Register Error", e.message);
+      }finally{
+        spinner.stop();
       }
       };
 
@@ -436,18 +487,21 @@ const [selectedLocation, setSelectedLocation] = useState(null);
         const days=["일요일","월요일","화요일","수요일","목요일","금요일","토요일"];
 
         const _setBookDate = date => {
-          y = date.getFullYear();
-          m = date.getMonth()+1;
+          var y = date.getFullYear();
+          var m = date.getMonth()+1;
           if(m < 10){
             m = "0"+m;
           }
-          d = date.getDate();
+          var d = date.getDate();
           if(d< 10){
             d = "0"+d;
           }
-          w = days[date.getDay()];
+          var w = days[date.getDay()];
           setBookDate(y+"년 "+m+"월 "+d+"일 "+w);
           setBookDateVisible(false);
+          let s = date.toISOString();
+          let ss = s.slice(0,11);
+          setBookFullData(ss);
         };
 
         const _hideBookDatePicker = () => {
@@ -459,8 +513,8 @@ const [selectedLocation, setSelectedLocation] = useState(null);
       };
 
       const _setBookTime = time => {
-        h = time.getHours();
-        m = time.getMinutes();
+        var h = time.getHours();
+        var m = time.getMinutes();
         if(h < 10){
           h = "0"+h;
         }
@@ -470,6 +524,10 @@ const [selectedLocation, setSelectedLocation] = useState(null);
         }
         setBookTime(h+"시 "+m+"분");
         setBookTimeVisible(false);
+        let s = time.toISOString();
+        let ss = s.slice(11,s.length);
+        let sss = bookFullData + ss;
+        setBookFullData(sss);
       };
 
       const _hideBookTimePicker = () => {
@@ -481,18 +539,21 @@ const [selectedLocation, setSelectedLocation] = useState(null);
     };
 
     const _setEndDate = date => {
-      y = date.getFullYear();
-      m = date.getMonth()+1;
+      var y = date.getFullYear();
+      var m = date.getMonth()+1;
       if(m < 10){
         m = "0"+m;
       }
-      d = date.getDate();
+      var d = date.getDate();
       if(d< 10){
         d = "0"+d;
       }
-      w = days[date.getDay()];
+      var w = days[date.getDay()];
       setEndDate(y+"년 "+m+"월 "+d+"일 "+w);
       setEndDateVisible(false);
+      let s = date.toISOString();
+      let ss = s.slice(0,11);
+      setEndFullData(ss);
     };
 
     const _hideEndDatePicker = () => {
@@ -504,8 +565,8 @@ const [selectedLocation, setSelectedLocation] = useState(null);
   };
 
   const _setEndTime = time => {
-    h = time.getHours();
-    m = time.getMinutes();
+    var h = time.getHours();
+    var m = time.getMinutes();
     if(h < 10){
       h = "0"+h;
     }
@@ -515,6 +576,10 @@ const [selectedLocation, setSelectedLocation] = useState(null);
     }
     setEndTime(h+"시 "+m+"분");
     setEndTimeVisible(false);
+    let s = time.toISOString();
+    let ss = s.slice(11,s.length);
+    let sss = endFullData + ss;
+    setEndFullData(sss);
   };
 
   const _hideEndTimePicker = () => {
