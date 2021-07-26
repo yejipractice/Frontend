@@ -254,7 +254,7 @@ const Signup = ({ navigation, route }) => {
 
         // 이메일 인증 키값 확인
         const _handleEmailVaildatePress = async() => {
-            let fixedUrl = url+'/member/auth/signup/verification?email='+`${email}&key=${emailConfirmCode}`;
+            let fixedUrl = url+'/member/auth/verify?email='+`${email}&key=${emailConfirmCode}`;
             try{
                 spinner.start();
             
@@ -304,7 +304,7 @@ const Signup = ({ navigation, route }) => {
 
         // 이메일 키값 전송 api
         const postemailApi = async () => {
-            let fixedUrl = url+'/member/auth/signup/verification?email='+`${email}`;
+            let fixedUrl = url+'/member/auth/verify?email='+`${email}`;
             console.log(fixedUrl);
             
             let options = {
