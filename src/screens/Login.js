@@ -94,14 +94,14 @@ const ButtonText = styled.Text`
 const Login = ({navigation}) => {
     const {spinner} = useContext(ProgressContext);
     const {url} = useContext(UrlContext);
-    const {setSuccess, setAllow} = useContext(LoginContext);
+    const {token, mode, doc, allow, setSuccess, setAllow, setAutoLogin, setToken, setMode, setDoc} = useContext(LoginContext);
     const [userId, setUserId] = useState("");
     const [password, setPassword] = useState("");
     const [disabled, setDisabled] = useState(true);
-    const [autoLogin, setAutoLogin] = useState(false);
+    const [auto, setAuto] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const passwordRef = useRef();
-
+    let tokenData = "";
     const theme = useContext(ThemeContext);
 
     useEffect(()=> {setDisabled(!(userId&&password))}, [userId,password]);
@@ -112,6 +112,50 @@ const Login = ({navigation}) => {
         setErrorMessage(
             validateEmail(changedEmail)? "" : "이메일 형식을 확인하세요."
         );
+    };
+
+    const getDocApi = async () => {
+        let fixedUrl = url+"/member/store";
+
+        let options = {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : tokenData,
+            },
+        };
+
+        try {
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+            setDoc(res["data"]["documentChecked"]);
+            return(res["data"]["documentChecked"]);
+        }catch(error) {
+            console.error(error);
+        }
+    };
+
+    const getModeApi = async () => {
+        let fixedUrl = url+"/member/userId";
+
+        let options = {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : tokenData,
+            },
+        };
+
+        try {
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+            setMode(res["type"]);
+            return res["type"];
+        }catch(error) {
+            console.error(error);
+        }
     };
 
     const handleApi = async () => {
@@ -129,14 +173,14 @@ const Login = ({navigation}) => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify( Info ),
-        
         };
 
         try{
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
-            
-            console.log(res);
+            setToken(res["data"]);
+            tokenData = res["data"];
+            setAutoLogin(auto);
             return res["success"];
         }catch (error) {
             console.error(error);
@@ -144,11 +188,39 @@ const Login = ({navigation}) => {
         
     };
 
-    
+    const getAllowApi = async () => {
+        const {status} = await Location.requestBackgroundPermissionsAsync();
+        if (status === "granted"){ 
+            setAllow(true);
+        }else{
+            setAllow(false);
+        }
+    }
 
-    // useEffect(()=> {
-    // unmount
-    // },[]);
+    const _loginSuccess = async (callback1, callback2, callback3) => {
+        var m = await callback1();
+        if(m === "STORE"){
+            const d = await callback2();
+        }
+        await callback3();
+    };
+
+    const _handleLoginPress = async () => {
+        try{
+            spinner.start();
+            const result = await handleApi();
+            if (!result) {
+                alert("로그인 실패! 다시 입력해주세요.");
+            }else {
+                await _loginSuccess(getModeApi,getDocApi,getAllowApi);
+                setSuccess(true);
+            }
+    }catch(e){
+        Alert.alert("Login Error", e.message);
+    }finally{
+        spinner.stop();
+    }
+    };
 
     return (
         <KeyboardAwareScrollView
@@ -184,37 +256,18 @@ const Login = ({navigation}) => {
                 {({dispatch})=> (
                     <Button
                     title="로그인"
-                    onPress={async () => {
-                        try{
-                            spinner.start();
-                            const result = await handleApi();
-                        if (!result) {
-                            alert("로그인 실패! 다시 입력해주세요.");
-                        }else {
-                            setSuccess(true);
-                            const {status} = await Location.requestBackgroundPermissionsAsync();
-                            if (status === "granted"){
-                                setAllow(true);
-                            }
-                        }
-                    }catch(e){
-                        Alert.alert("Login Error", e.message);
-                    }finally{
-                        spinner.stop();
-                    }
-                    }} 
+                    onPress={_handleLoginPress} 
                     disabled={disabled}
                     containerStyle={{marginTop: 0, marginBottom: 2}}/>
             )}
         </LoginConsumer>
                
             <Letter>
-            
             <CheckBoxLetter
             hasIcon={true}
-            type={autoLogin? images.checked : images.unchecked}
+            type={auto? images.checked : images.unchecked}
             title="자동 로그인"
-            onPress={() => setAutoLogin(!autoLogin)} />
+            onPress={() => setAuto(!auto)} />
              <CheckBoxLetter
             hasIcon={false}
             title="아이디/비밀번호 찾기"
@@ -223,7 +276,7 @@ const Login = ({navigation}) => {
             </Letter>
 
            
-           <SocialContainer>
+           {/* <SocialContainer>
                 <QText>SNS 계정 로그인</QText>
             <SocialBackground color={theme.kakaoColor}>
                     <KakaoImage source={images.kakaoLogin} />
@@ -233,9 +286,9 @@ const Login = ({navigation}) => {
                     <NaverImage source={images.naverLogin} />
                     <ButtonText>네이버 로그인</ButtonText>
                 </SocialBackground>
-            </SocialContainer>
+            </SocialContainer> */}
 
-            <SocialContainer style={{marginTop: 8}}>
+            <SocialContainer style={{marginTop: 20}}>
                 <QText>아직 회원이 아니신가요?</QText>
                 <Button title="회원가입" containerStyle={{marginTop: 0}}
                 onPress={() => {

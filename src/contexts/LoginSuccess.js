@@ -48,7 +48,7 @@ const LoginProvider = ({children}) => {
             doc: doc,
         };
         AsyncStorage.setItem('user_infomation', JSON.stringify(data));
-        console.log(JSON.stringify(data))
+        console.log(data);
     };
 
     useEffect(() => {

@@ -6,6 +6,7 @@ import { FlatList, ScrollView } from "react-native";
 import { popular, recomendedStore } from "../utils/data";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { ThemeContext } from "styled-components";
+import {LoginContext} from "../contexts";
 
 const Header = styled.View`
     height: 12%;
@@ -203,6 +204,18 @@ const Main = ({ navigation }) => {
         navigation.navigate('StoreDetail', { id: item.id, name: item.storeName })
     };
 
+    const {allow, autoLogin, doc, mode, token} = useContext(LoginContext);
+    const data = {
+        allow,
+        autoLogin,
+        doc,
+        mode,
+        token,
+    };
+
+    useEffect(()=> {
+        console.log(data);
+    },[]);
 
     return (
         <>
