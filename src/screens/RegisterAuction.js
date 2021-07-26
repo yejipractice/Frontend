@@ -159,7 +159,7 @@ border-width: 1px;
 
 
 const RegisterAuction = ({navigation}) => {
-  const {allow} = useContext(LoginContext);
+  const {allow, token} = useContext(LoginContext);
   const {url} = useContext(UrlContext);
   const {spinner} = useContext(ProgressContext);
 
@@ -294,12 +294,15 @@ const [selectedLocation, setSelectedLocation] = useState(null);
       method: 'POST',
       headers: {
           Accept: 'application/json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-AUTH-TOKEN' : token,
       },
       body: JSON.stringify( Info ),
   };
 
   try{
+    console.log(options);
+    console.log(Info);
     let response = await fetch(fixedUrl, options);
     let res = await response.json();
     
@@ -411,7 +414,6 @@ const [selectedLocation, setSelectedLocation] = useState(null);
             setMeetingType("");
             setFoodType([]);
             setNumOfPeople("");
-            setSelected("");
             setSelectedAge("");
             setSelectedSex("");
             setContent("");
@@ -422,7 +424,7 @@ const [selectedLocation, setSelectedLocation] = useState(null);
             setDisabled(true);
             setUploaded(false);
             //임의로 메인보내기 원래는 공고 상세로 이동. 
-            navigation.navigate("Main");
+            // navigation.navigate("Main");
           }else {
             alert("오류가 발생하였습니다. 잠시후 다시 시도해주세요.");
           };
@@ -499,9 +501,8 @@ const [selectedLocation, setSelectedLocation] = useState(null);
           var w = days[date.getDay()];
           setBookDate(y+"년 "+m+"월 "+d+"일 "+w);
           setBookDateVisible(false);
-          let s = date.toISOString();
-          let ss = s.slice(0,11);
-          setBookFullData(ss);
+          let s = date.toJSON();
+          setBookFullData(s);
         };
 
         const _hideBookDatePicker = () => {
@@ -527,7 +528,8 @@ const [selectedLocation, setSelectedLocation] = useState(null);
         let s = time.toISOString();
         let ss = s.slice(11,s.length);
         let sss = bookFullData + ss;
-        setBookFullData(sss);
+        // setBookFullData(sss);
+
       };
 
       const _hideBookTimePicker = () => {
