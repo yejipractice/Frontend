@@ -123,9 +123,8 @@ const StyledTextInputs  = styled.TextInput.attrs(({ theme }) => ({
   const ErrorText = styled.Text`
     align-items: flex-start;
     width: 100%;
-    height: 20px;
+    font-size: 13px;
     margin-bottom: 10px;
-    line-height: 20px;
     color: ${({ theme }) => theme.errorText};
 `;
 
@@ -455,7 +454,7 @@ const [selectedLocation, setSelectedLocation] = useState(null);
       useLayoutEffect(()=> {
         navigation.setOptions({
             headerRight: () => (
-              disabled? (<MaterialCommunityIcons name="check" size={35} onPress={() => {}} 
+              disabled? (<MaterialCommunityIcons name="check" size={35} onPress={() => {setUploaded(true)}} 
               style={{marginRight: 10, marginBottom:3, opacity: 0.3}}/>)
               : (<MaterialCommunityIcons name="check" size={35} onPress={_onPress} 
               style={{marginRight: 10, marginBottom:3, opacity: 1}}/>)
@@ -834,7 +833,9 @@ const [selectedLocation, setSelectedLocation] = useState(null);
   onRegionChangeComplete={(r) => setRegion(r)}
   provider={PROVIDER_GOOGLE}
   showsUserLocation={true}
-  loadingEnabled={true}>
+  loadingEnabled={true}
+  showsMyLocationButton={false}
+  >
     <Marker
       coordinate={region}
       pinColor="blue"
