@@ -899,6 +899,7 @@ const [selectedLocation, setSelectedLocation] = useState(null);
               placeholder="평균연령대"
               placeholderStyle={{color: theme.label, fontSize: 16}}
               listMode="SCROLLVIEW"
+              maxHeight={130}
               /> 
             
           <DropDownPicker 
@@ -912,7 +913,9 @@ const [selectedLocation, setSelectedLocation] = useState(null);
               placeholder="평균성별"
               placeholderStyle={{color: theme.label, fontSize: 16}}
               listMode="SCROLLVIEW"
+              maxHeight={130}
               />  
+              <Container style={{height: 200}}></Container>
               </AddContainer>
 
             
