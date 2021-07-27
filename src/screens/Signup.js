@@ -25,7 +25,8 @@ const Title = styled.Text`
 const ErrorText = styled.Text`
     align-items: flex-start;
     width: 100%;
-    font-size: 10px;
+    font-size: 13px;
+    font-weight: 900;
     margin-bottom: 10px;
     padding-bottom: 1px;
     padding-left: 1%;
