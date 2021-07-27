@@ -91,6 +91,7 @@ const Signup = ({ navigation, route }) => {
 
     //이메일 인증 확인 결과
     const [isConfirmedEmail, setIsConfirmedEmail] = useState(false);
+    let isCorrect = false;
 
     //이메일 인증 전송<>확인
     const [isConfirmedSend, setIsConfirmSend] = useState(false);
@@ -176,7 +177,7 @@ const Signup = ({ navigation, route }) => {
             }else if(!emailCodePress){
                 _emailErrorMessage="이메일 인증번호를 확인하세요. ";
             }
-            else if(!isConfirmedEmail && emailCodePress) {
+            else if(!isConfirmedEmail && emailCodePress && isCorrect) {
                 _emailErrorMessage="인증번호가 틀렸습니다. ";
             }
             else {
@@ -267,8 +268,9 @@ const Signup = ({ navigation, route }) => {
                         }
                         else{
                             setIsConfirmedEmail(false)
-                            alert("이메일을 다시 확인하세요.");
+                            alert("인증키를 다시 확인하세요.");
                         }
+                        isCorrect = true;
                     }
             
             }catch(e){
