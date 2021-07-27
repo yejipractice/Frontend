@@ -25,9 +25,10 @@ const Title = styled.Text`
 const ErrorText = styled.Text`
     align-items: flex-start;
     width: 100%;
-    height: 20px;
+    font-size: 10px;
     margin-bottom: 10px;
-    line-height: 20px;
+    padding-bottom: 1px;
+    padding-left: 1%;
     color: ${({ theme }) => theme.errorText};
 `;
 
