@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useLayoutEffect, useState, useContext, useEffect} from 'react';
 import styled from "styled-components/native";
 import { Text, View, StyleSheet, Dimensions, TouchableOpacity} from "react-native";
 import { Button } from '../components';
@@ -6,6 +6,7 @@ import { theme } from '../theme';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { BidstoreList } from '../utils/data';
+import {LoginContext, UrlContext, ProgressContext} from "../contexts";
 
 const WIDTH = Dimensions.get("screen").width;
 
@@ -21,8 +22,6 @@ const Container = styled.View`
 const Header = styled.View`
     width: ${WIDTH*0.98};
     height: 12%;
-    background-color: ${({ theme }) => theme.background}; 
-    flex-direction: row;
 `;
 
 const Title = styled.Text`
@@ -32,14 +31,19 @@ const Title = styled.Text`
     align-self: flex-start;
 `;
 
-const Endtime = styled.View`
-    flex: 1; 
-    margin-right: 10px;
-    flex-direction: column;
-    justify-content: flex-end;
-    alignItems: flex-end;
-    margin-bottom: 5px;
+const TitleBox = styled.View`
+    flex-direction: row;
+    align-items: center;
 `;
+
+const TextBox = styled.View`
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 20
+    padding-right: 10
+`;
+
 
 const InfoContainer = styled.View`
     flex: ${({ flex }) => flex ? flex : 7};
@@ -97,12 +101,23 @@ const AuctionDetail = ({ navigation, route}) => {
     const [isStar, setIsStar] = useState(false);
     const _onStarPress = () => { setIsStar(!isStar) };
     const [isFinished, setIsFinished] = useState(false);
-    const [isUser, setIsUser] = useState(false);
+    const [isUser, setIsUser] = useState(false); // 자신의 공고 확인일 경우 true
 
+    const AuctionId = route.params.id;
+    const {token, mode}  = useContext(LoginContext);
+    const {spinner}  = useContext(ProgressContext);
+    const {aurl}  = useContext(UrlContext);
+    const [title, setTitle] = useState("");
+    const [userName, setUserName] = useState("");
+    const [userType, setUserType] = useState("");
+    const [reservation, setReservation] = useState("");
+    const [storeType, setStoreType] = useState("");
+    const [maxPrice, setMaxPrice] = useState("");
+    const [minPrice, setMinPrice] = useState("");
+    const [deadline, setDeadline] = useState("");
+    const [status, setStatus] = useState("");
 
     const _onMessagePress = () => { navigation.navigate("Message" , {name: "닉네임"+AuctionId}) };
-    
-    const AuctionId = route.params.id;
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -114,6 +129,98 @@ const AuctionDetail = ({ navigation, route}) => {
         });
     }, []);
     
+    const handleApi = async() => {
+        let fixedUrl = aurl+"/auction/"+AuctionId;
+
+        let options = {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token,
+            },
+        };
+
+        try {
+            spinner.start();
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+            let data = res.data;
+            setTitle(data.title);
+            setUserName(data.userName);
+            setUserType(data.userType);
+            setReservation(data.reservation);
+            setStoreType(data.storeType);
+            setMaxPrice(data.maxPrice);
+            setMinPrice(data.minPrice);
+            setDeadline(data.deadline);
+            setStatus(data.status);
+        }catch(error) {
+            console.error(error);
+        }finally {
+            spinner.stop();
+        }
+    };
+
+    const changeDateData = (date) =>{
+        var y = date.slice(0,4);
+        var m = date.slice(5,7);
+        var d = date.slice(8,10);
+        var h = date.slice(11,13);
+        var min = date.slice(14,16);
+        return y+"년 "+m+"월 "+d+"일 "+h+"시 "+min+"분";
+    }; 
+
+    
+    const changeListData = (list) => {
+        var sliced = list.slice(1,list.length-1);
+        var changed = sliced.replace(/"/gim, "");
+        var completed = changed.replace(/,/gim, ", ");
+        return completed;
+    };
+
+    const changeEndDateData = (date) => {
+        var now = new Date().toJSON();
+        var now_y = now.slice(0,4);
+        var now_m = now.slice(5,7);
+        var now_d = now.slice(8,10);
+        var now_h = now.slice(11,13);
+        var now_min = now.slice(14,16); 
+        var y = date.slice(0,4);
+        var m = date.slice(5,7);
+        var d = date.slice(8,10);
+        var h = date.slice(11,13);
+        var min = date.slice(14,16);
+        var yy = y - now_y;
+
+        var res = "";
+        if (yy > 0){
+            if (m == now_m){
+                res = "약 "+yy+"년 ";
+            }else if (m > now_m){
+                var mm = m - now_m;
+                res = "약 "+yy+"년 "+mm+"달";
+            }else {
+                var mm = now_m - m;
+                res = "약 "+(yy-1)+"년 "+mm+"달";
+            }
+        }else if(m - now_m > 0){
+            res = "약 "+(m-now_m)+"달";
+        }else if(d - now_d){
+            res = "약 "+(d-now_d)+"일";
+        }else if(h - now_h > 0){
+            res = "약 "+ (h-now_h) +"시간";
+        }else {
+            res = "약 "+ (min-now_min) +"분";
+        }
+
+        return res;
+    };
+
+
+    useEffect(()=> {
+        handleApi();
+    },[]);
 
     return (
 
@@ -124,32 +231,34 @@ const AuctionDetail = ({ navigation, route}) => {
             >
                 <Header>
                     <View style={styles.name}>
-                        <Title>공고 제목{AuctionId}</Title>
-                        <Text>닉네임</Text>
-                    </View>
-                    <Endtime>
+                        <TitleBox>
+                        <Title>{title}</Title>
                         {isStar ?
                             (
                                 <MaterialCommunityIcons name="star" size={40} onPress={_onStarPress} color="yellow"
-                                    style={{ marginLeft: 15, marginBottom: 5, opacity: 0.7 }} />
+                                    style={{ marginLeft: 15,  opacity: 0.7 }} />
                             )
                             : (
                                 <MaterialCommunityIcons name="star-outline" size={40} onPress={_onStarPress} color="yellow"
-                                    style={{ marginLeft: 15, marginBottom: 5, opacity: 0.7 }} />
-                            )}
-                        <Text>마감{ }시간전</Text>
-                    </Endtime>
+                                    style={{ marginLeft: 15, opacity: 0.7 }} />
+                        )}
+                        </TitleBox>
+                    </View>
+                        <TextBox>
+                        <Text style={{fontSize: 16, paddingLeft: 5}}>{userName}</Text>
+                        {(status==="PROCEEDING") && <Text>마감 {changeEndDateData(deadline)} 전</Text>}
+                        </TextBox>
                 </Header>
 
                 {/* 공고 조회에서 클릭시 데이터 연동 구현 필요 */}
                 <InfoContainer>
                     <RowItemContainer>
-                        <DescTitle>단체유형 및 인원수</DescTitle>
-                        <Desc>단체유형</Desc>
+                        <DescTitle style={{marginTop: 10}}>단체유형 및 인원수</DescTitle>
+                        <Desc>{userType} (0명)</Desc>
                     </RowItemContainer>
                     <RowItemContainer>
                         <DescTitle>예약시간 및 날짜</DescTitle>
-                        <Desc>0000년 00월 00일 00시 00분</Desc>
+                        <Desc>{changeDateData(reservation)}</Desc>
                     </RowItemContainer>
                     <RowItemContainer>
                         <DescTitle>선호 위치</DescTitle>
@@ -157,11 +266,11 @@ const AuctionDetail = ({ navigation, route}) => {
                     </RowItemContainer>
                     <RowItemContainer>
                         <DescTitle>선호 메뉴</DescTitle>
-                        <Desc>제육볶음</Desc>
+                        <Desc>{changeListData(storeType)}</Desc>
                     </RowItemContainer>
                     <RowItemContainer border='0'>
                         <DescTitle>선호 가격</DescTitle>
-                        <Desc>0000000원</Desc>
+                        <Desc style={{marginBottom: 10}}>{minPrice}원 ~ {maxPrice}원</Desc>
                     </RowItemContainer>
                 </InfoContainer>
 
@@ -172,9 +281,11 @@ const AuctionDetail = ({ navigation, route}) => {
                     </RowItemContainer>
 
                     {BidstoreList.map(item => (
-                        <TouchableOpacity style={styles.row}
+                        <TouchableOpacity style={styles.row} key={item.id}
                             onPress={() => {
-                                navigation.navigate("BidDetail", {id: item.id})
+                                if(isUser){
+                                    navigation.navigate("BidDetail", {id: item.id})
+                                }
                             }}>
                             <Store><Desc>{item.name}</Desc></Store>
                             <Store><Desc>{item.menu}</Desc></Store>
@@ -184,7 +295,7 @@ const AuctionDetail = ({ navigation, route}) => {
                 </InfoContainer>
 
                 {/* Store만 ButtonContainer가 보이도록 구현 필요 이미 참여했으면 수정으로 바꾸기..? */}
-                {!isFinished &&
+                {!(status==="PROCEEDING") && (mode==="STORE") &&
                  (<ButtonContainer>
                  <Button
                      title="참여"
@@ -205,6 +316,8 @@ const AuctionDetail = ({ navigation, route}) => {
 const styles = StyleSheet.create({
     name: {
         marginLeft: 20,
+        flexDirection: 'row',
+        alignContent: 'center',
     },
     row: {
         flexDirection: 'row',

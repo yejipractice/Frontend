@@ -171,7 +171,7 @@ const Auction = ({navigation, route}) => {
     }, [selected1, selected2, selected3]);
 
     const _onAuctionPress = item => {
-        navigation.navigate("AuctionDetail",{id: item['id']});
+        navigation.navigate("AuctionDetail",{id: item['auctionId']});
     };
     return (
         <Container>
