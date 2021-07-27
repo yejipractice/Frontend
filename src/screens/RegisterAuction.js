@@ -160,7 +160,7 @@ border-width: 1px;
 
 const RegisterAuction = ({navigation}) => {
   const {allow, token} = useContext(LoginContext);
-  const {url} = useContext(UrlContext);
+  const {aurl} = useContext(UrlContext);
   const {spinner} = useContext(ProgressContext);
 
   //각 변수들에 대한 state 
@@ -182,11 +182,17 @@ const RegisterAuction = ({navigation}) => {
     const [errorMessage, setErrorMessage] = useState("아래 정보를 입력해주세요.");
     const [disabled, setDisabled] = useState(true);
     const [uploaded, setUploaded] = useState(false);
-    const [content, setContent] = useState('');
+    const [additionalContent, setAdditionalContent] = useState("");
     const didMountRef = useRef();
     const [foodType, setFoodType] = useState([]);
-    const [bookFullData,setBookFullData] = useState("");
-    const [endFullData, setEndFullData] = useState("");
+    let bookFullData = "";
+    let endFullData = "";
+    
+    //날짜 데이터
+    const [BD, setBD] = useState("");
+    const [BT, setBT] = useState("");
+    const [ED, setED] = useState("");
+    const [ET, setET] = useState("");
 
     // 나이 드롭다운  
     const [open1, setOpen1] = useState(false);
@@ -277,17 +283,17 @@ const [selectedLocation, setSelectedLocation] = useState(null);
   }, []);
 
   const handleApi = async () => {
-    let fixedUrl = url+"/auction";
+    let fixedUrl = aurl+"/auction";
 
     let Info = {
-      content: content,
+      content: additionalContent,
       deadline: endFullData,
       maxPrice: maxPrice,
       minPrice: minPrice,
       reservation: bookFullData,
       storeType: JSON.stringify(foodType),
       title: title,
-      userType: meetingType,
+      userType: meetingType
     };
 
     let options = {
@@ -301,13 +307,11 @@ const [selectedLocation, setSelectedLocation] = useState(null);
   };
 
   try{
-    console.log(options);
-    console.log(Info);
     let response = await fetch(fixedUrl, options);
     let res = await response.json();
-    
     console.log(res);
     return res["success"];
+   
   }catch (error) {
     console.error(error);
   }
@@ -396,11 +400,23 @@ const [selectedLocation, setSelectedLocation] = useState(null);
       setEnd(_end);
     },[bookTime,bookDate,endDate,endTime]);
 
+    const _setData = async () => {
+      bookFullData = BD+BT;
+      endFullData = ED+ET;
+      return true;
+    };
+
+    const f = async (callback1, callback2) => {
+      var d = await callback1();
+      var res = await callback2();
+      return res;
+    };
+
     //공고 등록 버튼 액션: 공고 등록 후 공고 상세 보여주기 함수 연동 후 스피너 추가
     const _onPress = async () => {
       try{
         spinner.start();
-        const result = await handleApi();
+        const result = await f(_setData, handleApi);
         if (!result) {
           alert("오류가 발생하였습니다. 잠시후 다시 시도해주세요.");
         }else {
@@ -416,7 +432,7 @@ const [selectedLocation, setSelectedLocation] = useState(null);
             setNumOfPeople("");
             setSelectedAge("");
             setSelectedSex("");
-            setContent("");
+            setAdditionalContent("");
             setSelectedLocation("");
             setMinPrice("");
             setMaxPrice("");
@@ -439,7 +455,7 @@ const [selectedLocation, setSelectedLocation] = useState(null);
       useLayoutEffect(()=> {
         navigation.setOptions({
             headerRight: () => (
-              disabled? (<MaterialCommunityIcons name="check" size={35} onPress={_onPress} 
+              disabled? (<MaterialCommunityIcons name="check" size={35} onPress={() => {}} 
               style={{marginRight: 10, marginBottom:3, opacity: 0.3}}/>)
               : (<MaterialCommunityIcons name="check" size={35} onPress={_onPress} 
               style={{marginRight: 10, marginBottom:3, opacity: 1}}/>)
@@ -489,6 +505,9 @@ const [selectedLocation, setSelectedLocation] = useState(null);
         const days=["일요일","월요일","화요일","수요일","목요일","금요일","토요일"];
 
         const _setBookDate = date => {
+          var strD = date.toJSON();
+          var sliced = strD.slice(0,11);
+          setBD(sliced);
           var y = date.getFullYear();
           var m = date.getMonth()+1;
           if(m < 10){
@@ -501,8 +520,6 @@ const [selectedLocation, setSelectedLocation] = useState(null);
           var w = days[date.getDay()];
           setBookDate(y+"년 "+m+"월 "+d+"일 "+w);
           setBookDateVisible(false);
-          let s = date.toJSON();
-          setBookFullData(s);
         };
 
         const _hideBookDatePicker = () => {
@@ -514,6 +531,9 @@ const [selectedLocation, setSelectedLocation] = useState(null);
       };
 
       const _setBookTime = time => {
+        var strT = time.toJSON();
+        var sliced = strT.slice(11,time.length);
+        setBT(sliced)
         var h = time.getHours();
         var m = time.getMinutes();
         if(h < 10){
@@ -525,11 +545,6 @@ const [selectedLocation, setSelectedLocation] = useState(null);
         }
         setBookTime(h+"시 "+m+"분");
         setBookTimeVisible(false);
-        let s = time.toISOString();
-        let ss = s.slice(11,s.length);
-        let sss = bookFullData + ss;
-        // setBookFullData(sss);
-
       };
 
       const _hideBookTimePicker = () => {
@@ -541,6 +556,9 @@ const [selectedLocation, setSelectedLocation] = useState(null);
     };
 
     const _setEndDate = date => {
+      var strD = date.toJSON();
+      var sliced = strD.slice(0,11);
+      setED(sliced);
       var y = date.getFullYear();
       var m = date.getMonth()+1;
       if(m < 10){
@@ -553,9 +571,6 @@ const [selectedLocation, setSelectedLocation] = useState(null);
       var w = days[date.getDay()];
       setEndDate(y+"년 "+m+"월 "+d+"일 "+w);
       setEndDateVisible(false);
-      let s = date.toISOString();
-      let ss = s.slice(0,11);
-      setEndFullData(ss);
     };
 
     const _hideEndDatePicker = () => {
@@ -567,6 +582,9 @@ const [selectedLocation, setSelectedLocation] = useState(null);
   };
 
   const _setEndTime = time => {
+    var strT = time.toJSON();
+    var sliced = strT.slice(11,time.length);
+    setET(sliced);
     var h = time.getHours();
     var m = time.getMinutes();
     if(h < 10){
@@ -578,17 +596,11 @@ const [selectedLocation, setSelectedLocation] = useState(null);
     }
     setEndTime(h+"시 "+m+"분");
     setEndTimeVisible(false);
-    let s = time.toISOString();
-    let ss = s.slice(11,s.length);
-    let sss = endFullData + ss;
-    setEndFullData(sss);
   };
 
   const _hideEndTimePicker = () => {
     setEndTimeVisible(false);
   };
-
-
 
     return (
       <KeyboardAwareScrollView
@@ -755,7 +767,6 @@ const [selectedLocation, setSelectedLocation] = useState(null);
                 let array = foodType.slice();
                 array.push("기타");
                 setFoodType(array)
-                console.log(foodType);
               }
             }}
             />
@@ -866,8 +877,8 @@ const [selectedLocation, setSelectedLocation] = useState(null);
 
            
           <StyledTextInputs 
-           value={content}
-           onChangeText={text => setContent(text)}
+           value={additionalContent}
+           onChangeText={text => setAdditionalContent(text)}
            autoCapitalize="none"
            placeholder="추가 사항"
            autoCorrect={false}
