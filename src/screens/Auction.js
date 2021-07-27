@@ -4,6 +4,7 @@ import {Text, Dimensions, FlatList} from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import {AuctionList} from "../utils/data";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
+import {LoginContext, UrlContext, ProgressContext} from "../contexts";
 
 const WIDTH = Dimensions.get("screen").width; 
 
@@ -42,8 +43,10 @@ const ContentTitleText = styled.Text`
 
 const ContentText = styled.Text`
     font-size: 15px;
+    padding-left: 1%;
     color: ${({theme})=> theme.opacityTextColor};
 `;
+
 
 const ItemBox = styled.View`
     border-radius: 1px;
@@ -58,12 +61,66 @@ const StarBox = styled.View`
     top: 5px;
 `;
 
-const Item = ({item: {id, title, type, count, region, preMenu, prePrice, bookTime, registerTime}, onPress, onStarPress, isStar}) => {
+const changeDateData = (date) =>{
+    var y = date.slice(0,4);
+    var m = date.slice(5,7);
+    var d = date.slice(8,10);
+    var h = date.slice(11,13);
+    var min = date.slice(14,16);
+    return y+"/"+m+"/"+d+" "+h+":"+min;
+} 
+
+const changeEndDateData = (date) => {
+    var now = new Date().toJSON();
+    var now_y = now.slice(0,4);
+    var now_m = now.slice(5,7);
+    var now_d = now.slice(8,10);
+    var now_h = now.slice(11,13);
+    var now_min = now.slice(14,16); 
+    var y = date.slice(0,4);
+    var m = date.slice(5,7);
+    var d = date.slice(8,10);
+    var h = date.slice(11,13);
+    var min = date.slice(14,16);
+    var yy = y - now_y;
+
+    var res = "";
+    if (yy > 0){
+        if (m == now_m){
+            res = "약 "+yy+"년 ";
+        }else if (m > now_m){
+            var mm = m - now_m;
+            res = "약 "+yy+"년 "+mm+"달";
+        }else {
+            var mm = now_m - m;
+            res = "약 "+(yy-1)+"년 "+mm+"달";
+        }
+    }else if(m - now_m > 0){
+        res = "약 "+(m-now_m)+"달";
+    }else if(d - now_d){
+        res = "약 "+(d-now_d)+"일";
+    }else if(h - now_h > 0){
+        res = "약 "+ (h-now_h) +"시간";
+    }else {
+        res = "약 "+ (min-now_min) +"분";
+    }
+
+    return res;
+};
+
+const changeListData = (list) => {
+    var sliced = list.slice(1,list.length-1);
+    var changed = sliced.replace(/"/gim, "");
+    var completed = changed.replace(/,/gim, ", ");
+    return completed;
+};
+
+const Item = ({item: {auctionId, auctioneers, content, createdData, deadline, maxPrice, minPrice, reservation, status, storeType, title, updatedDate, useName, userType}, onPress, onStarPress, isStar}) => {
     return (
         <ItemContainer onPress={onPress} >
             <TimeTextContiner>
-                <ContentText>{bookTime}</ContentText>
-                <ContentText>마감 N분전</ContentText>
+                <ContentText>{changeDateData(reservation)} 예약</ContentText>
+                <ContentText>마감 {changeEndDateData(deadline)} 전</ContentText>
             </TimeTextContiner>
             <ItemBox>
                 <ContentTitleText>{title}</ContentTitleText>
@@ -78,20 +135,25 @@ const Item = ({item: {id, title, type, count, region, preMenu, prePrice, bookTim
                                     style={{ marginLeft: 15, marginBottom: 5, opacity: 0.7 }} />
                             )}
                 </StarBox>
-                <ContentText>단체 유형: {type}({count}명)</ContentText>
-                <ContentText>선호 지역: {region}</ContentText>
-                <ContentText>선호 메뉴: {preMenu}</ContentText>
-                <ContentText>선호 가격대: {prePrice}</ContentText>
-                <ContentText style={{position: "absolute", right: 5, bottom: 0}}>{registerTime}</ContentText>
+                <ContentText>단체 유형: {userType} (0명)</ContentText>
+                <ContentText>선호 지역: 지역</ContentText>
+                <ContentText>선호 메뉴: {changeListData(storeType)}</ContentText>
+                <ContentText style={{marginBottom: 10}}>선호 가격대: {minPrice}원 ~ {maxPrice}원</ContentText>
+                <ContentText style={{position: "absolute", right: 5, bottom: 0}}>{changeDateData(updatedDate)} 등록</ContentText>
             </ItemBox>
         </ItemContainer>
     );
 };
 
+
 const Auction = ({navigation}) => {
     const theme = useContext(ThemeContext);
+    const {token} = useContext(LoginContext);
+    const {aurl} = useContext(UrlContext);
+    const {spinner} = useContext(ProgressContext);
 
     const [isStar, setIsStar] = useState(false);
+    const [auctionListData, setAuctionListData] = useState([]);
 
     const [open1, setOpen1] = useState(false);
     const [selected1, setSelected1] = useState(null);
@@ -120,17 +182,61 @@ const Auction = ({navigation}) => {
         {label: "대구광역시", value: "정렬기준3"}
     ]);
 
+    const handleApi = async () => {
+        let fixedUrl = aurl+"/auction/auctions";
+
+        let options = {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token,
+            },
+        };
+
+        try {
+            spinner.start();
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+            setAuctionListData(res["list"]);
+        }catch(error) {
+            console.error(error);
+        }finally {
+            spinner.stop();
+        }
+    };
+
+    const cutDateData = (date) => {
+        var a = date.slice(0,4)
+        var b = date.slice(5,7)
+        var c = date.slice(8,10)
+        var d =  date.slice(11,13)
+        var e = date.slice(14,16);
+        return a+b+c+d+e;
+    };
+
+    const filterDataList = (data) => {
+        var now = new Date().toJSON();
+        var nowdata = cutDateData(changeDateData(now));
+        
+        let res = data.filter((item) => cutDateData(changeDateData(item.deadline)) > nowdata);
+        return res;
+    };
+
+    useEffect(()=> {
+        handleApi();
+    }, []);
+
     useEffect(()=> {
         //data 정렬
     }, [selected1, selected2, selected3]);
 
-    const _onAuctionPress = item => {navigation.navigate("AuctionDetail",{id: item['id']})};
+    const _onAuctionPress = item => {navigation.navigate("AuctionDetail",{id: item['auctionId']})};
 
     const _onStarPress = () => { setIsStar(!isStar) };
 
     return (
         <Container>
-            
                 <DropDownPicker
                 open={open1}
                 value={selected1}
@@ -177,8 +283,8 @@ const Auction = ({navigation}) => {
         <AuctionsContainer>
             <FlatList
             horizontal={false}
-            keyExtractor={item => item['id'].toString()}
-            data={AuctionList} 
+            keyExtractor={item => item['auctionId'].toString()}
+            data={filterDataList(auctionListData)} 
             renderItem={({item}) => (
                 <Item item={item} onPress={()=> _onAuctionPress(item)} onStarPress={_onStarPress} isStar={isStar}/>
             )}/>

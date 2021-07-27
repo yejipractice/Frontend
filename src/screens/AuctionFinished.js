@@ -3,6 +3,7 @@ import styled, {ThemeContext} from "styled-components/native";
 import {Text, Dimensions, FlatList} from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import {AuctionList} from "../utils/data";
+import {LoginContext, UrlContext, ProgressContext} from "../contexts";
 
 const WIDTH = Dimensions.get("screen").width; 
 
@@ -51,19 +52,35 @@ const ItemBox = styled.View`
     background-color: ${({theme})=> theme.opacityTextColor};
 `;
 
-const Item = ({item: {id, title, type, count, region, preMenu, prePrice, bookTime, registerTime}, onPress}) => {
+const changeDateData = (date) =>{
+    var y = date.slice(0,4);
+    var m = date.slice(5,7);
+    var d = date.slice(8,10);
+    var h = date.slice(11,13);
+    var min = date.slice(14,16);
+    return y+"/"+m+"/"+d+" "+h+":"+min;
+} 
+
+const changeListData = (list) => {
+    var sliced = list.slice(1,list.length-1);
+    var changed = sliced.replace(/"/gim, "");
+    var completed = changed.replace(/,/gim, ", ");
+    return completed;
+};
+
+const Item = ({item: {auctionId, auctioneers, content, createdData, deadline, maxPrice, minPrice, reservation, status, storeType, title, updatedDate, useName, userType}, onPress, onStarPress, isStar}) => {
     return (
         <ItemContainer onPress={onPress} >
             <TimeTextContiner>
-                <ContentText>{bookTime}</ContentText>
+                <ContentText>{changeDateData(reservation)} 예약</ContentText>
             </TimeTextContiner>
             <ItemBox>
                 <ContentTitleText>{title}</ContentTitleText>
-                <ContentText>단체 유형: {type}({count}명)</ContentText>
-                <ContentText>선호 지역: {region}</ContentText>
-                <ContentText>선호 메뉴: {preMenu}</ContentText>
-                <ContentText>선호 가격대: {prePrice}</ContentText>
-                <ContentText style={{position: "absolute", right: 5, bottom: 0}}>{registerTime}</ContentText>
+                <ContentText>단체 유형: {userType} (0명)</ContentText>
+                <ContentText>선호 지역: 지역</ContentText>
+                <ContentText>선호 메뉴: {changeListData(storeType)}</ContentText>
+                <ContentText style={{marginBottom: 10}}>선호 가격대: {minPrice}원 ~ {maxPrice}원</ContentText>
+                <ContentText style={{position: "absolute", right: 5, bottom: 0}}>{changeDateData(updatedDate)} 등록</ContentText>
             </ItemBox>
         </ItemContainer>
     );
@@ -71,6 +88,11 @@ const Item = ({item: {id, title, type, count, region, preMenu, prePrice, bookTim
 
 const Auction = ({navigation, route}) => {
     const theme = useContext(ThemeContext);
+    const {token} = useContext(LoginContext);
+    const {aurl} = useContext(UrlContext);
+    const {spinner} = useContext(ProgressContext);
+
+    const [auctionListData, setAuctionListData] = useState([]);
 
     const [open1, setOpen1] = useState(false);
     const [selected1, setSelected1] = useState(null);
@@ -98,6 +120,51 @@ const Auction = ({navigation, route}) => {
         {label: "부산광역시", value: "정렬기준2"},
         {label: "대구광역시", value: "정렬기준3"}
     ]);
+
+    const handleApi = async () => {
+        let fixedUrl = aurl+"/auction/auctions";
+
+        let options = {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token,
+            },
+        };
+
+        try {
+            spinner.start();
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+            setAuctionListData(res["list"]);
+        }catch(error) {
+            console.error(error);
+        }finally {
+            spinner.stop();
+        }
+    };
+
+    const cutDateData = (date) => {
+        var a = date.slice(0,4)
+        var b = date.slice(5,7)
+        var c = date.slice(8,10)
+        var d =  date.slice(11,13)
+        var e = date.slice(14,16);
+        return a+b+c+d+e;
+    };
+
+    const filterDataList = (data) => {
+        var now = new Date().toJSON();
+        var nowdata = cutDateData(changeDateData(now));
+        
+        let res = data.filter((item) => cutDateData(changeDateData(item.deadline)) <= nowdata);
+        return res;
+    };
+
+    useEffect(()=> {
+        handleApi();
+    }, []);
 
     useEffect(()=> {
         //data 정렬
@@ -155,8 +222,8 @@ const Auction = ({navigation, route}) => {
         <AuctionsContainer>
             <FlatList
             horizontal={false}
-            keyExtractor={item => item['id'].toString()}
-            data={AuctionList} 
+            keyExtractor={item => item['auctionId'].toString()}
+            data={filterDataList(auctionListData)}
             renderItem={({item}) => (
                 <Item item={item} onPress={()=> _onAuctionPress(item)} />
             )}/>
