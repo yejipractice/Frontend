@@ -186,7 +186,8 @@ const RegisterAuction = ({navigation}) => {
     const [foodType, setFoodType] = useState([]);
     let bookFullData = "";
     let endFullData = "";
-    
+    let auctionId = "";
+  
     //날짜 데이터
     const [BD, setBD] = useState("");
     const [BT, setBT] = useState("");
@@ -309,6 +310,7 @@ const [selectedLocation, setSelectedLocation] = useState(null);
     let response = await fetch(fixedUrl, options);
     let res = await response.json();
     console.log(res);
+    auctionId = res["data"]["auctionId"];
     return res["success"];
    
   }catch (error) {
@@ -376,6 +378,8 @@ const [selectedLocation, setSelectedLocation] = useState(null);
           _errorMessage = "공고 마감 시간을 잘못 입력하였습니다";
         }else if(parseInt(end)>parseInt(book)){
           _errorMessage = "공고 마감 시간을 예약 시간 이전으로 설정해주세요."
+        }else if(!additionalContent) {
+          _errorMessage = "추가 사항을 입력하세요.";
         }
         else {
           _errorMessage = "";
@@ -385,11 +389,11 @@ const [selectedLocation, setSelectedLocation] = useState(null);
       }else {
         didMountRef.current = true;
       }
-    },[title, bookDate,bookTime,endDate,endTime,foodType,numOfPeople,minPrice, maxPrice,selectedLocation,book,end]);
+    },[title, bookDate,bookTime,endDate,endTime,foodType,numOfPeople,minPrice, maxPrice,selectedLocation,book,end, additionalContent]);
 
     useEffect(()=> {
-      setDisabled(!(title && bookDate && bookTime && endDate && endTime && foodType.length!=0 && numOfPeople && selectedLocation && maxPrice && minPrice && !errorMessage));
-    },[title, bookDate,bookTime,endDate,endTime,foodType,numOfPeople,minPrice,maxPrice,errorMessage,selectedLocation]);
+      setDisabled(!(title && bookDate && bookTime && endDate && endTime && foodType.length!=0 && numOfPeople && selectedLocation && maxPrice && minPrice && additionalContent && !errorMessage));
+    },[title, bookDate,bookTime,endDate,endTime,foodType,numOfPeople,minPrice,maxPrice,errorMessage,selectedLocation, additionalContent]);
 
 
     useEffect(()=> {
@@ -438,8 +442,8 @@ const [selectedLocation, setSelectedLocation] = useState(null);
             setErrorMessage("아래 정보를 입력해주세요");
             setDisabled(true);
             setUploaded(false);
-            //임의로 메인보내기 원래는 공고 상세로 이동. 
-            // navigation.navigate("Main");
+            
+            navigation.navigate("AuctionDetailStack", {isUser: true, id: auctionId });
           }else {
             alert("오류가 발생하였습니다. 잠시후 다시 시도해주세요.");
           };
@@ -454,7 +458,7 @@ const [selectedLocation, setSelectedLocation] = useState(null);
       useLayoutEffect(()=> {
         navigation.setOptions({
             headerRight: () => (
-              disabled? (<MaterialCommunityIcons name="check" size={35} onPress={() => {setUploaded(true)}} 
+              disabled? (<MaterialCommunityIcons name="check" size={35} onPress={() => {setUploaded(true);}} 
               style={{marginRight: 10, marginBottom:3, opacity: 0.3}}/>)
               : (<MaterialCommunityIcons name="check" size={35} onPress={_onPress} 
               style={{marginRight: 10, marginBottom:3, opacity: 1}}/>)

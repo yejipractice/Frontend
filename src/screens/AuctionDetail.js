@@ -2,7 +2,6 @@ import React, { useLayoutEffect, useState, useContext, useEffect} from 'react';
 import styled from "styled-components/native";
 import { Text, View, StyleSheet, Dimensions, TouchableOpacity} from "react-native";
 import { Button } from '../components';
-import { theme } from '../theme';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { BidstoreList } from '../utils/data';
@@ -22,6 +21,7 @@ const Container = styled.View`
 const Header = styled.View`
     width: ${WIDTH*0.98};
     height: 12%;
+    margin-bottom: 20px;
 `;
 
 const Title = styled.Text`
@@ -32,6 +32,7 @@ const Title = styled.Text`
 `;
 
 const TitleBox = styled.View`
+    width: 100%;
     flex-direction: row;
     align-items: center;
 `;
@@ -100,8 +101,7 @@ const AuctionDetail = ({ navigation, route}) => {
 
     const [isStar, setIsStar] = useState(false);
     const _onStarPress = () => { setIsStar(!isStar) };
-    const [isFinished, setIsFinished] = useState(false);
-    const [isUser, setIsUser] = useState(false); // 자신의 공고 확인일 경우 true
+    const [isUser, setIsUser] = useState(route.params.isUser); // 자신의 공고 확인일 경우 true
 
     const AuctionId = route.params.id;
     const {token, mode}  = useContext(LoginContext);
@@ -116,6 +116,7 @@ const AuctionDetail = ({ navigation, route}) => {
     const [minPrice, setMinPrice] = useState("");
     const [deadline, setDeadline] = useState("");
     const [status, setStatus] = useState("");
+    const [content, setContent] = useState("");
 
     const _onMessagePress = () => { navigation.navigate("Message" , {name: "닉네임"+AuctionId}) };
 
@@ -155,6 +156,7 @@ const AuctionDetail = ({ navigation, route}) => {
             setMinPrice(data.minPrice);
             setDeadline(data.deadline);
             setStatus(data.status);
+            setContent(data.content);
         }catch(error) {
             console.error(error);
         }finally {
@@ -268,9 +270,13 @@ const AuctionDetail = ({ navigation, route}) => {
                         <DescTitle>선호 메뉴</DescTitle>
                         <Desc>{changeListData(storeType)}</Desc>
                     </RowItemContainer>
-                    <RowItemContainer border='0'>
+                    <RowItemContainer>
                         <DescTitle>선호 가격</DescTitle>
-                        <Desc style={{marginBottom: 10}}>{minPrice}원 ~ {maxPrice}원</Desc>
+                        <Desc>{minPrice}원 ~ {maxPrice}원</Desc>
+                    </RowItemContainer>
+                    <RowItemContainer border='0'>
+                        <DescTitle>추가 사항</DescTitle>
+                        <Desc style={{marginBottom: 10}}>{content}</Desc>
                     </RowItemContainer>
                 </InfoContainer>
 
