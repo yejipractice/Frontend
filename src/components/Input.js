@@ -25,6 +25,7 @@ const StyledTextInput = styled.TextInput.attrs(({ theme }) => ({
     border: 1px solid
       ${({ theme, isFocused }) => (isFocused ? theme.text : theme.inputBorder)};
     border-radius: 4px;
+    padding-right: ${({ hasButton}) => hasButton? 22 : 5}%;
   `;
 
 const InputContainer = styled.View` 
@@ -105,6 +106,7 @@ const Input = forwardRef(
           textContentType="none" // iOS only
           underlineColorAndroid="transparent" // Android only
           keyboardType={keyboardType}
+          hasButton={hasButton}
         />
         {hasButton && 
         <InputButton 
