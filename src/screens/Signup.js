@@ -138,11 +138,11 @@ const Signup = ({ navigation, route }) => {
                 if(!age){
                     _errorMessage = "나이를 입력하세요.";
                 }
-                if (!userId){
+                if (!removeWhitespace(userId)){
                     _errorMessage = "닉네임을 입력하세요.";
                 }
             }else if (route.params.mode === "Store") {
-                if (!userId){
+                if (!removeWhitespace(userId)){
                     _errorMessage = "업체명을 입력하세요.";
                 }
             }
@@ -460,7 +460,7 @@ const Signup = ({ navigation, route }) => {
                 ref={userIdRef}
                 label={route.params.mode === "User"? "닉네임" : "업체명"}
                 value={userId}
-                onChangeText={ text => setuserId(removeWhitespace(text))}
+                onChangeText={ text => setuserId(text)}
                 onSubmitEditing= { route.params.mode === 'User' ? 
                 () => ageRef.current.focus() : null }
                 placeholder={route.params.mode === "User"? "닉네임을 입력하세요" : "업체명을 입력하세요"}
