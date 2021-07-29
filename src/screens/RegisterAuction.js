@@ -11,6 +11,7 @@ import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import * as Location from "expo-location";
 import {LoginContext, UrlContext, ProgressContext} from "../contexts";
 
+
 const WIDTH = Dimensions.get("screen").width;
 const HEIGHT = Dimensions.get("screen").height;
 
@@ -50,6 +51,11 @@ const Container = styled.View`
     font-size: 16px;
     color: ${({theme})=> theme.inputPlaceholder}
   `;
+
+  const CheckedText = styled.Text`
+  font-size: 20px;
+  color: ${({theme})=> theme.inputPlaceholder}
+`;
 
   const Label = styled.Text`
       font-size: 16px;
@@ -175,7 +181,7 @@ const RegisterAuction = ({navigation}) => {
     const [endTime, setEndTime] = useState("");
     const [endTimeVisible, setEndTimeVisible] = useState(false);
     const [meetingType, setMeetingType] = useState(null);
-    const [numOfPeople, setNumOfPeople] = useState("");
+    const [numOfPeople, setNumOfPeople] = useState(0);
     const [maxPrice, setMaxPrice] = useState("");
     const [minPrice, setMinPrice] = useState("");
     const [errorMessage, setErrorMessage] = useState("아래 정보를 입력해주세요.");
@@ -187,6 +193,7 @@ const RegisterAuction = ({navigation}) => {
     let bookFullData = "";
     let endFullData = "";
     let auctionId = "";
+    const [buttonPress, setButtonPress] = useState(false);
   
     //날짜 데이터
     const [BD, setBD] = useState("");
@@ -219,6 +226,8 @@ const RegisterAuction = ({navigation}) => {
 
   //현재 위치
   const [loc, setLoc] = useState(null); //선택 지역 
+  const initialLati = 37.535887;
+  const initialLongi = 126.984063;
   const [lati, setLati] = useState(37.535887);
   const [longi, setLongi] = useState(126.984063);
   const [region, setRegion] = useState({
@@ -293,7 +302,11 @@ const [selectedLocation, setSelectedLocation] = useState(null);
       reservation: bookFullData,
       storeType: JSON.stringify(foodType),
       title: title,
-      userType: meetingType
+      groupType: meetingType,
+      groupCnt: numOfPeople,
+      gender: selectedSex,
+      age: selectedAge,
+      addr: String(loc),
     };
 
     let options = {
@@ -307,11 +320,11 @@ const [selectedLocation, setSelectedLocation] = useState(null);
   };
 
   try{
-    let response = await fetch(fixedUrl, options);
-    let res = await response.json();
-    console.log(res);
-    auctionId = res["data"]["auctionId"];
-    return res["success"];
+      let response = await fetch(fixedUrl, options);
+      let res = await response.json();
+      console.log(res);
+      auctionId = res["data"]["auctionId"];
+      return res["success"];
    
   }catch (error) {
     console.error(error);
@@ -330,8 +343,10 @@ const [selectedLocation, setSelectedLocation] = useState(null);
           _errorMessage = "예약 시각을 입력하세요";
         }else if(parseInt(book)<parseInt(getNowString())) {
           _errorMessage = "예약 시간을 잘못 입력하였습니다";
+        }else if(!meetingType){
+          _errorMessage = "단체 유형을 입력하세요";
         }
-      else if(foodType.length == 0){
+        else if(foodType.length == 0){
           _errorMessage = "선호 메뉴을 입력하세요";
         }else if(!numOfPeople){
           _errorMessage = "인원 수를 입력하세요";
@@ -389,11 +404,11 @@ const [selectedLocation, setSelectedLocation] = useState(null);
       }else {
         didMountRef.current = true;
       }
-    },[title, bookDate,bookTime,endDate,endTime,foodType,numOfPeople,minPrice, maxPrice,selectedLocation,book,end, additionalContent]);
+    },[title, bookDate,bookTime,endDate,endTime,foodType,numOfPeople,minPrice, maxPrice,selectedLocation,book,end, additionalContent, meetingType, selectedAge, selectedSex,loc]);
 
     useEffect(()=> {
-      setDisabled(!(title && bookDate && bookTime && endDate && endTime && foodType.length!=0 && numOfPeople && selectedLocation && maxPrice && minPrice && additionalContent && !errorMessage));
-    },[title, bookDate,bookTime,endDate,endTime,foodType,numOfPeople,minPrice,maxPrice,errorMessage,selectedLocation, additionalContent]);
+      setDisabled(errorMessage!=="");
+    },[errorMessage]);
 
 
     useEffect(()=> {
@@ -402,6 +417,12 @@ const [selectedLocation, setSelectedLocation] = useState(null);
       setBook(_book);
       setEnd(_end);
     },[bookTime,bookDate,endDate,endTime]);
+
+    useEffect(() => {
+      if (buttonPress) {
+        var r = _onPress();
+      }
+    },[buttonPress]);
 
     const _setData = async () => {
       bookFullData = BD+BT;
@@ -432,13 +453,21 @@ const [selectedLocation, setSelectedLocation] = useState(null);
             setEndTime("");
             setMeetingType("");
             setFoodType([]);
-            setNumOfPeople("");
+            setNumOfPeople(0);
             setSelectedAge("");
             setSelectedSex("");
-            setAdditionalContent("");
             setSelectedLocation("");
+            setAdditionalContent("");
+            setButtonPress(false);
+            setLoc("");
             setMinPrice("");
             setMaxPrice("");
+            setRegion({
+              longitude: initialLongi,
+              latitude: initialLati,
+              latitudeDelta: 0.3,
+              longitudeDelta: 0.3,
+          });
             setErrorMessage("아래 정보를 입력해주세요");
             setDisabled(true);
             setUploaded(false);
@@ -455,12 +484,16 @@ const [selectedLocation, setSelectedLocation] = useState(null);
       }
       };
 
+      const _onButtonPress = () => {
+        setButtonPress(true);
+      };
+
       useLayoutEffect(()=> {
         navigation.setOptions({
             headerRight: () => (
               disabled? (<MaterialCommunityIcons name="check" size={35} onPress={() => {setUploaded(true);}} 
               style={{marginRight: 10, marginBottom:3, opacity: 0.3}}/>)
-              : (<MaterialCommunityIcons name="check" size={35} onPress={_onPress} 
+              : (<MaterialCommunityIcons name="check" size={35} onPress={_onButtonPress} 
               style={{marginRight: 10, marginBottom:3, opacity: 1}}/>)
             )});
         },[disabled]);
@@ -605,12 +638,13 @@ const [selectedLocation, setSelectedLocation] = useState(null);
     setEndTimeVisible(false);
   };
 
+
     return (
       <KeyboardAwareScrollView
         extraScrollHeight={20}
         >
         <Container>
-          {uploaded && disabled && <ErrorText>{errorMessage}</ErrorText>}
+          {errorMessage!=="" && uploaded && disabled && <ErrorText>{errorMessage}</ErrorText>}
           <Label>공고 제목</Label>
            <StyledTextInput 
            value={title}
@@ -880,8 +914,7 @@ const [selectedLocation, setSelectedLocation] = useState(null);
             <TripleLabel>내용</TripleLabel>
            </RadioContiner>
 
-           
-          <StyledTextInputs 
+           <StyledTextInputs 
            value={additionalContent}
            onChangeText={text => setAdditionalContent(text)}
            autoCapitalize="none"
