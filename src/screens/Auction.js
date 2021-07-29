@@ -61,6 +61,14 @@ const StarBox = styled.View`
     top: 5px;
 `;
 
+const ButtonContainer = styled.TouchableOpacity`
+    position: absolute;
+    bottom: 3%;
+    right: 5%;
+    justify-content: center;
+    align-items: center;
+    `;
+
 const Item = ({item: {auctionId, auctioneers, content, createdDate, deadline, maxPrice, minPrice, reservation, status, storeType, title, updatedDate, userName, groupType, groupCnt, addr, age, gender}, onPress, onStarPress, isStar}) => {
     return (
         <ItemContainer onPress={onPress} >
@@ -81,7 +89,7 @@ const Item = ({item: {auctionId, auctioneers, content, createdDate, deadline, ma
                                     style={{ marginLeft: 15, marginBottom: 5, opacity: 0.7 }} />
                             )}
                 </StarBox>
-                <ContentText>단체 유형: {groupType} (0명)</ContentText>
+                <ContentText>단체 유형: {groupType} ({groupCnt}명)</ContentText>
                 <ContentText>선호 지역: {addr}</ContentText>
                 <ContentText>선호 메뉴: {changeListData(storeType)}</ContentText>
                 <ContentText style={{marginBottom: 10}}>선호 가격대: {minPrice}원 ~ {maxPrice}원</ContentText>
@@ -235,7 +243,9 @@ const Auction = React.memo(({navigation}) => {
                 <Item item={item} onPress={()=> _onAuctionPress(item)} onStarPress={_onStarPress} isStar={isStar}/>
             )}/>
         </AuctionsContainer>
-
+        <ButtonContainer>
+            <MaterialCommunityIcons name="refresh-circle" size={65} onPress={handleApi} color={theme.titleColor}/>
+        </ButtonContainer>
         </Container>
     );
 });
