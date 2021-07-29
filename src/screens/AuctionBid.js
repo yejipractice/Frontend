@@ -1,7 +1,7 @@
 import React, { useLayoutEffect, useState, useEffect, useRef } from 'react';
 import styled from "styled-components/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Text, View, Modal, StyleSheet, TouchableOpacity } from 'react-native';
+import { Modal, StyleSheet, TouchableOpacity } from 'react-native';
 
 const Container = styled.View`
     flex: 1;

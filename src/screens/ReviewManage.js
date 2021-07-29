@@ -107,10 +107,11 @@ const ReviewSet = ({review: {id, date, name, score, ment, src, userSrc}, onChang
     return (
         <InfoContainer>
             <DefaultText>{date}</DefaultText>
+            {isUser && 
             <ChangeContainer>
-                {isUser && <ChangeText onPress={onChange}>수정</ChangeText>}
+               <ChangeText onPress={onChange}>수정</ChangeText>
                 <ChangeText onPress={onRemove}>삭제</ChangeText>
-            </ChangeContainer>
+            </ChangeContainer> }
             <UserInfoContainer>
                 <UserContainer>
                     <UserImage source={{uri: userSrc}}/>
