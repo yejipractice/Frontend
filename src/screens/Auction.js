@@ -62,13 +62,13 @@ const StarBox = styled.View`
 `;
 
 const changeDateData = (date) =>{
-    var y = date.slice(0,4);
-    var m = date.slice(5,7);
-    var d = date.slice(8,10);
-    var h = date.slice(11,13);
-    var min = date.slice(14,16);
-    return y+"/"+m+"/"+d+" "+h+":"+min;
-} 
+        var y = date.slice(0,4);
+        var m = date.slice(5,7);
+        var d = date.slice(8,10);
+        var h = date.slice(11,13);
+        var min = date.slice(14,16);
+        return y+"/"+m+"/"+d+" "+h+":"+min;
+} ;
 
 const changeEndDateData = (date) => {
     var now = new Date().toJSON();
@@ -115,7 +115,7 @@ const changeListData = (list) => {
     return completed;
 };
 
-const Item = ({item: {auctionId, auctioneers, content, createdData, deadline, maxPrice, minPrice, reservation, status, storeType, title, updatedDate, useName, userType}, onPress, onStarPress, isStar}) => {
+const Item = ({item: {auctionId, auctioneers, content, createdDate, deadline, maxPrice, minPrice, reservation, status, storeType, title, updatedDate, userName, groupType, groupCnt, addr, age, gender}, onPress, onStarPress, isStar}) => {
     return (
         <ItemContainer onPress={onPress} >
             <TimeTextContiner>
@@ -135,18 +135,18 @@ const Item = ({item: {auctionId, auctioneers, content, createdData, deadline, ma
                                     style={{ marginLeft: 15, marginBottom: 5, opacity: 0.7 }} />
                             )}
                 </StarBox>
-                <ContentText>단체 유형: {userType} (0명)</ContentText>
-                <ContentText>선호 지역: 지역</ContentText>
+                <ContentText>단체 유형: {groupType} (0명)</ContentText>
+                <ContentText>선호 지역: {addr}</ContentText>
                 <ContentText>선호 메뉴: {changeListData(storeType)}</ContentText>
                 <ContentText style={{marginBottom: 10}}>선호 가격대: {minPrice}원 ~ {maxPrice}원</ContentText>
-                <ContentText style={{position: "absolute", right: 5, bottom: 0}}>{changeDateData(updatedDate)} 등록</ContentText>
+                <ContentText style={{position: "absolute", right: 5, bottom: 0}}>{changeDateData(createdDate)} 등록</ContentText> 
             </ItemBox>
         </ItemContainer>
     );
 };
 
 
-const Auction = ({navigation}) => {
+const Auction = React.memo(({navigation}) => {
     const theme = useContext(ThemeContext);
     const {token} = useContext(LoginContext);
     const {aurl} = useContext(UrlContext);
@@ -207,12 +207,12 @@ const Auction = ({navigation}) => {
     };
 
     const cutDateData = (date) => {
-        var a = date.slice(0,4)
-        var b = date.slice(5,7)
-        var c = date.slice(8,10)
-        var d =  date.slice(11,13)
-        var e = date.slice(14,16);
-        return a+b+c+d+e;
+            var a = date.slice(0,4)
+            var b = date.slice(5,7)
+            var c = date.slice(8,10)
+            var d =  date.slice(11,13)
+            var e = date.slice(14,16);
+            return a+b+c+d+e;
     };
 
     const filterDataList = (data) => {
@@ -292,6 +292,6 @@ const Auction = ({navigation}) => {
 
         </Container>
     );
-};
+});
 
 export default Auction; 

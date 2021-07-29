@@ -29,6 +29,7 @@ const Title = styled.Text`
     font-weight: bold;
     color: ${({ theme }) => theme.text};
     align-self: flex-start;
+    width: 85%;
 `;
 
 const TitleBox = styled.View`
@@ -117,6 +118,8 @@ const AuctionDetail = ({ navigation, route}) => {
     const [deadline, setDeadline] = useState("");
     const [status, setStatus] = useState("");
     const [content, setContent] = useState("");
+    const [addr, setAddr] = useState("");
+    const [groupCnt, setGruopCnt] = useState(0);
 
     const _onMessagePress = () => { navigation.navigate("Message" , {name: "닉네임"+AuctionId}) };
 
@@ -149,7 +152,7 @@ const AuctionDetail = ({ navigation, route}) => {
             let data = res.data;
             setTitle(data.title);
             setUserName(data.userName);
-            setUserType(data.userType);
+            setUserType(data.groupType);
             setReservation(data.reservation);
             setStoreType(data.storeType);
             setMaxPrice(data.maxPrice);
@@ -157,6 +160,8 @@ const AuctionDetail = ({ navigation, route}) => {
             setDeadline(data.deadline);
             setStatus(data.status);
             setContent(data.content);
+            setGruopCnt(data.groupCnt);
+            setAddr(data.addr);
         }catch(error) {
             console.error(error);
         }finally {
@@ -238,11 +243,11 @@ const AuctionDetail = ({ navigation, route}) => {
                         {isStar ?
                             (
                                 <MaterialCommunityIcons name="star" size={40} onPress={_onStarPress} color="yellow"
-                                    style={{ marginLeft: 15,  opacity: 0.7 }} />
+                                    style={{ position: "absolute", right: '5%', opacity: 0.7 }} />
                             )
                             : (
                                 <MaterialCommunityIcons name="star-outline" size={40} onPress={_onStarPress} color="yellow"
-                                    style={{ marginLeft: 15, opacity: 0.7 }} />
+                                    style={{ position: "absolute", right: '5%', opacity: 0.7 }} />
                         )}
                         </TitleBox>
                     </View>
@@ -256,7 +261,7 @@ const AuctionDetail = ({ navigation, route}) => {
                 <InfoContainer>
                     <RowItemContainer>
                         <DescTitle style={{marginTop: 10}}>단체유형 및 인원수</DescTitle>
-                        <Desc>{userType} (0명)</Desc>
+                        <Desc>{userType} ({groupCnt}명)</Desc>
                     </RowItemContainer>
                     <RowItemContainer>
                         <DescTitle>예약시간 및 날짜</DescTitle>
@@ -264,7 +269,7 @@ const AuctionDetail = ({ navigation, route}) => {
                     </RowItemContainer>
                     <RowItemContainer>
                         <DescTitle>선호 위치</DescTitle>
-                        <Desc>00시 00구</Desc>
+                        <Desc>{addr}</Desc>
                     </RowItemContainer>
                     <RowItemContainer>
                         <DescTitle>선호 메뉴</DescTitle>
