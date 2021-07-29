@@ -4,7 +4,7 @@ import {Dimensions, FlatList} from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
 import {LoginContext, UrlContext, ProgressContext} from "../contexts";
-import {changeDateData, changeEndDateData, changeListData} from "../utils/common";
+import {changeDateData, changeEndDateData, changeListData, cutDateData} from "../utils/common";
 
 const WIDTH = Dimensions.get("screen").width; 
 
@@ -158,15 +158,6 @@ const Auction = React.memo(({navigation}) => {
         }finally {
             spinner.stop();
         }
-    };
-
-    const cutDateData = (date) => {
-            var a = date.slice(0,4)
-            var b = date.slice(5,7)
-            var c = date.slice(8,10)
-            var d =  date.slice(11,13)
-            var e = date.slice(14,16);
-            return a+b+c+d+e;
     };
 
     const filterDataList = (data) => {

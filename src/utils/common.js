@@ -44,7 +44,7 @@ export const changeEndDateData = date => {
             var mm = m - now_m;
             res = "약 "+yy+"년 "+mm+"달";
         }else {
-            var mm = now_m - m;
+            var mm = (12-now_m) +m;
             res = "약 "+(yy-1)+"년 "+mm+"달";
         }
     }else if(m - now_m > 0){
@@ -65,4 +65,52 @@ export const changeListData = (list) => {
     var changed = sliced.replace(/"/gim, "");
     var completed = changed.replace(/,/gim, ", ");
     return completed;
+};
+
+// YYYY/MM/DD HH:MM => "YYYYMMDDHHMM" 
+export const cutDateData = (date) => {
+    var a = date.slice(0,4)
+    var b = date.slice(5,7)
+    var c = date.slice(8,10)
+    var d =  date.slice(11,13)
+    var e = date.slice(14,16);
+    return a+b+c+d+e;
+};
+
+export const changeCreatedDateData = now => {
+    var date = new Date().toJSON();
+    var now_y = now.slice(0,4);
+    var now_m = now.slice(5,7);
+    var now_d = now.slice(8,10);
+    var now_h = now.slice(11,13);
+    var now_min = now.slice(14,16); 
+    var y = date.slice(0,4);
+    var m = date.slice(5,7);
+    var d = date.slice(8,10);
+    var h = date.slice(11,13);
+    var min = date.slice(14,16);
+    var yy = now_y - y;
+
+    var res = "";
+    if (yy > 0){
+        if (m == now_m){
+            res = "약 "+yy+"년 ";
+        }else if (m > now_m){
+            var mm = m - now_m;
+            res = "약 "+yy+"년 "+mm+"달";
+        }else {
+            var mm = (12-now_m) +m;
+            res = "약 "+(yy-1)+"년 "+mm+"달";
+        }
+    }else if(m - now_m > 0){
+        res = "약 "+(m-now_m)+"달";
+    }else if(d - now_d){
+        res = "약 "+(d-now_d)+"일";
+    }else if(h - now_h > 0){
+        res = "약 "+ (h-now_h) +"시간";
+    }else {
+        res = "약 "+ (min-now_min) +"분";
+    }
+
+    return res;
 };

@@ -485,6 +485,11 @@ const [selectedLocation, setSelectedLocation] = useState(null);
       };
 
       const _onButtonPress = () => {
+        foodType.sort(function(a, b) {
+          if(a < b) return 1;
+          if(a > b) return -1;
+          if(a === b) return 0;
+        });
         setButtonPress(true);
       };
 

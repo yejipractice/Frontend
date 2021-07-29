@@ -252,7 +252,7 @@ const AuctionDetail = ({ navigation, route}) => {
                         </TitleBox>
                     </View>
                         <TextBox>
-                        <Text style={{fontSize: 16, paddingLeft: 5}}>{userName}</Text>
+                        <Text style={{fontSize: 16, paddingLeft: 3}}>{userName}</Text>
                         {(status==="PROCEEDING") && <Text>마감 {changeEndDateData(deadline)} 전</Text>}
                         </TextBox>
                 </Header>
