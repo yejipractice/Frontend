@@ -216,14 +216,16 @@ const Signup = ({ navigation, route }) => {
                     if(email){
                         setIsEmailValidated(true);
                         //중복 확인 코드 
-                        if (result){
+                        if (result===true){
                             setIsSameEmail(false);
                             setEmailConfirmPress(true);
                             setEmailErrorMessage("");
                             
-                        }else{
+                        }else if (result === "overlap"){
                             setIsSameEmail(true);
                             setEmailErrorMessage("중복된 이메일입니다.");
+                        }else{
+                            setEmailErrorMessage("오류가 발생하였습니다.");
                         }
                     }
                 }
@@ -387,6 +389,10 @@ const Signup = ({ navigation, route }) => {
                 let response = await fetch(url);
                 let res = await response.json();
                 console.log(res);
+                let msg = res["msg"];
+                if (msg === "이미 등록된 회원 이메일입니다."){
+                    return "overlap"
+                }
                 return res["success"];
 
               } catch (error) {
