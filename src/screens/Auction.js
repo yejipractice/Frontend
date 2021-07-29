@@ -1,10 +1,10 @@
 import React, {useState, useContext, useEffect} from 'react';
 import styled, {ThemeContext} from "styled-components/native";
-import {Text, Dimensions, FlatList} from "react-native";
+import {Dimensions, FlatList} from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
-import {AuctionList} from "../utils/data";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
 import {LoginContext, UrlContext, ProgressContext} from "../contexts";
+import {changeDateData, changeEndDateData, changeListData} from "../utils/common";
 
 const WIDTH = Dimensions.get("screen").width; 
 
@@ -60,60 +60,6 @@ const StarBox = styled.View`
     right: 5px;
     top: 5px;
 `;
-
-const changeDateData = (date) =>{
-        var y = date.slice(0,4);
-        var m = date.slice(5,7);
-        var d = date.slice(8,10);
-        var h = date.slice(11,13);
-        var min = date.slice(14,16);
-        return y+"/"+m+"/"+d+" "+h+":"+min;
-} ;
-
-const changeEndDateData = (date) => {
-    var now = new Date().toJSON();
-    var now_y = now.slice(0,4);
-    var now_m = now.slice(5,7);
-    var now_d = now.slice(8,10);
-    var now_h = now.slice(11,13);
-    var now_min = now.slice(14,16); 
-    var y = date.slice(0,4);
-    var m = date.slice(5,7);
-    var d = date.slice(8,10);
-    var h = date.slice(11,13);
-    var min = date.slice(14,16);
-    var yy = y - now_y;
-
-    var res = "";
-    if (yy > 0){
-        if (m == now_m){
-            res = "약 "+yy+"년 ";
-        }else if (m > now_m){
-            var mm = m - now_m;
-            res = "약 "+yy+"년 "+mm+"달";
-        }else {
-            var mm = now_m - m;
-            res = "약 "+(yy-1)+"년 "+mm+"달";
-        }
-    }else if(m - now_m > 0){
-        res = "약 "+(m-now_m)+"달";
-    }else if(d - now_d){
-        res = "약 "+(d-now_d)+"일";
-    }else if(h - now_h > 0){
-        res = "약 "+ (h-now_h) +"시간";
-    }else {
-        res = "약 "+ (min-now_min) +"분";
-    }
-
-    return res;
-};
-
-const changeListData = (list) => {
-    var sliced = list.slice(1,list.length-1);
-    var changed = sliced.replace(/"/gim, "");
-    var completed = changed.replace(/,/gim, ", ");
-    return completed;
-};
 
 const Item = ({item: {auctionId, auctioneers, content, createdDate, deadline, maxPrice, minPrice, reservation, status, storeType, title, updatedDate, userName, groupType, groupCnt, addr, age, gender}, onPress, onStarPress, isStar}) => {
     return (

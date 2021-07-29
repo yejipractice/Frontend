@@ -1,9 +1,9 @@
 import React, {useState, useContext, useEffect, useMemo} from 'react';
 import styled, {ThemeContext} from "styled-components/native";
-import {Text, Dimensions, FlatList} from "react-native";
+import {Dimensions, FlatList} from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
-import {AuctionList} from "../utils/data";
 import {LoginContext, UrlContext, ProgressContext} from "../contexts";
+import {changeDateData, changeListData} from "../utils/common";
 
 const WIDTH = Dimensions.get("screen").width; 
 
@@ -52,22 +52,6 @@ const ItemBox = styled.View`
     background-color: ${({theme})=> theme.opacityTextColor};
 `;
 
-const changeDateData = (date) =>{
-        var y = date.slice(0,4);
-        var m = date.slice(5,7);
-        var d = date.slice(8,10);
-        var h = date.slice(11,13);
-        var min = date.slice(14,16);
-        return y+"/"+m+"/"+d+" "+h+":"+min;
-};
-
-const changeListData = (list) => {
-    var sliced = list.slice(1,list.length-1);
-    var changed = sliced.replace(/"/gim, "");
-    var completed = changed.replace(/,/gim, ", ");
-    return completed;
-};
-
 const Item = ({item: {auctionId, auctioneers, content, createdDate, deadline, maxPrice, minPrice, reservation, status, storeType, title, updatedDate, userName, groupType, groupCnt, addr, age, gender}, onPress, onStarPress, isStar}) => {
     return (
         <ItemContainer onPress={onPress} >
@@ -78,7 +62,7 @@ const Item = ({item: {auctionId, auctioneers, content, createdDate, deadline, ma
                 <ContentTitleText>{title}</ContentTitleText>
                 <ContentText>단체 유형: {groupType} (0명)</ContentText>
                 <ContentText>선호 지역: {addr}</ContentText>
-                <ContentText>선호 메뉴: {storeType}</ContentText>
+                <ContentText>선호 메뉴: {changeListData(storeType)}</ContentText>
                 <ContentText style={{marginBottom: 10}}>선호 가격대: {minPrice}원 ~ {maxPrice}원</ContentText>
                 <ContentText style={{position: "absolute", right: 5, bottom: 0}}>{changeDateData(createdDate)} 등록</ContentText>
             </ItemBox>
