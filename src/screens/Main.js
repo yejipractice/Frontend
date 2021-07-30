@@ -10,9 +10,10 @@ import {LoginContext, UrlContext, ProgressContext} from "../contexts";
 import {cutDateData, changeListData, createdDate, changeCreatedDateData} from "../utils/common";
 
 const WIDTH = Dimensions.get("screen").width;
+const HEIGHT = Dimensions.get("screen").height;
 
 const Header = styled.View`
-    height: 12%;
+    height: ${HEIGHT*0.1};
     background-color: ${({ theme }) => theme.titleColor}; 
     justify-content: center;
     flex-direction:row;
@@ -35,7 +36,7 @@ const Title = styled.Text`
     font-size: 25px;
     font-weight: bold;
     padding-left: 3%;
-    color: ${({ theme }) => theme.text};
+    color: ${({ theme, isLoading }) => isLoading? theme.background: theme.text};
 `;
 
 const StyledTextInput = styled.TextInput.attrs(({ theme }) => ({
@@ -213,6 +214,7 @@ const Main = ({ navigation }) => {
     const [isFocused, setIsFocused] = useState(false);
     const [auctionData, setAuctionData] = useState("");
     const [latestAuctions, setLatestAuctions] = useState("");
+    const [isLoading, setIsLoading] = useState(true);
 
     const _handleNoticePress = () => { navigation.navigate("Notice") };
 
@@ -239,6 +241,7 @@ const Main = ({ navigation }) => {
         };
 
         try {
+            setIsLoading(true);
             spinner.start();
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
@@ -247,6 +250,7 @@ const Main = ({ navigation }) => {
             console.error(error);
         }finally {
             spinner.stop();
+            setIsLoading(false);
         }
     };
 
@@ -292,12 +296,12 @@ const Main = ({ navigation }) => {
                 </IconContainer>
             </Header>
 
-            <FlatList 
+            {!isLoading && <FlatList 
                 ListHeaderComponent={
                 <>
                             
                 <PopularView>
-                    <Title>실시간 인기 공고</Title>
+                    <Title isLoading={isLoading}>실시간 인기 공고</Title>
                     <FlatList
                         horizontal={true}
                         showsHorizontalScrollIndicator={false}
@@ -311,7 +315,7 @@ const Main = ({ navigation }) => {
             <RecommededView>
                     {(mode==="CUSTOMER")
                         ? (<>
-                            <Title>사용자 추천 가게</Title>
+                            <Title isLoading={isLoading}>사용자 추천 가게</Title>
                             <FlatList
                                 horizontal={true}
                                 showsHorizontalScrollIndicator={false}
@@ -323,7 +327,7 @@ const Main = ({ navigation }) => {
                         </>
                         )
                         : (<>
-                            <Title>사용자 추천 공고</Title>
+                            <Title isLoading={isLoading}>사용자 추천 공고</Title>
                             <FlatList
                                 horizontal={true}
                                 showsHorizontalScrollIndicator={false}
@@ -337,7 +341,7 @@ const Main = ({ navigation }) => {
             </RecommededView>
 
                 <LatestView>
-                    <Title>실시간 최신 공고</Title>
+                    <Title isLoading={isLoading}>실시간 최신 공고</Title>
                  </LatestView>
                 </> }
                         horizontal={false}
@@ -346,7 +350,7 @@ const Main = ({ navigation }) => {
                         data={latestAuctions.slice(0,10)}
                         renderItem={({ item }) => (
                             <Item item={item} onPress={() => _handleItemPress(item)} latest={true} />
-                        )} />
+                        )} />}
               
 
 
