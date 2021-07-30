@@ -182,8 +182,8 @@ const RegisterAuction = ({navigation}) => {
     const [endTimeVisible, setEndTimeVisible] = useState(false);
     const [meetingType, setMeetingType] = useState(null);
     const [numOfPeople, setNumOfPeople] = useState(0);
-    const [maxPrice, setMaxPrice] = useState("");
-    const [minPrice, setMinPrice] = useState("");
+    const [maxPrice, setMaxPrice] = useState(0);
+    const [minPrice, setMinPrice] = useState(0);
     const [errorMessage, setErrorMessage] = useState("아래 정보를 입력해주세요.");
     const [disabled, setDisabled] = useState(true);
     const [uploaded, setUploaded] = useState(false);
@@ -322,7 +322,6 @@ const [selectedLocation, setSelectedLocation] = useState(null);
   try{
       let response = await fetch(fixedUrl, options);
       let res = await response.json();
-      console.log(res);
       auctionId = res["data"]["auctionId"];
       return res["success"];
    

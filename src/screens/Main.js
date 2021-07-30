@@ -34,6 +34,7 @@ const InputContainer = styled.View`
 const Title = styled.Text`
     font-size: 25px;
     font-weight: bold;
+    padding-left: 3%;
     color: ${({ theme }) => theme.text};
 `;
 
@@ -58,12 +59,12 @@ const PopularView = styled.View`
 
 const RecommededView = styled.View`
   flex: 4;
-  margin: 10px 10px;
+  margin: 10px 0px;
 `;
 
 const LatestView = styled.View`
   flex: 3;
-  margin: 10px 10px;
+  margin-top: 10px;
 `;
 
 const Desc = styled.Text`
@@ -125,13 +126,14 @@ const RowItemContainer = styled.TouchableOpacity`
      flex-direction: row;
      border-bottom-width: 1px;
      border-color:  ${({ theme }) => theme.label}
+     margin-left: 3%;
      align-items: center;
 `;
 
 const LatsetTimeContainer = styled.View`
     position: absolute;
-    right: 0;
-    top: 8px;
+    right: 5%;
+    top: 5%;
     `;
 
 const LatestTitle = styled.Text`
@@ -289,9 +291,13 @@ const Main = ({ navigation }) => {
                     <IconButton type={images.Notice} onPress={_handleNoticePress} />
                 </IconContainer>
             </Header>
-            <ScrollView>
+
+            <FlatList 
+                ListHeaderComponent={
+                <>
+                            
                 <PopularView>
-                    <Title style={{marginLeft: 10}}>실시간 인기 공고</Title>
+                    <Title>실시간 인기 공고</Title>
                     <FlatList
                         horizontal={true}
                         showsHorizontalScrollIndicator={false}
@@ -301,7 +307,8 @@ const Main = ({ navigation }) => {
                             <Item item={item} onPress={() => _handleItemPress(item)} />
                         )} />
                 </PopularView>
-                <RecommededView>
+
+            <RecommededView>
                     {(mode==="CUSTOMER")
                         ? (<>
                             <Title>사용자 추천 가게</Title>
@@ -320,17 +327,19 @@ const Main = ({ navigation }) => {
                             <FlatList
                                 horizontal={true}
                                 showsHorizontalScrollIndicator={false}
-                                keyExtractor={item => item['id'].toString()}
-                                data={popular}
+                                keyExtractor={item => item['auctionId'].toString()}
+                                data={latestAuctions}
                                 renderItem={({ item }) => (
                                     <Item item={item} onPress={() => _handleItemPress(item)} />
                                 )} />
-                        </>
-                        )}
-                </RecommededView>
+                            </>
+                    )}
+            </RecommededView>
+
                 <LatestView>
                     <Title>실시간 최신 공고</Title>
-                    <FlatList
+                 </LatestView>
+                </> }
                         horizontal={false}
                         showsVerticalScrollIndicator={false}
                         keyExtractor={item => item['auctionId'].toString()}
@@ -338,10 +347,10 @@ const Main = ({ navigation }) => {
                         renderItem={({ item }) => (
                             <Item item={item} onPress={() => _handleItemPress(item)} latest={true} />
                         )} />
-                </LatestView>
+              
 
 
-            </ScrollView>
+            
         </>
     );
 };
