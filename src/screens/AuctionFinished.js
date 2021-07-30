@@ -1,10 +1,12 @@
-import React, {useState, useContext, useEffect, useMemo} from 'react';
+import React, {useState, useContext, useEffect} from 'react';
 import styled, {ThemeContext} from "styled-components/native";
-import {Dimensions, FlatList} from "react-native";
+import {Dimensions, ScrollView} from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
-import {LoginContext, UrlContext, ProgressContext} from "../contexts";
-import {changeDateData, changeListData} from "../utils/common";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
+import {LoginContext, UrlContext, ProgressContext} from "../contexts";
+import {changeDateData, changeEndDateData, changeListData, cutDateData} from "../utils/common";
+import {Spinner} from "../components";
+
 
 const WIDTH = Dimensions.get("screen").width; 
 
@@ -43,8 +45,10 @@ const ContentTitleText = styled.Text`
 
 const ContentText = styled.Text`
     font-size: 15px;
+    padding-left: 1%;
     color: ${({theme})=> theme.text};
 `;
+
 
 const ItemBox = styled.View`
     border-radius: 1px;
@@ -53,15 +57,17 @@ const ItemBox = styled.View`
     background-color: ${({theme})=> theme.opacityTextColor};
 `;
 
+
+
 const ButtonContainer = styled.TouchableOpacity`
     position: absolute;
     bottom: 3%;
     right: 5%;
     justify-content: center;
     align-items: center;
-`;
+    `;
 
-const Item = ({item: {auctionId, auctioneers, content, createdDate, deadline, maxPrice, minPrice, reservation, status, storeType, title, updatedDate, userName, groupType, groupCnt, addr, age, gender}, onPress, onStarPress, isStar}) => {
+const Item = React.memo(({item: {auctionId, auctioneers, content, createdDate, deadline, maxPrice, minPrice, reservation, status, storeType, title, updatedDate, userName, groupType, groupCnt, addr, age, gender}, onPress, onStarPress, isStar}) => {
     return (
         <ItemContainer onPress={onPress} >
             <TimeTextContiner>
@@ -73,19 +79,23 @@ const Item = ({item: {auctionId, auctioneers, content, createdDate, deadline, ma
                 <ContentText>선호 지역: {addr}</ContentText>
                 <ContentText>선호 메뉴: {changeListData(storeType)}</ContentText>
                 <ContentText style={{marginBottom: 10}}>선호 가격대: {minPrice}원 ~ {maxPrice}원</ContentText>
-                <ContentText style={{position: "absolute", right: 5, bottom: 0}}>{changeDateData(createdDate)} 등록</ContentText>
+                <ContentText style={{position: "absolute", right: 5, bottom: 0}}>{changeDateData(createdDate)} 등록</ContentText> 
             </ItemBox>
         </ItemContainer>
     );
-};
+});
 
-const Auction = React.memo(({navigation, route}) => {
+
+const Auction = ({navigation}) => {
     const theme = useContext(ThemeContext);
     const {token} = useContext(LoginContext);
     const {aurl} = useContext(UrlContext);
     const {spinner} = useContext(ProgressContext);
 
-    const [auctionListData, setAuctionListData] = useState([]);
+    const [isStar, setIsStar] = useState(false);
+    const [auctionListData, setAuctionListData] = useState([]); 
+    const [isLoading, setIsLoading] = useState(false);
+    const [isChanged, setIsChanged] = useState(false);
 
     const [open1, setOpen1] = useState(false);
     const [selected1, setSelected1] = useState(null);
@@ -114,6 +124,14 @@ const Auction = React.memo(({navigation, route}) => {
         {label: "대구광역시", value: "정렬기준3"}
     ]);
 
+    const filterDataList = (data) => {
+        var now = new Date().toJSON();
+        var nowdata = cutDateData(changeDateData(now));
+        
+        let res = data.filter((item) => cutDateData(changeDateData(item.deadline)) <= nowdata);
+        return res;
+    };
+
     const handleApi = async () => {
         let fixedUrl = aurl+"/auction/auctions";
 
@@ -130,7 +148,8 @@ const Auction = React.memo(({navigation, route}) => {
             spinner.start();
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
-            setAuctionListData(res["list"]);
+            var list = filterDataList(res["list"]);
+            setAuctionListData(list);
         }catch(error) {
             console.error(error);
         }finally {
@@ -138,20 +157,18 @@ const Auction = React.memo(({navigation, route}) => {
         }
     };
 
-    const cutDateData = (date) => {
-            var a = date.slice(0,4)
-            var b = date.slice(5,7)
-            var c = date.slice(8,10)
-            var d =  date.slice(11,13)
-            var e = date.slice(14,16);
-            return a+b+c+d+e;
+
+    const _setLatestAuctionList = (prev) => {
+        var res = prev.sort(function (a,b){
+            return Number(cutDateData(b.createdDate)) - Number(cutDateData(a.createdDate));
+        });
+        return res;
     };
 
-    const filterDataList = (data) => {
-        var now = new Date().toJSON();
-        var nowdata = cutDateData(changeDateData(now));
-        
-        let res = data.filter((item) => cutDateData(changeDateData(item.deadline)) <= nowdata);
+    const _setHurryingAuctionList = (prev) => {
+        var res = prev.sort(function (a,b){
+            return Number(cutDateData(a.deadline)) - Number(cutDateData(b.deadline));
+        });
         return res;
     };
 
@@ -160,15 +177,30 @@ const Auction = React.memo(({navigation, route}) => {
     }, []);
 
     useEffect(()=> {
+        setIsLoading(false)
+    },[isChanged]);
+
+    useEffect(()=> {
         //data 정렬
+        let prev = auctionListData;
+        if(selected1==="마감순"){
+            setIsLoading(true);
+            var list = _setHurryingAuctionList(prev);
+            setAuctionListData(list);
+        }else if(selected1==="최신순"){
+            setIsLoading(true);
+            var list = _setLatestAuctionList(prev);
+            setAuctionListData(list);
+        }
+        setIsChanged(!isChanged);
     }, [selected1, selected2, selected3]);
 
-    const _onAuctionPress = item => {
-        navigation.navigate("AuctionDetail",{id: item['auctionId']});
-    };
+    const _onAuctionPress = item => {navigation.navigate("AuctionDetail",{id: item['auctionId']})};
+
+    const _onStarPress = () => { setIsStar(!isStar) };
+
     return (
         <Container>
-            
                 <DropDownPicker
                 open={open1}
                 value={selected1}
@@ -182,6 +214,8 @@ const Auction = React.memo(({navigation, route}) => {
                 placeholderStyle={{color: theme.text, fontSize: 14, fontWeight: "bold"}}
                 listMode="SCROLLVIEW" 
                 style={{height: WIDTH*0.1}}
+                maxHeight={WIDTH*0.2}
+                onChangeValue={() => setIsLoading(true)}
                 />
 
                 <DropDownPicker
@@ -196,7 +230,8 @@ const Auction = React.memo(({navigation, route}) => {
                 placeholder="메뉴"
                 placeholderStyle={{color: theme.text, fontSize: 14, fontWeight: "bold"}}
                 listMode="SCROLLVIEW" 
-                style={{height: WIDTH*0.1}}/>
+                style={{height: WIDTH*0.1}}
+                maxHeight={WIDTH*0.2}/>
 
                 <DropDownPicker 
                 open={open3}
@@ -210,22 +245,21 @@ const Auction = React.memo(({navigation, route}) => {
                 placeholder="지역"
                 placeholderStyle={{color: theme.text, fontSize: 14, fontWeight: "bold"}}
                 listMode="SCROLLVIEW" 
-                style={{height: WIDTH*0.1}}/>
+                style={{height: WIDTH*0.1}}
+                maxHeight={WIDTH*0.2}/>
 
         <AuctionsContainer>
-            <FlatList
-            horizontal={false}
-            keyExtractor={item => item['auctionId'].toString()}
-            data={filterDataList(auctionListData)}
-            renderItem={({item}) => (
-                <Item item={item} onPress={()=> _onAuctionPress(item)} />
-            )}/>
+            {!isLoading &&
+                <ScrollView>
+                {auctionListData.map(item => (<Item item={item} key={item.auctionId} onPress={_onAuctionPress} onStarPress={_onStarPress} isStar={isStar}/>))}
+            </ScrollView>}
         </AuctionsContainer>
         <ButtonContainer>
             <MaterialCommunityIcons name="refresh-circle" size={65} onPress={handleApi} color={theme.titleColor}/>
         </ButtonContainer>
+        {isLoading && <Spinner />}
         </Container>
     );
-});
+};
 
 export default Auction; 
