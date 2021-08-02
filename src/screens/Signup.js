@@ -5,7 +5,7 @@ import { Input,Button, RadioButton } from '../components';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { validateEmail, removeWhitespace, validatePassword } from '../utils/common';
 import { __asyncGenerator } from 'tslib';
-import {ProgressContext} from "../contexts";
+import {ProgressContext, UrlContext} from "../contexts";
 
 
 const Container = styled.View`
@@ -25,9 +25,11 @@ const Title = styled.Text`
 const ErrorText = styled.Text`
     align-items: flex-start;
     width: 100%;
-    height: 20px;
+    font-size: 13px;
+    font-weight: 900;
     margin-bottom: 10px;
-    line-height: 20px;
+    padding-bottom: 1px;
+    padding-left: 1%;
     color: ${({ theme }) => theme.errorText};
 `;
 
@@ -58,7 +60,7 @@ const RadioTitle = styled.Text`
 const Signup = ({ navigation, route }) => {
 
     const {spinner} = useContext(ProgressContext);
-
+    const {url} = useContext(UrlContext);
 
     //별명, 업체명
     const [userId, setuserId] = useState('');
@@ -91,10 +93,10 @@ const Signup = ({ navigation, route }) => {
 
     //이메일 인증 확인 결과
     const [isConfirmedEmail, setIsConfirmedEmail] = useState(false);
+    let isCorrect = false;
 
     //이메일 인증 전송<>확인
-    const [isConfirmedSend, setIsConfirmSend] = useState(true);
-
+    const [isConfirmedSend, setIsConfirmSend] = useState(false);
 
     const userIdRef =useRef();
     const emailConfirmRef = useRef();
@@ -103,7 +105,7 @@ const Signup = ({ navigation, route }) => {
     const didMountRef = useRef();
     const ageRef = useRef();
     const emailMountRef = useRef();
-
+     
 
     useEffect(() => {
 
@@ -115,7 +117,7 @@ const Signup = ({ navigation, route }) => {
             else if (!emailConfirmPress && !isSameEmail)
             {
                 _errorMessage = "이메일을 인증하세요.";
-            }else if(!isSameEmail ) 
+            }else if(!emailCodePress) 
             {
                 _errorMessage = "이메일 인증번호를 확인하세요. ";
             }
@@ -136,11 +138,11 @@ const Signup = ({ navigation, route }) => {
                 if(!age){
                     _errorMessage = "나이를 입력하세요.";
                 }
-                if (!userId){
+                if (!removeWhitespace(userId)){
                     _errorMessage = "닉네임을 입력하세요.";
                 }
             }else if (route.params.mode === "Store") {
-                if (!userId){
+                if (!removeWhitespace(userId)){
                     _errorMessage = "업체명을 입력하세요.";
                 }
             }
@@ -152,7 +154,7 @@ const Signup = ({ navigation, route }) => {
             didMountRef.current = true;
             }
         
-    }, [email, password, passwordConfirm, userId, emailConfirmPress,gender,age,isSameEmail]);
+    }, [email, password, passwordConfirm, userId, emailConfirmPress,gender,age,emailCodePress]);
 
     useEffect(() => {
         
@@ -169,7 +171,7 @@ const Signup = ({ navigation, route }) => {
             else if(isSameEmail){
                 _emailErrorMessage = "중복된 이메일입니다. ";
             }
-            else if(!isSameEmail ){
+            else if(!isSameEmail && !emailCodePress){
                 _emailErrorMessage="사용 가능한 이메일입니다. ";
             }
             else if(!emailConfirmCode){
@@ -177,7 +179,7 @@ const Signup = ({ navigation, route }) => {
             }else if(!emailCodePress){
                 _emailErrorMessage="이메일 인증번호를 확인하세요. ";
             }
-            else if(!isConfirmedEmail && emailCodePress) {
+            else if(!isConfirmedEmail && emailCodePress && isCorrect) {
                 _emailErrorMessage="인증번호가 틀렸습니다. ";
             }
             else {
@@ -187,7 +189,7 @@ const Signup = ({ navigation, route }) => {
         }else {
             emailMountRef.current = true;
         }
-    },[pressBeforeEmail,email,isSameEmail, isConfirmedEmail, emailConfirmCode, emailCodePress, isEmailValidated]);
+    },[pressBeforeEmail,email,isSameEmail, isConfirmedEmail, emailConfirmPress, emailConfirmCode, emailCodePress, isEmailValidated]);
 
         useEffect(() => {
             setDisabled(            
@@ -202,11 +204,11 @@ const Signup = ({ navigation, route }) => {
         
         // 이메일 중복확인 
         const _handleEmailButtonPress = async() => {
-            let url = 'http://192.168.113.1:8000/member/auth/signup?email='+`${email}`;
+            let fixedUrl = url+'/member/auth/signup?email='+`${email}`;
             try{
                 spinner.start();
 
-                const result =  await getApi(url);
+                const result =  await getApi(fixedUrl);
                 if(!isSameEmail){ 
                     setEmailConfirmPress(true);
                 }else{
@@ -214,14 +216,16 @@ const Signup = ({ navigation, route }) => {
                     if(email){
                         setIsEmailValidated(true);
                         //중복 확인 코드 
-                        if (result){
+                        if (result===true){
                             setIsSameEmail(false);
                             setEmailConfirmPress(true);
                             setEmailErrorMessage("");
                             
-                        }else{
+                        }else if (result === "overlap"){
                             setIsSameEmail(true);
                             setEmailErrorMessage("중복된 이메일입니다.");
+                        }else{
+                            setEmailErrorMessage("오류가 발생하였습니다.");
                         }
                     }
                 }
@@ -242,7 +246,7 @@ const Signup = ({ navigation, route }) => {
                     alert("이메일을 다시 확인하세요.");
                 }else{
                     alert("인증번호가 전송되었습니다.");
-                    setIsConfirmSend();
+                    setIsConfirmSend(true);
                 }
         
             }catch(e){
@@ -255,22 +259,22 @@ const Signup = ({ navigation, route }) => {
 
         // 이메일 인증 키값 확인
         const _handleEmailVaildatePress = async() => {
-            let url = 'http://192.168.113.1:8000/member/auth/signup?email='+`${email}&key=${emailConfirmCode}`;
+            let fixedUrl = url+'/member/auth/verify?email='+`${email}&key=${emailConfirmCode}`;
             try{
                 spinner.start();
             
-                setPressBeforeCode(true);
-                    const result = await getApi(url);
+                setEmailCodePress(true);
+                    const result = await getApi(fixedUrl);
                     if(emailConfirmCode)
                     {    
                         if(result){
-                            setEmailCodePress(true);
                             setIsConfirmedEmail(true)
                         }
                         else{
                             setIsConfirmedEmail(false)
-                            alert("이메일을 다시 확인하세요.");
+                            alert("인증키를 다시 확인하세요.");
                         }
+                        isCorrect = true;
                     }
             
             }catch(e){
@@ -306,8 +310,8 @@ const Signup = ({ navigation, route }) => {
 
         // 이메일 키값 전송 api
         const postemailApi = async () => {
-            let url = 'http://192.168.113.1:8000/member/auth/signup/verification?email='+`${email}`;
-            console.log(url);
+            let fixedUrl = url+'/member/auth/verify?email='+`${email}`;
+            console.log(fixedUrl);
             
             let options = {
                 method: 'POST',
@@ -317,7 +321,7 @@ const Signup = ({ navigation, route }) => {
                 },
             };
             try {
-                let response = await fetch(url, options);
+                let response = await fetch(fixedUrl, options);
                 let res = await response.json();
 
                 console.log(res);
@@ -331,29 +335,24 @@ const Signup = ({ navigation, route }) => {
 
         // 회원가입 api
         const postApi = async () => {
-            let url = 'http://192.168.113.1:8000/member/auth/signup'; 
+            let fixedUrl = url+'/member/auth/signup'; 
             let Info;
 
             if(route.params.mode === 'User'){
                 Info = {
                     age: parseInt(age),
                     gender: gender,
-                    signUserDto: {
-                        email : email,
-                        name : userId,
-                        password : password,
-                      },
+                    email : email,
+                    name : userId,
+                    password : password,
                     userType: "CUSTOMER",
                 }
-
             }
             else if(route.params.mode === 'Store'){
                 Info = {
-                    signUserDto: {
-                        email : email,
-                        name : userId,
-                        password : password,
-                      },
+                    email : email,
+                    name : userId,
+                    password : password,
                     userType: "STORE",
                 }
             }
@@ -369,7 +368,7 @@ const Signup = ({ navigation, route }) => {
             };
             console.log(JSON.stringify( Info ));
             try {
-                let response = await fetch(url, options);
+                let response = await fetch(fixedUrl, options);
                 let res = await response.json();
 
                 console.log(res);
@@ -390,6 +389,10 @@ const Signup = ({ navigation, route }) => {
                 let response = await fetch(url);
                 let res = await response.json();
                 console.log(res);
+                let msg = res["msg"];
+                if (msg === "이미 등록된 회원 이메일입니다."){
+                    return "overlap"
+                }
                 return res["success"];
 
               } catch (error) {
@@ -457,7 +460,7 @@ const Signup = ({ navigation, route }) => {
                 ref={userIdRef}
                 label={route.params.mode === "User"? "닉네임" : "업체명"}
                 value={userId}
-                onChangeText={ text => setuserId(removeWhitespace(text))}
+                onChangeText={ text => setuserId(text)}
                 onSubmitEditing= { route.params.mode === 'User' ? 
                 () => ageRef.current.focus() : null }
                 placeholder={route.params.mode === "User"? "닉네임을 입력하세요" : "업체명을 입력하세요"}

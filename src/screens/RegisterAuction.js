@@ -1,4 +1,4 @@
-import React, {useLayoutEffect, useState, useEffect, useRef} from 'react';
+import React, {useLayoutEffect, useState, useEffect, useRef, useContext} from 'react';
 import styled from "styled-components/native";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
 import {DateTimePicker,  RadioButton} from "../components";
@@ -7,8 +7,13 @@ import {removeWhitespace} from "../utils/common";
 import DropDownPicker from "react-native-dropdown-picker";
 import {Dimensions, Alert} from "react-native";
 import { theme } from '../theme';
+import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
+import * as Location from "expo-location";
+import {LoginContext, UrlContext, ProgressContext} from "../contexts";
+
 
 const WIDTH = Dimensions.get("screen").width;
+const HEIGHT = Dimensions.get("screen").height;
 
 const Container = styled.View`
     flex: 1;
@@ -46,6 +51,11 @@ const Container = styled.View`
     font-size: 16px;
     color: ${({theme})=> theme.inputPlaceholder}
   `;
+
+  const CheckedText = styled.Text`
+  font-size: 20px;
+  color: ${({theme})=> theme.inputPlaceholder}
+`;
 
   const Label = styled.Text`
       font-size: 16px;
@@ -119,9 +129,8 @@ const StyledTextInputs  = styled.TextInput.attrs(({ theme }) => ({
   const ErrorText = styled.Text`
     align-items: flex-start;
     width: 100%;
-    height: 20px;
+    font-size: 13px;
     margin-bottom: 10px;
-    line-height: 20px;
     color: ${({ theme }) => theme.errorText};
 `;
 
@@ -136,9 +145,29 @@ const AdditionContainer = styled.View`
   height: 1px;
 `;
 
+const MapContainer = styled.View`
+  justify-content: center;
+  align-items: center;
+`;
+
+const CurrentButton = styled.TouchableOpacity`
+width: 40px;
+height: 40px;
+position: absolute;
+top: 10px;
+right: 10px;
+justify-content: center;
+align-items: center;
+border-radius: 50px;
+border-width: 1px;
+`;
 
 
 const RegisterAuction = ({navigation}) => {
+  const {allow, token} = useContext(LoginContext);
+  const {aurl} = useContext(UrlContext);
+  const {spinner} = useContext(ProgressContext);
+
   //각 변수들에 대한 state 
     const [title, setTitle] = useState("");
     const [book, setBook] = useState(''); //String ver.
@@ -151,41 +180,26 @@ const RegisterAuction = ({navigation}) => {
     const [endDate, setEndDate] = useState("");
     const [endTime, setEndTime] = useState("");
     const [endTimeVisible, setEndTimeVisible] = useState(false);
-    const [meetingType, setMeetingType] = useState("");
-    const [foodType, setFoodType] = useState("");
-    const [numOfPeople, setNumOfPeople] = useState("");
-    const [maxPrice, setMaxPrice] = useState("");
-    const [minPrice, setMinPrice] = useState("");
+    const [meetingType, setMeetingType] = useState(null);
+    const [numOfPeople, setNumOfPeople] = useState(0);
+    const [maxPrice, setMaxPrice] = useState(0);
+    const [minPrice, setMinPrice] = useState(0);
     const [errorMessage, setErrorMessage] = useState("아래 정보를 입력해주세요.");
     const [disabled, setDisabled] = useState(true);
     const [uploaded, setUploaded] = useState(false);
-    const [content, setContent] = useState('');
-    const [nowTime, setNowTime] = useState("");
+    const [additionalContent, setAdditionalContent] = useState("");
     const didMountRef = useRef();
-
-    // 지역 드롭다운  
-    const [open, setOpen] = useState(false);
-    const [selected, setSelected] = useState(""); // 선택된 지역(시,도)
-    const [city, setCity] = useState(""); // 상세 지역
-    const [cities, setCities] = useState([
-      {label: "서울특별시", value: "서울특별시"},
-      {label: "부산광역시", value: "부산광역시"},
-      {label: "대구광역시", value: "대구광역시"},
-      {label: "인천광역시", value: "인천광역시"},
-      {label: "광주광역시", value: "광주광역시"},
-      {label: "대전광역시", value: "대전광역시"},
-      {label: "울산광역시", value: "울산광역시"},
-      {label: "세종특별자치시", value: "세종특별자치시"},
-      {label: "강원도", value: "강원도"},
-      {label: "경기도", value: "경기도"},
-      {label: "충청북도", value: "충청북도"},
-      {label: "충청남도", value: "충청남도"},
-      {label: "전라북도", value: "전라북도"},
-      {label: "전라남도", value: "전라남도"},
-      {label: "경상북도", value: "경상북도"},
-      {label: "경상남도", value: "경상남도"},
-      {label: "제주특별자치도", value: "제주특별자치도"},
-    ]);
+    const [foodType, setFoodType] = useState([]);
+    let bookFullData = "";
+    let endFullData = "";
+    let auctionId = "";
+    const [buttonPress, setButtonPress] = useState(false);
+  
+    //날짜 데이터
+    const [BD, setBD] = useState("");
+    const [BT, setBT] = useState("");
+    const [ED, setED] = useState("");
+    const [ET, setET] = useState("");
 
     // 나이 드롭다운  
     const [open1, setOpen1] = useState(false);
@@ -210,6 +224,112 @@ const RegisterAuction = ({navigation}) => {
       {label: "반반", value: "반반"},
     ]); 
 
+  //현재 위치
+  const [loc, setLoc] = useState(null); //선택 지역 
+  const initialLati = 37.535887;
+  const initialLongi = 126.984063;
+  const [lati, setLati] = useState(37.535887);
+  const [longi, setLongi] = useState(126.984063);
+  const [region, setRegion] = useState({
+    longitude: longi,
+    latitude: lati,
+    latitudeDelta: 0.3,
+    longitudeDelta: 0.3,
+});
+const [selectedLocation, setSelectedLocation] = useState(null);
+
+    //현재 위치 
+    const getLocation = async () => {
+        if(allow){
+          let location = await Location.getCurrentPositionAsync({}); 
+          setLati(location.coords.latitude);
+          setLongi(location.coords.longitude);
+        }
+      return loc;
+  };
+
+  const convertKoreanLocation = async(res) => {
+    let result = "";
+    if (res.localityInfo.administrative.length >= 4){
+      let gu = res.localityInfo.administrative[3].name;
+      if (gu[gu.length-1]==="구"){
+        result = `${res.principalSubdivision} ${res.localityInfo.administrative[2].name} ${res.localityInfo.administrative[3].name}`;
+      }else {
+        result = `${res.principalSubdivision} ${res.localityInfo.administrative[2].name}`;
+      }
+    }else{
+      result = `${res.principalSubdivision} ${res.localityInfo.administrative[2].name}`;
+    }
+
+    return result;
+  };
+
+  const getKoreanLocation = async (lat, lng, api) => {
+    let response = await fetch(api);
+    let res = await response.json();
+    let result = convertKoreanLocation(res);
+    return result;
+  };
+
+  const getGeocodeAsync = async (location) => {
+    let geocode = await Location.reverseGeocodeAsync(location);
+    let region = geocode[0]["region"]
+    let city = geocode[0]["city"]
+    let street = geocode[0]["street"];
+
+    let selectedLatitude = location["latitude"];
+    let selectedLongitude = location["longitude"];
+    let aapi = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${selectedLatitude}&longitude=${selectedLongitude}&localityLanguage=ko`;
+    
+    let res = await getKoreanLocation(selectedLatitude, selectedLongitude, aapi);
+    setLoc(res);
+
+
+  };
+
+  useEffect(() => {
+    const result = getLocation();
+  }, []);
+
+  const handleApi = async () => {
+    let fixedUrl = aurl+"/auction";
+
+    let Info = {
+      content: additionalContent,
+      deadline: endFullData,
+      maxPrice: maxPrice,
+      minPrice: minPrice,
+      reservation: bookFullData,
+      storeType: JSON.stringify(foodType),
+      title: title,
+      groupType: meetingType,
+      groupCnt: numOfPeople,
+      gender: selectedSex,
+      age: selectedAge,
+      addr: String(loc),
+    };
+
+    let options = {
+      method: 'POST',
+      headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'X-AUTH-TOKEN' : token,
+      },
+      body: JSON.stringify( Info ),
+  };
+
+  try{
+      let response = await fetch(fixedUrl, options);
+      let res = await response.json();
+      auctionId = res["data"]["auctionId"];
+      return res["success"];
+   
+  }catch (error) {
+    console.error(error);
+  }
+  };
+
     //에러 메세지 설정 
     useEffect(() => {
       if(didMountRef.current) {
@@ -222,10 +342,10 @@ const RegisterAuction = ({navigation}) => {
           _errorMessage = "예약 시각을 입력하세요";
         }else if(parseInt(book)<parseInt(getNowString())) {
           _errorMessage = "예약 시간을 잘못 입력하였습니다";
-        }
-        else if(!meetingType){
+        }else if(!meetingType){
           _errorMessage = "단체 유형을 입력하세요";
-        }else if(!foodType){
+        }
+        else if(foodType.length == 0){
           _errorMessage = "선호 메뉴을 입력하세요";
         }else if(!numOfPeople){
           _errorMessage = "인원 수를 입력하세요";
@@ -260,7 +380,7 @@ const RegisterAuction = ({navigation}) => {
         }else if(parseInt(minPrice) > parseInt(maxPrice)) {
           _errorMessage = "최소 가격과 최대 가격을 제대로 입력하세요";
         }
-        else if(!selected){
+        else if(!selectedLocation){
           _errorMessage = "선호지역을 입력하세요";
         }
         else if(!endDate){
@@ -272,6 +392,8 @@ const RegisterAuction = ({navigation}) => {
           _errorMessage = "공고 마감 시간을 잘못 입력하였습니다";
         }else if(parseInt(end)>parseInt(book)){
           _errorMessage = "공고 마감 시간을 예약 시간 이전으로 설정해주세요."
+        }else if(!additionalContent) {
+          _errorMessage = "추가 사항을 입력하세요.";
         }
         else {
           _errorMessage = "";
@@ -281,11 +403,11 @@ const RegisterAuction = ({navigation}) => {
       }else {
         didMountRef.current = true;
       }
-    },[title, bookDate,bookTime,endDate,endTime,meetingType,foodType,numOfPeople,minPrice, maxPrice,selected,book,end]);
+    },[title, bookDate,bookTime,endDate,endTime,foodType,numOfPeople,minPrice, maxPrice,selectedLocation,book,end, additionalContent, meetingType, selectedAge, selectedSex,loc]);
 
     useEffect(()=> {
-      setDisabled(!(title && bookDate && bookTime && endDate && endTime && meetingType && foodType && numOfPeople && selected  && maxPrice && minPrice && !errorMessage));
-    },[title, bookDate,bookTime,endDate,endTime,meetingType,foodType,numOfPeople,minPrice,maxPrice,errorMessage,selected]);
+      setDisabled(errorMessage!=="");
+    },[errorMessage]);
 
 
     useEffect(()=> {
@@ -295,41 +417,87 @@ const RegisterAuction = ({navigation}) => {
       setEnd(_end);
     },[bookTime,bookDate,endDate,endTime]);
 
-    //공고 등록 버튼 액션: 공고 등록 후 공고 상세 보여주기 함수 연동 후 스피너 추가
-    const _onPress = () => {
-      setUploaded(true);
-
-      if(!disabled){
-        // 서버에 post후
-        setTitle('');
-        setBookDate("");
-        setBookTime("");
-        setEndDate("");
-        setEndTime("");
-        setMeetingType("");
-        setFoodType("");
-        setNumOfPeople("");
-        setSelected("");
-        setSelectedAge("");
-        setSelectedSex("");
-        setContent("");
-        setCity("");
-        setMinPrice("");
-        setMaxPrice("");
-        setErrorMessage("아래 정보를 입력해주세요");
-        setDisabled(true);
-        setUploaded(false);
-        //임의로 메인보내기 원래는 공고 상세로 이동. 
-        navigation.navigate("Main");
+    useEffect(() => {
+      if (buttonPress) {
+        var r = _onPress();
       }
+    },[buttonPress]);
+
+    const _setData = async () => {
+      bookFullData = BD+BT;
+      endFullData = ED+ET;
+      return true;
+    };
+
+    const f = async (callback1, callback2) => {
+      var d = await callback1();
+      var res = await callback2();
+      return res;
+    };
+
+    //공고 등록 버튼 액션: 공고 등록 후 공고 상세 보여주기 함수 연동 후 스피너 추가
+    const _onPress = async () => {
+      try{
+        spinner.start();
+        const result = await f(_setData, handleApi);
+        if (!result) {
+          alert("오류가 발생하였습니다. 잠시후 다시 시도해주세요.");
+        }else {
+          setUploaded(true);
+          if(!disabled){
+            setTitle('');
+            setBookDate("");
+            setBookTime("");
+            setEndDate("");
+            setEndTime("");
+            setMeetingType("");
+            setFoodType([]);
+            setNumOfPeople(0);
+            setSelectedAge("");
+            setSelectedSex("");
+            setSelectedLocation("");
+            setAdditionalContent("");
+            setButtonPress(false);
+            setLoc("");
+            setMinPrice("");
+            setMaxPrice("");
+            setRegion({
+              longitude: initialLongi,
+              latitude: initialLati,
+              latitudeDelta: 0.3,
+              longitudeDelta: 0.3,
+          });
+            setErrorMessage("아래 정보를 입력해주세요");
+            setDisabled(true);
+            setUploaded(false);
+            
+            navigation.navigate("AuctionDetailStack", {isUser: true, id: auctionId });
+          }else {
+            alert("오류가 발생하였습니다. 잠시후 다시 시도해주세요.");
+          };
+        }
+      }catch(e){
+        Alert.alert("Register Error", e.message);
+      }finally{
+        spinner.stop();
+      }
+      };
+
+      const _onButtonPress = () => {
+        foodType.sort(function(a, b) {
+          if(a < b) return 1;
+          if(a > b) return -1;
+          if(a === b) return 0;
+        });
+        setButtonPress(true);
       };
 
       useLayoutEffect(()=> {
         navigation.setOptions({
             headerRight: () => (
-              disabled? (<MaterialCommunityIcons name="check" size={35} onPress={_onPress} 
+              disabled? (<MaterialCommunityIcons name="check" size={35} onPress={() => {setUploaded(true);}} 
               style={{marginRight: 10, marginBottom:3, opacity: 0.3}}/>)
-              : (<MaterialCommunityIcons name="check" size={35} onPress={_onPress} 
+              : (<MaterialCommunityIcons name="check" size={35} onPress={_onButtonPress} 
               style={{marginRight: 10, marginBottom:3, opacity: 1}}/>)
             )});
         },[disabled]);
@@ -377,16 +545,19 @@ const RegisterAuction = ({navigation}) => {
         const days=["일요일","월요일","화요일","수요일","목요일","금요일","토요일"];
 
         const _setBookDate = date => {
-          y = date.getFullYear();
-          m = date.getMonth()+1;
+          var strD = date.toJSON();
+          var sliced = strD.slice(0,11);
+          setBD(sliced);
+          var y = date.getFullYear();
+          var m = date.getMonth()+1;
           if(m < 10){
             m = "0"+m;
           }
-          d = date.getDate();
+          var d = date.getDate();
           if(d< 10){
             d = "0"+d;
           }
-          w = days[date.getDay()];
+          var w = days[date.getDay()];
           setBookDate(y+"년 "+m+"월 "+d+"일 "+w);
           setBookDateVisible(false);
         };
@@ -400,8 +571,11 @@ const RegisterAuction = ({navigation}) => {
       };
 
       const _setBookTime = time => {
-        h = time.getHours();
-        m = time.getMinutes();
+        var strT = time.toJSON();
+        var sliced = strT.slice(11,time.length);
+        setBT(sliced)
+        var h = time.getHours();
+        var m = time.getMinutes();
         if(h < 10){
           h = "0"+h;
         }
@@ -422,16 +596,19 @@ const RegisterAuction = ({navigation}) => {
     };
 
     const _setEndDate = date => {
-      y = date.getFullYear();
-      m = date.getMonth()+1;
+      var strD = date.toJSON();
+      var sliced = strD.slice(0,11);
+      setED(sliced);
+      var y = date.getFullYear();
+      var m = date.getMonth()+1;
       if(m < 10){
         m = "0"+m;
       }
-      d = date.getDate();
+      var d = date.getDate();
       if(d< 10){
         d = "0"+d;
       }
-      w = days[date.getDay()];
+      var w = days[date.getDay()];
       setEndDate(y+"년 "+m+"월 "+d+"일 "+w);
       setEndDateVisible(false);
     };
@@ -445,8 +622,11 @@ const RegisterAuction = ({navigation}) => {
   };
 
   const _setEndTime = time => {
-    h = time.getHours();
-    m = time.getMinutes();
+    var strT = time.toJSON();
+    var sliced = strT.slice(11,time.length);
+    setET(sliced);
+    var h = time.getHours();
+    var m = time.getMinutes();
     if(h < 10){
       h = "0"+h;
     }
@@ -463,13 +643,12 @@ const RegisterAuction = ({navigation}) => {
   };
 
 
-
     return (
       <KeyboardAwareScrollView
         extraScrollHeight={20}
         >
         <Container>
-          {uploaded && disabled && <ErrorText>{errorMessage}</ErrorText>}
+          {errorMessage!=="" && uploaded && disabled && <ErrorText>{errorMessage}</ErrorText>}
           <Label>공고 제목</Label>
            <StyledTextInput 
            value={title}
@@ -554,67 +733,82 @@ const RegisterAuction = ({navigation}) => {
             <RadioContiner>
             <RadioButton 
             label="한식"
-            value={(foodType==="한식")}
-            status={(foodType==="한식"? "checked" : "unchecked")}
+            value={(foodType.includes("한식"))}
+            status={(foodType.includes("한식")? "checked" : "unchecked")}
             containerStyle={{ marginLeft: 0, marginRight: 0}}
             onPress={() => {
-                if(foodType==="한식"){
-                    setFoodType("");
+                if(foodType.includes("한식")){
+                  let array = foodType.filter((el) => el !=="한식");
+                  setFoodType(array);
                 }else {
-                    setFoodType("한식");
+                  let array = foodType.slice();
+                  array.push("한식");
+                  setFoodType(array)
                 }
             }}
             />
             <RadioButton 
             label="양식"
-            value={(foodType==="양식")}
-            status={(foodType==="양식"? "checked" : "unchecked")}
+            value={(foodType.includes("양식"))}
+            status={(foodType.includes("양식")? "checked" : "unchecked")}
             containerStyle={{ marginLeft: 0, marginRight: 0}}
             onPress={() => {
-                if(foodType==="양식"){
-                    setFoodType("");
-                }else {
-                    setFoodType("양식");
-                }
+              if(foodType.includes("양식")){
+                let array = foodType.filter((el) => el !=="양식");
+                setFoodType(array);
+              }else {
+                let array = foodType.slice();
+                array.push("양식");
+                setFoodType(array)
+              }
             }}
             />
            <RadioButton 
             label="중식"
-            value={(foodType==="중식")}
-            status={(foodType==="중식"? "checked" : "unchecked")}
+            value={(foodType.includes("중식"))}
+            status={(foodType.includes("중식")? "checked" : "unchecked")}
             containerStyle={{ marginLeft: 0, marginRight: 0}}
             onPress={() => {
-                if(foodType==="중식"){
-                    setFoodType("");
-                }else {
-                    setFoodType("중식");
-                }
+              if(foodType.includes("중식")){
+                let array = foodType.filter((el) => el !=="중식");
+                setFoodType(array);
+              }else {
+                let array = foodType.slice();
+                array.push("중식");
+                setFoodType(array)
+              }
             }}
             />
             <RadioButton 
             label="일식"
-            value={(foodType==="일식")}
-            status={(foodType==="일식"? "checked" : "unchecked")}
+            value={(foodType.includes("일식"))}
+            status={(foodType.includes("일식")? "checked" : "unchecked")}
             containerStyle={{ marginLeft: 0, marginRight: 0}}
             onPress={() => {
-                if(foodType==="일식"){
-                    setFoodType("");
-                }else {
-                    setFoodType("일식");
-                }
+              if(foodType.includes("일식")){
+                let array = foodType.filter((el) => el !=="일식");
+                setFoodType(array);
+              }else {
+                let array = foodType.slice();
+                array.push("일식");
+                setFoodType(array)
+              }
             }}
             />
             <RadioButton 
             label="기타"
-            value={(foodType==="기타")}
-            status={(foodType==="기타"? "checked" : "unchecked")}
+            value={(foodType.includes("기타"))}
+            status={(foodType.includes("기타")? "checked" : "unchecked")}
             containerStyle={{ marginLeft: 0, marginRight: 0}}
             onPress={() => {
-                if(foodType==="기타"){
-                    setFoodType("");
-                }else {
-                    setFoodType("기타");
-                }
+              if(foodType.includes("기타")){
+                let array = foodType.filter((el) => el !=="기타");
+                setFoodType(array);
+              }else {
+                let array = foodType.slice();
+                array.push("기타");
+                setFoodType(array)
+              }
             }}
             />
             </RadioContiner>
@@ -665,32 +859,49 @@ const RegisterAuction = ({navigation}) => {
             <TripleLabel>선호 지역</TripleLabel>
         </RadioContiner>
 
- <RegionContiner>
-        <DropDownPicker 
-        open={open}
-        value={selected}
-        items={cities}
-        setOpen={setOpen}
-        setValue={setSelected}
-        setItems={setCities}
-        containerStyle={{width: WIDTH*0.43, alignSelf: 'center'}}
-        placeholder="시/도"
-        placeholderStyle={{color: theme.label, fontSize: 16}}
-        listMode="SCROLLVIEW"
-        />   
+<MapContainer>
+<MapView 
+  style={{
+    width: WIDTH*0.9,
+    height: HEIGHT*0.2,
+  }}
+  initialRegion={{
+    longitude: longi,
+    latitude: lati,
+    latitudeDelta: 0.5,
+    longitudeDelta: 0.5,
+  }}
+  region={region}
+  onRegionChangeComplete={(r) => setRegion(r)}
+  provider={PROVIDER_GOOGLE}
+  showsUserLocation={true}
+  loadingEnabled={true}
+  showsMyLocationButton={false}
+  >
+    <Marker
+      coordinate={region}
+      pinColor="blue"
+      onPress={() => {setSelectedLocation(region); getGeocodeAsync(region);}}
+    />
+</MapView>
+<CurrentButton onPress= {()=> {
+  if(allow) {
+    setRegion({
+      longitude: longi,
+      latitude: lati,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01, })
+  }else {
+    Alert.alert("Location Permission Error","위치 정보를 허용해주세요.");
+  }
+}}>
+<MaterialCommunityIcons name="map-marker" size={30} color="black"/>
+</CurrentButton>
+</MapContainer>
+<Label style={{width: WIDTH*0.9, borderRadius: 5, borderWidth: 1, paddingLeft: 5, marginTop: 5, paddingTop: 10, paddingBottom: 10}}>
+  {(selectedLocation && loc !== null)? String(loc) : "지역이 선택되지 않았습니다."}</Label>
 
-        <StyledTextInputs 
-           value={city}
-           onChangeText={text => setCity(removeWhitespace(text))}
-           autoCapitalize="none"
-           placeholder="시/군/구/읍/면/동"
-           autoCorrect={false}
-           textContentType="none" // iOS only
-           underlineColorAndroid="transparent" // Android only
-           style={{width: WIDTH * 0.43, marginBottom: 0, marginTop: 0, marginLeft: 10}}
-           />
 
-</RegionContiner>
 
             <Label>공고 마감 날짜 및 시각</Label>
             <DateContainer onPress={_handleEndDatePress} >
@@ -707,10 +918,9 @@ const RegisterAuction = ({navigation}) => {
             <TripleLabel>내용</TripleLabel>
            </RadioContiner>
 
-           
-          <StyledTextInputs 
-           value={content}
-           onChangeText={text => setContent(text)}
+           <StyledTextInputs 
+           value={additionalContent}
+           onChangeText={text => setAdditionalContent(text)}
            autoCapitalize="none"
            placeholder="추가 사항"
            autoCorrect={false}
@@ -742,6 +952,7 @@ const RegisterAuction = ({navigation}) => {
               placeholder="평균연령대"
               placeholderStyle={{color: theme.label, fontSize: 16}}
               listMode="SCROLLVIEW"
+              maxHeight={130}
               /> 
             
           <DropDownPicker 
@@ -755,7 +966,9 @@ const RegisterAuction = ({navigation}) => {
               placeholder="평균성별"
               placeholderStyle={{color: theme.label, fontSize: 16}}
               listMode="SCROLLVIEW"
+              maxHeight={130}
               />  
+              <Container style={{height: 200}}></Container>
               </AddContainer>
 
             

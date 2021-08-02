@@ -50,13 +50,6 @@ const RadioTitle = styled.Text`
     align-self: center;
 `;
 
-const CenterContainer = styled.View`
-    justify-content: center;
-    align-items: center;
-    margin-right: 15px;
-    margin-bottom: 5%;
-`;
-
 const AdditionalContainer = styled.View`
     flex: 1;
     flex-direction: row;
@@ -67,13 +60,12 @@ const AdditionalContainer = styled.View`
 const  UesrInfo = ({navigation}) => {
 
     // 임의로 설정
-    const address = "장소 위치";
-    const phoneNumber = "전화번호";
     const userName = "닉네임이름";
     const email = "이메일주소";
     const password = "비밀번호 비공개";
     const age = "나이";
     const gender = "female";
+    const address = "땡땡구 행복시 사랑동"
     const [isNoticed, setIsNoticed] = useState(false);
 
     return (
@@ -87,17 +79,6 @@ const  UesrInfo = ({navigation}) => {
                 </InfoChangeButton>
 
                 <ProfileImage />
-
-                <CenterContainer>
-                <RowContainer>
-                        <MaterialIcons name="location-on" size={23}/>
-                        <Text style={styles.info}>{address}</Text>
-                    </RowContainer>
-                    <RowContainer>
-                        <MaterialIcons name="call" size={23}/>
-                        <Text style={styles.info}>{phoneNumber}</Text>
-                    </RowContainer>
-                </CenterContainer>
 
                 <InfoContainer>
                     <InfoText label="닉네임" content={userName}/>
@@ -120,6 +101,7 @@ const  UesrInfo = ({navigation}) => {
                             onPress={()=>{}}
                         /></AdditionalContainer>
                     </RowContainer>
+                    <InfoText label="지역" content={address}/>
                 </InfoContainer>
                 
                 <View style={styles.hr}/>

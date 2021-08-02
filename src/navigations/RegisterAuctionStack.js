@@ -3,6 +3,7 @@ import {ThemeContext} from "styled-components/native";
 import { createStackNavigator } from '@react-navigation/stack';
 import RegisterAuction from "../screens/RegisterAuction";
 import Main from "../screens/Main";
+import AuctionDetailStack from "./AuctionDetailStack";
 
 const Stack = createStackNavigator();
 
@@ -25,7 +26,8 @@ const RegisterAuctionStack = () => {
             />
 
             <Stack.Screen name="Main" component={Main} />
-           
+            <Stack.Screen name="AuctionDetailStack" component={AuctionDetailStack}
+                options={{headerShown: false}} />
         </Stack.Navigator>
     );
 }

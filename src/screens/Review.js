@@ -1,5 +1,4 @@
 import React, {useState} from 'react';
-import {notices} from "../utils/data";
 import styled from "styled-components/native";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import {MaterialCommunityIcons} from "@expo/vector-icons";

@@ -7,7 +7,7 @@ const Container = styled.View`
   flex-direction: row;
   margin-left: 5px;
   margin-right: 5px;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   align-items: center;
   justify-content: center;
   `;
@@ -31,6 +31,7 @@ const Button = ({ label, value, status, onPress, containerStyle }) => {
         onPress={onPress}
         color={theme.titleColor}
      />
+      
     </Container>
   );
 };

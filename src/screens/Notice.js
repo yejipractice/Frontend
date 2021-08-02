@@ -67,11 +67,11 @@ const CloseButton = styled.TouchableOpacity`
     right: 0;
 `;
 
-const Alert = ({item: {id, scr, name, desc, time}, onPress}) => {
+const Alert = ({item: {id, src, name, desc, time}, onPress}) => {
     return (
         <AlertContainer>
             <ImageContainer>
-                <StyledImage source={{uri: scr}} />
+                <StyledImage source={{uri: src}} />
             </ImageContainer>
             <TextContainer>
                 <TitleContainer>

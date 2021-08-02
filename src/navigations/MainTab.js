@@ -1,6 +1,6 @@
-import React,{useState} from 'react';
+import React,{useState, useEffect, useContext} from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Main, Auction, Store, Mypage} from '../screens';
+import { Main, Auction, Store, Mypage, OnlyCustomer} from '../screens';
 import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../theme';
 import MypageStack from './MypageStack';
@@ -8,7 +8,8 @@ import RegisterAuctionStack from "./RegisterAuctionStack";
 import MainStack from './MainStack';
 import AuctionListTab from './AuctionListTab';
 import AuctionListStack from './AuctionListStack';
-
+import StoreListStack from './StoreListStack';
+import {LoginContext} from "../contexts";
 const Tab = createBottomTabNavigator();
 
 const TabBarIcon = ({ focused, name }) => {
@@ -22,7 +23,7 @@ const TabBarIcon = ({ focused, name }) => {
 };
 
 const MainTab = ({navigation}) => {
-    
+    const {mode} = useContext(LoginContext);
 
     return(
         <Tab.Navigator
@@ -59,7 +60,7 @@ const MainTab = ({navigation}) => {
             />
             <Tab.Screen 
                 name = "경매등록" 
-                component={RegisterAuctionStack} 
+                component={(mode==="CUSTOMER")? RegisterAuctionStack : OnlyCustomer} 
                 options={{
                     tabBarIcon: ({ focused }) =>
                         TabBarIcon({
@@ -89,7 +90,7 @@ const MainTab = ({navigation}) => {
             />
             <Tab.Screen 
                 name = "업체" 
-                component={Store} 
+                component={StoreListStack} 
                 options={{
                     tabBarIcon: ({ focused }) =>
                         TabBarIcon({

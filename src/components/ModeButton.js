@@ -17,8 +17,6 @@ const Container = styled.TouchableOpacity`
 const Title = styled.Text`
     color: ${({theme})=> theme.buttonTextColor};
     font-size: 28px;
-    line-height: 60px;
-    height: 60px;
     font-weight: bold;
     align-self: center;
 `;

@@ -2,10 +2,14 @@ import React, { useState, useEffect, useContext } from 'react';
 import styled from "styled-components/native";
 import { IconButton } from "../components";
 import { images } from '../images';
-import { FlatList, ScrollView } from "react-native";
+import { FlatList, ScrollView, Dimensions } from "react-native";
 import { popular, recomendedStore } from "../utils/data";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { ThemeContext } from "styled-components";
+import {LoginContext, UrlContext, ProgressContext} from "../contexts";
+import {cutDateData, changeListData, createdDate, changeCreatedDateData} from "../utils/common";
+
+const WIDTH = Dimensions.get("screen").width;
 
 const Header = styled.View`
     height: 12%;
@@ -30,6 +34,7 @@ const InputContainer = styled.View`
 const Title = styled.Text`
     font-size: 25px;
     font-weight: bold;
+    padding-left: 3%;
     color: ${({ theme }) => theme.text};
 `;
 
@@ -49,17 +54,17 @@ const StyledTextInput = styled.TextInput.attrs(({ theme }) => ({
 
 const PopularView = styled.View`
   flex: 4;
-  margin: 10px 10px;
+  margin: 10px 0px;
 `;
 
 const RecommededView = styled.View`
   flex: 4;
-  margin: 10px 10px;
+  margin: 10px 0px;
 `;
 
 const LatestView = styled.View`
   flex: 3;
-  margin: 10px 10px;
+  margin-top: 10px;
 `;
 
 const Desc = styled.Text`
@@ -69,9 +74,18 @@ const Desc = styled.Text`
   margin-right:  ${({ marginRight }) => marginRight ? marginRight : 0}px;
 `;
 
-const StyledImage = styled.Image`
+// const StyledImage = styled.Image`
+//     margin-top: 3px;
+//     margin-bottom: 10px;
+//     background-color:${({ theme }) => theme.imageBackground};
+//     height: 80;
+//     width: 80;
+//     border-radius: ${({ rounded }) => (rounded ? 50 : 0)}px;
+// `;
+
+const StyledImage = styled.View`
     margin-top: 3px;
-    margin-bottom: 10px;
+    margin-bottom: 3px;
     background-color:${({ theme }) => theme.imageBackground};
     height: 80;
     width: 80;
@@ -79,7 +93,8 @@ const StyledImage = styled.Image`
 `;
 
 const ImageContainer = styled.View`
-    flex: 1.3;
+    align-items: center;
+    justify-content: center;
 `;
 
 const DescContainer = styled.View`
@@ -91,13 +106,16 @@ const RowDescContainer = styled.View`
     align-items: flex-start;
     margin-left: 20px;
     justify-content: center;
+    margin-top: 5px;
+    margin-bottom: 5px;
 `;
 
 const ItemContainer = styled.TouchableOpacity`
-    width: 120;
+    width: ${WIDTH*0.35};
     padding-top: 10;
     align-items: center;
 `;
+
 const ReviewContatiner = styled.View`
   flex-direction: row;
   align-items: center;
@@ -108,44 +126,56 @@ const RowItemContainer = styled.TouchableOpacity`
      flex-direction: row;
      border-bottom-width: 1px;
      border-color:  ${({ theme }) => theme.label}
+     margin-left: 3%;
+     align-items: center;
 `;
 
 const LatsetTimeContainer = styled.View`
     position: absolute;
-    right: 0;
-    top: 5px;
+    right: 5%;
+    top: 5%;
     `;
 
+const LatestTitle = styled.Text`
+    font-size: 20px;
+    font-weight: bold;
+    color: ${({ theme }) => theme.text};
+    margin-bottom: 3px;
+  `;
+    
 const LatestTime = styled.Text`
     font-size: 15px;
     font-weight: bold;
-    color: ${({ theme }) => theme.label}
+    color: ${({ theme, notTime }) => notTime? theme.text : theme.label}
 `;
 
-const Item = ({ item: { id, userType, count, foodType, price, src }, onPress, latest }) => {
+const Item = ({ item: {auctionId, auctioneers, content, createdDate, deadline, maxPrice, minPrice, reservation, status, storeType, title, updatedDate, userName, groupType, groupCnt, addr, age, gender}, onPress, latest }) => {
     return (
         latest ? (
             <RowItemContainer onPress={onPress}>
-                <StyledImage source={{ uri: src }} rounded={true} />
+                {/* <StyledImage source={{ uri: src }} rounded={true} /> */}
+                <StyledImage rounded={true} />
                 <RowDescContainer>
-                    <Desc>{userType} {count}명</Desc>
-                    <Desc>{foodType}</Desc>
-                    <Desc>{price}원</Desc>
+                    <LatestTitle>{title}</LatestTitle>
+                    <LatestTime notTime>{groupType} {groupCnt}명</LatestTime>
+                    <LatestTime notTime>{changeListData(storeType)}</LatestTime>
+                    <LatestTime notTime>{minPrice}원 ~ {maxPrice}원</LatestTime>
                 </RowDescContainer>
                 <LatsetTimeContainer>
-                    <LatestTime>{count}분전</LatestTime>
+                    <LatestTime>{changeCreatedDateData(createdDate)} 전</LatestTime>
                 </LatsetTimeContainer>
             </RowItemContainer>
         )
             : (
                 <ItemContainer onPress={onPress} >
                     <ImageContainer>
-                        <StyledImage source={{ uri: src }} rounded={true} />
+                        {/* <StyledImage source={{ uri: src }} rounded={true} /> */}
+                        <StyledImage rounded={true} />
                     </ImageContainer>
                     <DescContainer>
-                        <Desc>{userType} {count}명</Desc>
-                        <Desc>{foodType}</Desc>
-                        <Desc>{price}원</Desc>
+                        <Desc>{title}</Desc>
+                        <Desc size={14}>{groupType} {groupCnt}명</Desc>
+                        <Desc size={14}>{(changeListData(storeType).length < 12)? changeListData(storeType) : changeListData(storeType).slice(0,10)+"..."}</Desc>
                     </DescContainer>
                 </ItemContainer>
             )
@@ -156,7 +186,8 @@ const Store = ({ item: { id, storeName, score, reviews, foodType, src }, onPress
     return (
         <ItemContainer onPress={onPress} >
             <ImageContainer>
-                <StyledImage source={{ uri: src }} rounded={false} />
+                {/* <StyledImage source={{ uri: src }} rounded={false} /> */}
+                <StyledImage />
             </ImageContainer>
             <DescContainer>
                 <Desc>{storeName}</Desc>
@@ -174,24 +205,68 @@ const Store = ({ item: { id, storeName, score, reviews, foodType, src }, onPress
 
 const Main = ({ navigation }) => {
     const theme = useContext(ThemeContext);
+    const {aurl} = useContext(UrlContext);
+    const {allow, autoLogin, doc, mode, token} = useContext(LoginContext);
+    const {spinner} = useContext(ProgressContext);
 
     const [input, setInput] = useState("");
     const [isFocused, setIsFocused] = useState(false);
-    const [isUser, setIsUser] = useState(true);
+    const [auctionData, setAuctionData] = useState("");
+    const [latestAuctions, setLatestAuctions] = useState("");
 
     const _handleNoticePress = () => { navigation.navigate("Notice") };
 
-    //임시로 
-    const _handleSearchPress = () => { };
+    const _handleSearchPress = () => { navigation.navigate("SearchTab", {input: input}) };
 
     const _handleItemPress = item => {
-        navigation.navigate('AuctionDetail', { id: item.id })
+        navigation.navigate('AuctionDetail', { id: item.auctionId })
     };
 
     const _handleStorePress = item => {
         navigation.navigate('StoreDetail', { id: item.id, name: item.storeName })
     };
 
+    const handleAuctionApi = async () => {
+        let fixedUrl = aurl+"/auction/auctions";
+
+        let options = {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token,
+            },
+        };
+
+        try {
+            spinner.start();
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+            setAuctionData(res["list"]);
+        }catch(error) {
+            console.error(error);
+        }finally {
+            spinner.stop();
+        }
+    };
+
+    const _setLatestAuctionList = () => {
+        var res = auctionData.sort(function (a,b){
+            return Number(cutDateData(b.createdDate)) - Number(cutDateData(a.createdDate));
+        });
+        setLatestAuctions(res);
+    };
+   
+
+    useEffect(()=> {
+        handleAuctionApi();
+    },[]);
+
+    useEffect(() => {
+        if(auctionData !== ""){
+            _setLatestAuctionList();
+        }
+    },[auctionData]);
 
     return (
         <>
@@ -216,20 +291,25 @@ const Main = ({ navigation }) => {
                     <IconButton type={images.Notice} onPress={_handleNoticePress} />
                 </IconContainer>
             </Header>
-            <ScrollView>
+
+            <FlatList 
+                ListHeaderComponent={
+                <>
+                            
                 <PopularView>
                     <Title>실시간 인기 공고</Title>
                     <FlatList
                         horizontal={true}
                         showsHorizontalScrollIndicator={false}
-                        keyExtractor={item => item['id'].toString()}
-                        data={popular}
+                        keyExtractor={item => item['auctionId'].toString()}
+                        data={latestAuctions}
                         renderItem={({ item }) => (
                             <Item item={item} onPress={() => _handleItemPress(item)} />
                         )} />
                 </PopularView>
-                <RecommededView>
-                    {isUser
+
+            <RecommededView>
+                    {(mode==="CUSTOMER")
                         ? (<>
                             <Title>사용자 추천 가게</Title>
                             <FlatList
@@ -247,28 +327,30 @@ const Main = ({ navigation }) => {
                             <FlatList
                                 horizontal={true}
                                 showsHorizontalScrollIndicator={false}
-                                keyExtractor={item => item['id'].toString()}
-                                data={popular}
+                                keyExtractor={item => item['auctionId'].toString()}
+                                data={latestAuctions}
                                 renderItem={({ item }) => (
                                     <Item item={item} onPress={() => _handleItemPress(item)} />
                                 )} />
-                        </>
-                        )}
-                </RecommededView>
+                            </>
+                    )}
+            </RecommededView>
+
                 <LatestView>
                     <Title>실시간 최신 공고</Title>
-                    <FlatList
+                 </LatestView>
+                </> }
                         horizontal={false}
                         showsVerticalScrollIndicator={false}
-                        keyExtractor={item => item['id'].toString()}
-                        data={popular}
+                        keyExtractor={item => item['auctionId'].toString()}
+                        data={latestAuctions.slice(0,10)}
                         renderItem={({ item }) => (
                             <Item item={item} onPress={() => _handleItemPress(item)} latest={true} />
                         )} />
-                </LatestView>
+              
 
 
-            </ScrollView>
+            
         </>
     );
 };

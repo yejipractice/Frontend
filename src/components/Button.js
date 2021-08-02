@@ -5,16 +5,15 @@ import PropTypes from "prop-types";
 const Container = styled.TouchableOpacity`
     background-color: ${({theme,isFilled})=> isFilled? theme.buttonBackground : theme.buttonUnfilledBackground};
     align-items: center;
+    justify-content: center;
     border-radius: 12px;
     width: 100%;
-    padding: 10px;
+    padding: 15px;
     opacity: ${({disabled}) => (disabled? 0.5 : 1)};
     margin-top: 25px;
 `;
 
 const Title = styled.Text`
-    height: 30px;
-    line-height: 30px;
     font-size: 16px;
     font-weight: bold;
     color: ${({theme, isFilled}) => isFilled? theme.buttonTextColor : theme.buttonUnfilledTitle };
