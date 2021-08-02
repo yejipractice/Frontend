@@ -1,9 +1,10 @@
-import React, {useState, useContext} from 'react';
+import React, {useState, useContext, useEffect} from 'react';
 import styled, {ThemeContext} from "styled-components/native";
-import {Text, Dimensions, FlatList} from "react-native";
+import {Dimensions, FlatList} from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
-import {AuctionList} from "../utils/data";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
+import {LoginContext, UrlContext, ProgressContext} from "../contexts";
+import {changeDateData, changeEndDateData, changeListData, cutDateData} from "../utils/common";
 
 const WIDTH = Dimensions.get("screen").width; 
 
@@ -42,8 +43,10 @@ const ContentTitleText = styled.Text`
 
 const ContentText = styled.Text`
     font-size: 15px;
+    padding-left: 1%;
     color: ${({theme})=> theme.opacityTextColor};
 `;
+
 
 const ItemBox = styled.View`
     border-radius: 1px;
@@ -58,12 +61,20 @@ const StarBox = styled.View`
     top: 5px;
 `;
 
-const Item = ({item: {id, title, type, count, region, preMenu, prePrice, bookTime, registerTime}, onPress, onStarPress, isStar}) => {
+const ButtonContainer = styled.TouchableOpacity`
+    position: absolute;
+    bottom: 3%;
+    right: 5%;
+    justify-content: center;
+    align-items: center;
+    `;
+
+const Item = ({item: {auctionId, auctioneers, content, createdDate, deadline, maxPrice, minPrice, reservation, status, storeType, title, updatedDate, userName, groupType, groupCnt, addr, age, gender}, onPress, onStarPress, isStar}) => {
     return (
         <ItemContainer onPress={onPress} >
             <TimeTextContiner>
-                <ContentText>{bookTime}</ContentText>
-                <ContentText>마감 N분전</ContentText>
+                <ContentText>{changeDateData(reservation)} 예약</ContentText>
+                <ContentText>마감 {changeEndDateData(deadline)} 전</ContentText>
             </TimeTextContiner>
             <ItemBox>
                 <ContentTitleText>{title}</ContentTitleText>
@@ -78,52 +89,99 @@ const Item = ({item: {id, title, type, count, region, preMenu, prePrice, bookTim
                                     style={{ marginLeft: 15, marginBottom: 5, opacity: 0.7 }} />
                             )}
                 </StarBox>
-                <ContentText>단체 유형: {type}({count}명)</ContentText>
-                <ContentText>선호 지역: {region}</ContentText>
-                <ContentText>선호 메뉴: {preMenu}</ContentText>
-                <ContentText>선호 가격대: {prePrice}</ContentText>
-                <ContentText style={{position: "absolute", right: 5, bottom: 0}}>{registerTime}</ContentText>
+                <ContentText>단체 유형: {groupType} ({groupCnt}명)</ContentText>
+                <ContentText>선호 지역: {addr}</ContentText>
+                <ContentText>선호 메뉴: {changeListData(storeType)}</ContentText>
+                <ContentText style={{marginBottom: 10}}>선호 가격대: {minPrice}원 ~ {maxPrice}원</ContentText>
+                <ContentText style={{position: "absolute", right: 5, bottom: 0}}>{changeDateData(createdDate)} 등록</ContentText> 
             </ItemBox>
         </ItemContainer>
     );
 };
 
-const Auction = ({navigation}) => {
+
+const Auction = React.memo(({navigation}) => {
     const theme = useContext(ThemeContext);
+    const {token} = useContext(LoginContext);
+    const {aurl} = useContext(UrlContext);
+    const {spinner} = useContext(ProgressContext);
 
     const [isStar, setIsStar] = useState(false);
+    const [auctionListData, setAuctionListData] = useState([]);
 
     const [open1, setOpen1] = useState(false);
     const [selected1, setSelected1] = useState(null);
     const [list1, setList1] = useState([
-        {label: "정렬기준1", value: "정렬기준1"},
-        {label: "정렬기준2", value: "정렬기준2"},
-        {label: "정렬기준3", value: "정렬기준3"}
+        {label: "최신순", value: "최신순"},
+        {label: "마감순", value: "마감순"},
     ]);
 
     const [open2, setOpen2] = useState(false);
     const [selected2, setSelected2] = useState(null);
     const [list2, setList2] = useState([
-        {label: "정렬기준1", value: "정렬기준1"},
-        {label: "정렬기준2", value: "정렬기준2"},
-        {label: "정렬기준3", value: "정렬기준3"}
+        {label: "전체", value: "전체"},
+        {label: "한식", value: "한식"},
+        {label: "중식", value: "중식"},
+        {label: "양식", value: "양식"},
+        {label: "일식", value: "일식"},
+        {label: "기타", value: "기타"},
     ]);
 
+    // 시도로 범위를 크게 vs 시도별 시군구까지 => api ? 
     const [open3, setOpen3] = useState(false);
     const [selected3, setSelected3] = useState(null);
     const [list3, setList3] = useState([
-        {label: "정렬기준1", value: "정렬기준1"},
-        {label: "정렬기준2", value: "정렬기준2"},
-        {label: "정렬기준3", value: "정렬기준3"}
+        {label: "서울특별시", value: "정렬기준1"},
+        {label: "부산광역시", value: "정렬기준2"},
+        {label: "대구광역시", value: "정렬기준3"}
     ]);
 
-    const _onAuctionPress = item => {navigation.navigate("AuctionDetail",{id: item['id']})};
+    const handleApi = async () => {
+        let fixedUrl = aurl+"/auction/auctions";
+
+        let options = {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token,
+            },
+        };
+
+        try {
+            spinner.start();
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+            setAuctionListData(res["list"]);
+        }catch(error) {
+            console.error(error);
+        }finally {
+            spinner.stop();
+        }
+    };
+
+    const filterDataList = (data) => {
+        var now = new Date().toJSON();
+        var nowdata = cutDateData(changeDateData(now));
+        
+        let res = data.filter((item) => cutDateData(changeDateData(item.deadline)) > nowdata);
+        return res;
+    };
+
+    useEffect(()=> {
+        handleApi();
+    }, []);
+
+    useEffect(()=> {
+        //data 정렬
+    }, [selected1, selected2, selected3]);
+
+    const _onAuctionPress = item => {navigation.navigate("AuctionDetail",{id: item['auctionId']})};
 
     const _onStarPress = () => { setIsStar(!isStar) };
 
     return (
         <Container>
-            
                 <DropDownPicker
                 open={open1}
                 value={selected1}
@@ -133,7 +191,7 @@ const Auction = ({navigation}) => {
                 setItems={setList1}
                 containerStyle={{width: WIDTH*0.28, position: "absolute", left: 5, top: 10,}}
                 textStyle={{color: theme.text, fontSize: 14, fontWeight: "bold"}}
-                placeholder="정렬1"
+                placeholder="정렬"
                 placeholderStyle={{color: theme.text, fontSize: 14, fontWeight: "bold"}}
                 listMode="SCROLLVIEW" 
                 style={{height: WIDTH*0.1}}
@@ -148,7 +206,7 @@ const Auction = ({navigation}) => {
                 setItems={setList2}
                 textStyle={{color: theme.text, fontSize: 14, fontWeight: "bold"}}
                 containerStyle={{width: WIDTH*0.28, position: "absolute", marginLeft: WIDTH*0.36, top: 10}}
-                placeholder="정렬2"
+                placeholder="메뉴"
                 placeholderStyle={{color: theme.text, fontSize: 14, fontWeight: "bold"}}
                 listMode="SCROLLVIEW" 
                 style={{height: WIDTH*0.1}}/>
@@ -162,7 +220,7 @@ const Auction = ({navigation}) => {
                 setItems={setList3}
                 textStyle={{color: theme.text, fontSize: 14, fontWeight: "bold"}}
                 containerStyle={{width: WIDTH*0.28, position: "absolute", right: 5, top: 10}}
-                placeholder="정렬3"
+                placeholder="지역"
                 placeholderStyle={{color: theme.text, fontSize: 14, fontWeight: "bold"}}
                 listMode="SCROLLVIEW" 
                 style={{height: WIDTH*0.1}}/>
@@ -170,15 +228,17 @@ const Auction = ({navigation}) => {
         <AuctionsContainer>
             <FlatList
             horizontal={false}
-            keyExtractor={item => item['id'].toString()}
-            data={AuctionList} 
+            keyExtractor={item => item['auctionId'].toString()}
+            data={filterDataList(auctionListData)} 
             renderItem={({item}) => (
                 <Item item={item} onPress={()=> _onAuctionPress(item)} onStarPress={_onStarPress} isStar={isStar}/>
             )}/>
         </AuctionsContainer>
-
+        <ButtonContainer>
+            <MaterialCommunityIcons name="refresh-circle" size={65} onPress={handleApi} color={theme.titleColor}/>
+        </ButtonContainer>
         </Container>
     );
-};
+});
 
 export default Auction; 

@@ -16,8 +16,8 @@ const Navigation = () => {
         <>
         <SafeAreaView />
         <NavigationContainer>
-            <MainTab />
-            {/* {success? <MainTab />: <AuthStack />} */}
+            {/* <MainTab /> */}
+            {success? <MainTab />: <AuthStack />}
             {inProgress&&<Spinner />}
         </NavigationContainer>
         </>

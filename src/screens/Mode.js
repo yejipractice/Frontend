@@ -1,13 +1,13 @@
 // 사용자/업체 모드 선택 페이지  
-import React, {useState} from 'react';
+import React, {useState, useContext} from 'react';
 import styled from "styled-components/native";
 import {ModeButton} from "../components";
+import {LoginConsumer, LoginContext} from "../contexts";
 
 const Container = styled.View`
     flex: 1;
     justify-content: flex-start;
     align-items: center;
-    background-color: ${({theme})=> theme.background};
 `;
 
 const Title = styled.Text`
@@ -18,23 +18,29 @@ const Title = styled.Text`
 `;
 
 const Mode = ({navigation}) => {
-    const [mode,setMode] = useState('');
+    const {setMode} = useContext(LoginContext);
 
     return (
         <Container>
             <Title>회식 모아</Title>
+            <LoginConsumer>
+            {({dispatch}) => (
+            <>
             <ModeButton title= "User"
-                onPress={() => {
-                setMode('User');
-                navigation.navigate("Signup",{ mode: 'User' });
+            onPress={() => {
+            setMode('User');
+            navigation.navigate("Signup",{ mode: 'User' });
             }}
             containerStyle={{marginBottom: 60}}
             />
             <ModeButton title= "Store"
-                onPress={() => {
-                setMode('Store');
-                navigation.navigate("Signup",{ mode: 'Store' });
+            onPress={() => {
+            setMode('Store');
+            navigation.navigate("Signup",{ mode: 'Store' });
             }}/>
+            </>
+            )}
+            </LoginConsumer>
         </Container>
     );
 };
