@@ -3,18 +3,20 @@ import { ThemeContext } from "styled-components/native";
 import { createStackNavigator } from '@react-navigation/stack';
 import { Mypage_Store, Mypage_User, StoreInfo, StoreInfoChange, UserInfo, UserInfoChange, StoreManage, ReviewManage
     ,ChatManage, Bookmark, Message, AuctionDetail, AuctionBid, PayManage, UseManage, ReviewWrite, DocumentRegister,
-    OrderDetail, StoreDetail, RegisterAuction, MultipleImage, StoreConvChange, StoreBasicChange  } from "../screens";
+    OrderDetail, StoreDetail, RegisterAuction, MultipleImage, StoreConvChange, StoreBasicChange, Login  } from "../screens";
 import BidManageTab from './BidManageTab';
+import {LoginContext} from "../contexts";
 
 
 const Stack = createStackNavigator();
 
 const MypageStack = () => {
     const theme = useContext(ThemeContext);
+    const {mode} = useContext(LoginContext);
     const [isUser, setIsUset] = useState(false);
     return (
         <Stack.Navigator
-            initialRouteName="Mypage_Store"
+            initialRouteName={mode==="STORE" ? "Mypage_Store" : "Mypage_User"}
             screenOptions={{
                 headerTitleAlign: "center",
                 cardStyle: { backgroundColor: theme.backgroundColor },

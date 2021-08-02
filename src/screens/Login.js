@@ -242,7 +242,8 @@ const Login = ({navigation}) => {
             ref={passwordRef} 
             label="비밀번호" 
             value={password} 
-            onChangeText={text=> setPassword(removeWhitespace(text))}  
+            onChangeText={text=> setPassword(removeWhitespace(text))} 
+            onSubmitEditing={() => _handleLoginPress()} 
             placeholder="비밀번호를 입력하세요" 
             returnKeyType="done" 
             isPassword 

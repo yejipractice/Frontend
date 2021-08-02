@@ -465,6 +465,13 @@ const Signup = ({ navigation, route }) => {
                 () => ageRef.current.focus() : null }
                 placeholder={route.params.mode === "User"? "닉네임을 입력하세요" : "업체명을 입력하세요"}
                 returnKeyType= {route.params.mode === "User"? "next" : "done"}
+                onSubmitEditing={() => {
+                    if(route.params.mode !== 'User'){
+                        _handleSignupPress();
+                    }else{
+                        ageRef.current.focus();
+                    }
+                }}
             />
 
         
