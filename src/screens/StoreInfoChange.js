@@ -46,7 +46,6 @@ const StoreInfoChange = ({navigation,route}) => {
     const [password, setPassword] = useState();
 
     const [errorMessage, setErrorMessage] = useState("");
-    const [uploaded, setUploaded] = useState(false);
     const [disabled, setDisabled] = useState(true);
 
     const didMountRef = useRef();
@@ -55,24 +54,28 @@ const StoreInfoChange = ({navigation,route}) => {
     useEffect(() => {
         if (didMountRef.current) {
             let _errorMessage = "";
-            if (uploaded) {
-                _errorMessage = "정보를 입력해주세요";
                 if (!userName) {
-                    _errorMessage = "닉네임을 입력하세요.";
+                    _errorMessage = "업체명을 입력하세요.";
                 } else if (!password) {
                     _errorMessage = "비밀번호를 입력하세요.";
                 } else if (!validatePassword(password)) {
                     _errorMessage = "비밀번호 조건을 확인하세요.";
                 }else {
-                    setDisabled(false);
                     _errorMessage = "";
                 }
-            }
             setErrorMessage(_errorMessage);
         } else {
             didMountRef.current = true;
         }
-    }, [userName, password, uploaded]);
+    }, [userName, password]);
+
+    // 버튼 활성화
+    useEffect(() => {
+        setDisabled(            
+            !(userName && password &&  !errorMessage && validatePassword(password) )
+        );
+        
+    }, [userName, password, errorMessage]);
 
     
     // 서버 put 처리 (회원 정보 수정)
@@ -109,66 +112,75 @@ const StoreInfoChange = ({navigation,route}) => {
     const postApi = async () => {
         let fixedUrl = url+'/member/image'; 
 
-        let filename = photo.split('/').pop();
+        if(photo != null && photo != route.params.photo){
+            let filename = photo.split('/').pop();
 
-        let match = /\.(\w+)$/.exec(filename);
-        let type = match ? `image/${match[1]}` : `image`;
+            let match = /\.(\w+)$/.exec(filename);
+            let type = match ? `image/${match[1]}` : `image`;
+    
+            let formData = new FormData();
+            formData.append('file', { uri: photo, name: filename, type: type });
+    
+            console.log(formData);
 
-        let formData = new FormData();
-        formData.append('file', { uri: photo, name: filename, type: type });
-
-        console.log(formData);
-        let options = {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'multipart/form-data',
-                'X-AUTH-TOKEN' : token,
-            },
-            body: formData,
-        
-        };
-        try {
-            let response = await fetch(fixedUrl, options);
-            let res = await response.json();
-
-            console.log(res);
-            return res["success"];
+            let options = {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'multipart/form-data',
+                    'X-AUTH-TOKEN' : token,
+                },
+                body: formData,
+            };
+            try {
+                let response = await fetch(fixedUrl, options);
+                let res = await response.json();
+    
+                console.log(res);
+                return res["success"];
             
-            
-          } catch (error) {
-            console.error(error);
-          }
-
+                } catch (error) {
+                console.error(error);
+            }
+        }
+    
     }
     
    
     // 정보 수정
     
     const _handleChangeButtonPress = async() => {
-        setUploaded(true);
+        try{
+            spinner.start();
 
-        if(!disabled){
-            try{
-                spinner.start();
-    
-                const result = await putApi(url+"/member/store");
-                const result_photo = await postApi();
-    
+            const result = await putApi(url+"/member/store");
+            const result_photo = await postApi();
+
+            if(photo != null && photo != route.params.photo){
                 if(result && result_photo){
                     navigation.navigate("StoreInfo");
                 }
                 else{
                     alert("저장에 실패했습니다.");
                 }
-        
-            }catch(e){
-                    console.log("Error", e.message);
-            }finally{
-                spinner.stop();
             }
+            else{
+                if(result){
+                    navigation.navigate("StoreInfo");
+                }
+                else{
+                    alert("저장에 실패했습니다.");
+                }
+            }
+            
+    
+        }catch(e){
+                console.log("Error", e.message);
+        }finally{
+            spinner.stop();
+        }      
            
-        }
+        
         
     }
 
@@ -187,7 +199,7 @@ const StoreInfoChange = ({navigation,route}) => {
 
                 <InfoContainer>
                     <InfoText
-                        label="닉네임"
+                        label="업체명"
                         value={userName}
                         onChangeText={text => setuserName(text)}
                         placeholder="닉네임"
@@ -214,6 +226,7 @@ const StoreInfoChange = ({navigation,route}) => {
                     <Button
                         containerStyle={{ width: '50%', }}
                         title="저장"
+                        disabled={disabled}
                         onPress={_handleChangeButtonPress}
                     />
                 </CenterContainer>

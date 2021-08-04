@@ -87,7 +87,6 @@ const  UserInfoChange = ({navigation, route}) => {
     const [gender, setGender] = useState(route.params.gender);
 
     const [errorMessage, setErrorMessage] = useState("");
-    const [uploaded, setUploaded] = useState(false);
     const [disabled, setDisabled] = useState(true);
 
     const didMountRef = useRef();
@@ -161,30 +160,35 @@ const  UserInfoChange = ({navigation, route}) => {
     useEffect(() => {
         if (didMountRef.current) {
             let _errorMessage = "";
-            if (uploaded) {
-                _errorMessage = "정보를 입력해주세요";
-                if (!userName) {
-                    _errorMessage = "닉네임을 입력하세요.";
-                } else if (!password) {
-                    _errorMessage = "비밀번호를 입력하세요.";
-                } else if (!validatePassword(password)) {
-                    _errorMessage = "비밀번호 조건을 확인하세요.";
-                } else if (!age) {
-                    _errorMessage = "나이를 입력하세요.";
-                }else if (!loc) {
-                    _errorMessage = "지역을 입력해주세요.";
-                }
-                else {
-                    setDisabled(false);
-                    _errorMessage = "";
-                }
+            if (!userName) {
+                _errorMessage = "닉네임을 입력하세요.";
+            } else if (!password) {
+                _errorMessage = "비밀번호를 입력하세요.";
+            } else if (!validatePassword(password)) {
+                _errorMessage = "비밀번호 조건을 확인하세요.";
+            } else if (!age) {
+                _errorMessage = "나이를 입력하세요.";
+            }else if (!loc) {
+                _errorMessage = "지역을 입력해주세요.";
+            }
+            else {
+                setDisabled(false);
+                _errorMessage = "";
             }
             setErrorMessage(_errorMessage);
 
         } else {
             didMountRef.current = true;
         }
-    }, [userName, password, age, loc, uploaded]);
+    }, [userName, password, age, loc]);
+
+    // 버튼 활성화
+    useEffect(() => {
+        setDisabled(            
+            !(userName && password &&  !errorMessage && validatePassword(password) && age && loc )
+        );
+        
+    }, [userName, password, errorMessage, age, loc]);
 
     
 
@@ -228,36 +232,39 @@ const  UserInfoChange = ({navigation, route}) => {
     const postApi = async () => {
         let fixedUrl = url+'/member/image'; 
 
-        let filename = photo.split('/').pop();
+        if(photo != null && photo != route.params.photo){
 
-        let match = /\.(\w+)$/.exec(filename);
-        let type = match ? `image/${match[1]}` : `image`;
+            let filename = photo.split('/').pop();
 
-        let formData = new FormData();
-        formData.append('file', { uri: photo, name: filename, type: type });
+            let match = /\.(\w+)$/.exec(filename);
+            let type = match ? `image/${match[1]}` : `image`;
 
-        console.log(formData);
-        let options = {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'multipart/form-data',
-                'X-AUTH-TOKEN' : token,
-            },
-            body: formData,
-        
-        };
-        try {
-            let response = await fetch(fixedUrl, options);
-            let res = await response.json();
+            let formData = new FormData();
+            formData.append('file', { uri: photo, name: filename, type: type });
 
-            console.log(res);
-            return res["success"];
+            console.log(formData);
+            let options = {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'multipart/form-data',
+                    'X-AUTH-TOKEN' : token,
+                },
+                body: formData,
             
-            
-          } catch (error) {
-            console.error(error);
-          }
+            };
+            try {
+                let response = await fetch(fixedUrl, options);
+                let res = await response.json();
+
+                console.log(res);
+                return res["success"];
+                
+                
+            } catch (error) {
+                console.error(error);
+            }
+        }
 
     }
     
@@ -265,29 +272,34 @@ const  UserInfoChange = ({navigation, route}) => {
     // 정보 수정
     
     const _handleChangeButtonPress = async() => {
-        setUploaded(true);
+        
+        try{
+            spinner.start();
+            const result = await putApi(url+"/member/customer");
+            const result_photo = await postApi();
 
-        if(!disabled){
-            try{
-                spinner.start();
-    
-            
-                const result = await putApi(url+"/member/customer");
-                const result_photo = await postApi();
-    
+            if(photo != null && photo != route.params.photo){
                 if(result && result_photo){
                     navigation.navigate("UserInfo");
                 }
                 else{
                     alert("저장에 실패했습니다.");
                 }
-        
-            }catch(e){
-                    console.log("Error", e.message);
-            }finally{
-                spinner.stop();
             }
-           
+            else{
+                if(result){
+                    navigation.navigate("StoreInfo");
+                }
+                else{
+                    alert("저장에 실패했습니다.");
+                }
+            }
+            
+    
+        }catch(e){
+                console.log("Error", e.message);
+        }finally{
+            spinner.stop();
         }
         
     }
@@ -408,6 +420,7 @@ const  UserInfoChange = ({navigation, route}) => {
                     <Button 
                     containerStyle={{width:'50%', }}
                     title="저장"
+                    disabled={disabled}
                     onPress={ _handleChangeButtonPress }
                     />
                 </CenterContainer>

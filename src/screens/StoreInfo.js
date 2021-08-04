@@ -96,7 +96,7 @@ const  StoreInfo = ({navigation}) => {
 
         // 화면 새로고침
         const willFocusSubscription = navigation.addListener('focus', () => {
-            getApi(url+"/member/store");;
+            getApi(url+"/member/store");
         });
     
         return willFocusSubscription;
