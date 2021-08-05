@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import styled from "styled-components/native";
 import { View, StyleSheet } from "react-native";
 import { ProfileImage, InfoText, Button } from "../../components";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { removeWhitespace, validatePassword } from "../../utils/common";
+import {UrlContext, ProgressContext, LoginContext} from "../../contexts";
 
 const Container = styled.View`
     flex: 1;
@@ -32,14 +33,19 @@ const ErrorText = styled.Text`
     color: ${({ theme }) => theme.errorText};
 `;
 
-const StoreInfoChange = () => {
-    // 임의로 설정, 연동 후 기존 설정값 등록
-    const [Photo, setPhoto] = useState(null);
-    const [userName, setuserName] = useState('');
-    const [password, setPassword] = useState('');
+const StoreInfoChange = ({navigation, route}) => {
+   
+    const {url} = useContext(UrlContext);
+    const {spinner} = useContext(ProgressContext);
+    const {token} = useContext(LoginContext);
 
+    const [photo, setPhoto] = useState(route.params.photo);
+    const [userName, setuserName] = useState(route.params.userName);
+    const [email, setEmail] = useState(route.params.email);
+    const [password, setPassword] = useState();
     const [errorMessage, setErrorMessage] = useState("");
     const [uploaded, setUploaded] = useState(false);
+    const [disabled, setDisabled] = useState(true);
 
     const didMountRef = useRef();
 
@@ -56,6 +62,7 @@ const StoreInfoChange = () => {
                 } else if (!validatePassword(password)) {
                     _errorMessage = "비밀번호 조건을 확인하세요.";
                 }else {
+                    setDisabled(false);
                     _errorMessage = "";
                 }
             }
@@ -65,9 +72,101 @@ const StoreInfoChange = () => {
         }
     }, [userName, password, uploaded]);
 
-    const _handleChangeButtonPress = () => {
+     // 서버 put 처리 (회원 정보 수정)
+     const putApi = async (url) => {
+
+        console.log(url);
+
+        let options = {
+            method: 'PUT',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token
+            },
+            body: JSON.stringify({ 
+                name: userName,
+                password: password,
+
+            }),
+        };
+        try {
+            let response = await fetch(url,options);
+            let res = await response.json();
+            console.log(res);
+
+            return res["success"];
+
+          } catch (error) {
+            console.error(error);
+          }
+    }
+
+    // 회원 이미지 등록
+    const postApi = async () => {
+        let fixedUrl = url+'/member/image'; 
+
+        let filename = photo.split('/').pop();
+
+        let match = /\.(\w+)$/.exec(filename);
+        let type = match ? `image/${match[1]}` : `image`;
+
+        let formData = new FormData();
+        formData.append('file', { uri: photo, name: filename, type: type });
+
+        console.log(formData);
+        let options = {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'multipart/form-data',
+                'X-AUTH-TOKEN' : token,
+            },
+            body: formData,
+
+        };
+        try {
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+
+            console.log(res);
+            return res["success"];
+
+
+          } catch (error) {
+            console.error(error);
+          }
+
+    }
+
+    const _handleChangeButtonPress = async() => {
         setUploaded(true);
-    };
+
+        if(!disabled){
+            try{
+                spinner.start();
+
+                const result = await putApi(url+"/member/store");
+                const result_photo = await postApi();
+
+                if(result && result_photo){
+                    navigation.navigate("StoreInfo");
+                }
+                else{
+                    alert("저장에 실패했습니다.");
+                }
+
+            }catch(e){
+                    console.log("Error", e.message);
+            }finally{
+                spinner.stop();
+            }
+
+        }
+
+    }
+
+   
 
 
     return (
@@ -78,7 +177,7 @@ const StoreInfoChange = () => {
                 <View style={{ marginTop: 30 }} ></View>
 
                 <ProfileImage
-                    url={Photo}
+                    url={photo}
                     onChangeImage={url => setPhoto(url)}
                     showButton />
 
@@ -92,7 +191,7 @@ const StoreInfoChange = () => {
                         isChanged
 
                     />
-                    <InfoText label="이메일" content="이메일주소" />
+                    <InfoText label="이메일" conten={email} />
                     <InfoText
                         label="비밀번호"
                         value={password}

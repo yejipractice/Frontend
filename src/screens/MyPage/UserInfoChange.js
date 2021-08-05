@@ -1,13 +1,13 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect, useRef, useContext} from 'react';
 import styled from "styled-components/native";
 import {View, Dimensions, StyleSheet, TouchableOpacity, Alert} from "react-native";
 import {ProfileImage, InfoText, Button, RadioButton} from '../../components';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { removeWhitespace, validatePassword } from '../../utils/common';
-import Postcode from '@actbase/react-daum-postcode';
+import { removeWhitespace, validateEmail, validatePassword } from '../../utils/common';
 import * as Location from "expo-location";
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import {MaterialCommunityIcons} from "@expo/vector-icons";
+import {UrlContext, ProgressContext, LoginContext} from "../../contexts";
 
 const WIDTH = Dimensions.get("screen").width;
 const HEIGHT = Dimensions.get("screen").height;
@@ -72,24 +72,29 @@ const ErrorText = styled.Text`
 
 
 
-const  UserInfoChange = () => {
+const  UserInfoChange = ({navigation, route}) => {
 
-    // 임의로 설정, 연동 후 기존 설정값 등록
-    const [Photo, setPhoto] = useState(null);
-    const [userName, setuserName] = useState('안녕하세요');
+    const {url} = useContext(UrlContext);
+    const {spinner} = useContext(ProgressContext);
+    const {token} = useContext(LoginContext);
+
+    const [photo, setPhoto] = useState(route.params.photo);
+    const [userName, setuserName] = useState(route.params.userName);
+    const email = route.params.email;
     const [password, setPassword] = useState('');
-    const [age, setAge] = useState('23');
-    const [gender, setGender] = useState('female');
+    const [age, setAge] = useState(route.params.age);
+    const [gender, setGender] = useState(route.params.gender);
 
     const [errorMessage, setErrorMessage] = useState("");
     const [uploaded, setUploaded] = useState(false);
+    const [disabled, setDisabled] = useState(true);
 
     const didMountRef = useRef();
     
-      //현재 위치
-    const [loc, setLoc] = useState(null); //선택 지역 
-    const [lati, setLati] = useState(37.535887);
-    const [longi, setLongi] = useState(126.984063);
+    //현재 위치
+    const [loc, setLoc] = useState(route.params.addr); //선택 지역 
+    const [lati, setLati] = useState(route.params.lati);
+    const [longi, setLongi] = useState(route.params.longi);
     const [region, setRegion] = useState({
         longitude: longi,
         latitude: lati,
@@ -97,6 +102,7 @@ const  UserInfoChange = () => {
         longitudeDelta: 0.3,
     });
     const [selectedLocation, setSelectedLocation] = useState(null);
+
 
     //현재 위치 
     const getLocation = async () => {
@@ -109,6 +115,7 @@ const  UserInfoChange = () => {
         return loc;
     };
   
+
     const convertKoreanLocation = async(res) => {
       let result = "";
       if (res.localityInfo.administrative.length >= 4){
@@ -166,18 +173,119 @@ const  UserInfoChange = () => {
                     _errorMessage = "지역을 입력해주세요.";
                 }
                 else {
+                    setDisabled(false);
                     _errorMessage = "";
                 }
             }
             setErrorMessage(_errorMessage);
+
         } else {
             didMountRef.current = true;
         }
     }, [userName, password, age, loc, uploaded]);
 
-    const _handleChangeButtonPress = () => {
+    // 서버 put 처리 (회원 정보 수정)
+    const putApi = async (url) => {
+
+        console.log(url);
+
+        let options = {
+            method: 'PUT',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token
+            },
+            body: JSON.stringify({ 
+                name: userName,
+                password: password,
+                age: parseInt(age),
+                gender: gender,
+                addr: String(loc),
+                latitude: lati,
+                longitude: longi,
+
+            }),
+
+        };
+        try {
+            let response = await fetch(url,options);
+            let res = await response.json();
+            console.log(res);
+
+            return res["success"];
+
+          } catch (error) {
+            console.error(error);
+          }
+    }
+
+    // 회원 이미지 등록
+    const postApi = async () => {
+        let fixedUrl = url+'/member/image'; 
+
+        let filename = photo.split('/').pop();
+
+        let match = /\.(\w+)$/.exec(filename);
+        let type = match ? `image/${match[1]}` : `image`;
+
+        let formData = new FormData();
+        formData.append('file', { uri: photo, name: filename, type: type });
+
+        console.log(formData);
+        let options = {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'multipart/form-data',
+                'X-AUTH-TOKEN' : token,
+            },
+            body: formData,
+
+        };
+        try {
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+
+            console.log(res);
+            return res["success"];
+
+
+          } catch (error) {
+            console.error(error);
+          }
+
+    }
+
+
+    // 정보 수정
+
+    const _handleChangeButtonPress = async() => {
         setUploaded(true);
-    };
+        if(!disabled){
+            try{
+                spinner.start();
+
+
+                const result = await putApi(url+"/member/customer");
+                const result_photo = await postApi();
+
+                if(result && result_photo){
+                    navigation.navigate("UserInfo");
+                }
+                else{
+                    alert("저장에 실패했습니다.");
+                }
+
+            }catch(e){
+                    console.log("Error", e.message);
+            }finally{
+                spinner.stop();
+            }
+
+        }
+
+    }
   
     useEffect(() => {
       const result = getLocation();
@@ -191,7 +299,7 @@ const  UserInfoChange = () => {
                 <View style={{marginTop: 30}} ></View>
 
                <ProfileImage 
-                url={Photo}
+                url={photo}
                 onChangeImage={url => setPhoto(url)}
                 showButton />
 
@@ -205,7 +313,7 @@ const  UserInfoChange = () => {
                         isChanged
                         title="적용"
                     />
-                    <InfoText label="이메일" content="이메일주소"/>
+                    <InfoText label="이메일" content={email}/>
                     <InfoText
                         label="비밀번호"
                         value={password}
@@ -220,7 +328,7 @@ const  UserInfoChange = () => {
 
                     <InfoText
                         label="나이"
-                        value={age}
+                        value={String(age)}
                         onChangeText={ text => setAge(text)}
                         placeholder="나이"
                         returnKeyType= "done"
@@ -246,7 +354,7 @@ const  UserInfoChange = () => {
                         
                 <InfoText
                         label="지역"
-                        value= {(selectedLocation && loc !== null)? String(loc) : ""}
+                        value= {( loc !== null)? String(loc) : ""}
                         placeholder="지역이 선택되지 않았습니다."
                         returnKeyType= "done"
                         isChanged
