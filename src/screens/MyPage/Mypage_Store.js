@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from "styled-components/native";
-import { MypageButton, ProfileImage, SmallButton } from '../components'
+import { MypageButton, ProfileImage, SmallButton } from '../../components'
 
 const Container = styled.View`
     background-color: ${({ theme }) => theme.background};

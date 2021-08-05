@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from "styled-components/native";
-import MypageButton from '../components/MypageButton';
-import ProfileImage from '../components/ProfileImage';
-import SmallButton from '../components/SmallButton';
+import MypageButton from '../../components/MypageButton';
+import ProfileImage from '../../components/ProfileImage';
+import SmallButton from '../../components/SmallButton';
 
 const Container = styled.View`
     background-color: ${({theme})=> theme.background};

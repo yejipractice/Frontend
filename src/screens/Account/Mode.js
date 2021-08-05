@@ -1,8 +1,8 @@
 // 사용자/업체 모드 선택 페이지  
 import React, {useState, useContext} from 'react';
 import styled from "styled-components/native";
-import {ModeButton} from "../components";
-import {LoginConsumer, LoginContext} from "../contexts";
+import {ModeButton} from "../../components";
+import {LoginConsumer, LoginContext} from "../../contexts";
 
 const Container = styled.View`
     flex: 1;

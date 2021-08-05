@@ -1,9 +1,9 @@
 import React, {useState, useEffect, useRef} from 'react';
 import styled from "styled-components/native";
 import {View, Dimensions, StyleSheet, TouchableOpacity, Alert} from "react-native";
-import {ProfileImage, InfoText, Button, RadioButton} from '../components';
+import {ProfileImage, InfoText, Button, RadioButton} from '../../components';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { removeWhitespace, validatePassword } from '../utils/common';
+import { removeWhitespace, validatePassword } from '../../utils/common';
 import Postcode from '@actbase/react-daum-postcode';
 import * as Location from "expo-location";
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';

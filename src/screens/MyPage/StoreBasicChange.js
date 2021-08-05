@@ -1,14 +1,14 @@
 import React, { useState,useEffect,useRef, useLayoutEffect, useContext } from 'react';
 import styled from "styled-components/native";
 import { Dimensions, Modal, View, StyleSheet,TouchableOpacity, Alert } from "react-native";
-import { DateTimePicker, SmallButton, ManageText } from '../components';
-import { theme } from '../theme';
+import { DateTimePicker, SmallButton, ManageText } from '../../components';
+import { theme } from '../../theme';
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Postcode from '@actbase/react-daum-postcode';
 import DropDownPicker from "react-native-dropdown-picker";
 import * as Location from "expo-location";
-import {LoginContext} from "../contexts";
+import {LoginContext} from "../../contexts";
 
 
 const WIDTH = Dimensions.get("screen").width;

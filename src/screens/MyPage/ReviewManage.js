@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import styled from "styled-components/native";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
-import {Reviews} from "../utils/data";
+import {Reviews} from "../../utils/data";
 import {Dimensions, FlatList} from "react-native";
 
 const WIDTH = Dimensions.get("screen").width;

@@ -1,7 +1,7 @@
 import React, { useState,useEffect,useRef } from 'react';
 import styled from "styled-components/native";
 import { Dimensions, Modal, View, StyleSheet,TouchableOpacity} from "react-native";
-import { Button, Image, ManageText, SmallButton } from '../components';
+import { Button, Image, ManageText, SmallButton } from '../../components';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const WIDTH = Dimensions.get("screen").width;

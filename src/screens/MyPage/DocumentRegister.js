@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import styled from "styled-components/native";
-import {Image} from '../components';
+import {Image} from '../../components';
 import {Text, View} from 'react-native';
 import {Dimensions} from "react-native";
 

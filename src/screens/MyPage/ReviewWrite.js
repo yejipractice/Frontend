@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import styled from "styled-components/native";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
 import {Dimensions,Text,FlatList,View,ScrollView} from "react-native";
-import { Button, SmallButton } from '../components';
+import { Button, SmallButton } from '../../components';
 
 
 const WIDTH = Dimensions.get("screen").width;
