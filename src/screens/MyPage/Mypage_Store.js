@@ -51,7 +51,7 @@ const LogoutContainer = styled.View`
 
 const Mypage_Store = ({ navigation }) => {
 
-    const {setSuccess} = useContext(LoginContext);
+    const {setSuccess, doc} = useContext(LoginContext);
 
     return (
         <Container>
@@ -69,9 +69,10 @@ const Mypage_Store = ({ navigation }) => {
                     </ProfileButton>
                 </ProfileContainer>
                 <LogoutContainer>
-                    <SmallButton title="서류등록"
+                    <SmallButton title={doc? "서류 변경" : "서류 등록"}
                         containerStyle={{ width: '30%' }}
                         onPress={() => {navigation.navigate("DocumentRegister")}}
+                        uploaded={doc? true : false}
                     />
                     <SmallButton title="로그아웃" containerStyle={{ width: '30%', }}
                         onPress={()=>{
