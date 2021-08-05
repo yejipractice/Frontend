@@ -1,8 +1,9 @@
-import React, {useState} from 'react';
+import React, {useState, useContext} from 'react';
 import styled from "styled-components/native";
-import {Image} from '../../components';
-import {Text, View} from 'react-native';
+import {Image, Button} from '../../components';
+import {View} from 'react-native';
 import {Dimensions} from "react-native";
+import {UrlContext, ProgressContext, LoginContext} from "../../contexts";
 
 const WIDTH = Dimensions.get("screen").width;
 const HEIGHT = Dimensions.get("screen").height;
@@ -21,7 +22,68 @@ const DocumentImage = styled.Image`
 
 const DocumentRegister = () => {
 
-    const [document, setDocument] = useState('');
+    const {url} = useContext(UrlContext);
+    const {spinner} = useContext(ProgressContext);
+    const {token, setDoc} = useContext(LoginContext);
+
+    const [document, setDocument] = useState();
+
+    // 서류 등록 post
+    const postApi = async () => {
+        let fixedUrl = url+'/member/store/document'; 
+
+        let filename = document.split('/').pop();
+
+        let match = /\.(\w+)$/.exec(filename);
+        let type = match ? `image/${match[1]}` : `image`;
+
+        let formData = new FormData();
+        formData.append('file', { uri: document, name: filename, type: type});
+
+        console.log(formData);
+
+        let options = {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'multipart/form-data',
+                'X-AUTH-TOKEN' : token,
+            },
+            body: formData,
+        };
+        try {
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+
+            console.log(res);
+            return res["success"];
+
+        } catch (error) {
+            console.error(error);
+        }
+
+    }
+
+    const _documentButtonPress = async() => {
+        try{
+            spinner.start();
+
+            const result = await postApi();
+            if(result){
+                alert("서류 등록 되었습니다.")
+                setDoc(true);
+            }
+            else{
+                alert("서류 등록을 다시 시도해주세요.");
+            }
+
+        }catch(e){
+                console.log("Error", e.message);
+        }finally{
+            spinner.stop();
+        }
+
+    }
 
     return (
         <Container>
@@ -30,8 +92,11 @@ const DocumentRegister = () => {
                     onChangeImage={url => setDocument(url)}
                     containerStyle={{ width: '70%',}}
             />
-            <View style={{borderBottomWidth: 0.5, marginTop: "4%",marginBottom: "4%"}}/>
-            <DocumentImage source = {{uri: document}} />
+           
+           {document && <DocumentImage source = {{uri: document}} />}
+            <View style={{ alignItems:'center'}}>
+                <Button title="저장" onPress={_documentButtonPress} containerStyle={{ width: '70%',}}/>
+            </View>
         
         </Container>
     );
