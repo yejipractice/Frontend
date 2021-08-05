@@ -1,7 +1,7 @@
 import React, { useState,useEffect,useRef, useLayoutEffect } from 'react';
 import styled from "styled-components/native";
 import { Dimensions, View, StyleSheet } from "react-native";
-import { RadioButton,ToggleButton } from '../components';
+import { RadioButton,ToggleButton } from '../../components';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 

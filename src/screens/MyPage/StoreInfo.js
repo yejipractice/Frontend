@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import styled from "styled-components/native";
 import { StyleSheet,Text, View} from "react-native";
-import {ProfileImage, InfoText,ToggleButton} from '../components';
+import {ProfileImage, InfoText,ToggleButton} from '../../components';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { MaterialIcons } from '@expo/vector-icons';
 

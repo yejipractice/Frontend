@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from "styled-components/native";
 import { View, StyleSheet } from "react-native";
-import { ProfileImage, InfoText, Button } from "../components";
+import { ProfileImage, InfoText, Button } from "../../components";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { removeWhitespace, validatePassword } from "../utils/common";
+import { removeWhitespace, validatePassword } from "../../utils/common";
 
 const Container = styled.View`
     flex: 1;
