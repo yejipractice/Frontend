@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import styled from "styled-components/native";
 import { MypageButton, ProfileImage, SmallButton } from '../../components'
+import {LoginContext} from "../../contexts";
+import {Alert} from "react-native";
 
 const Container = styled.View`
     background-color: ${({ theme }) => theme.background};
@@ -49,7 +51,7 @@ const LogoutContainer = styled.View`
 
 const Mypage_Store = ({ navigation }) => {
 
-    const [document, setDocument] = useState('');
+    const {setSuccess} = useContext(LoginContext);
 
     return (
         <Container>
@@ -71,7 +73,21 @@ const Mypage_Store = ({ navigation }) => {
                         containerStyle={{ width: '30%' }}
                         onPress={() => {navigation.navigate("DocumentRegister")}}
                     />
-                    <SmallButton title="로그아웃" onPress={() => { }} containerStyle={{ width: '30%', }} />
+                    <SmallButton title="로그아웃" containerStyle={{ width: '30%', }}
+                        onPress={()=>{
+                            Alert.alert(
+                                "", "로그아웃하시겠습니까?",
+                                [
+                                    { text: "확인", onPress: () => setSuccess(false) },
+                                    {
+                                      text: "취소",
+                                      style: "cancel"
+                                    },
+                                  ]
+                              );
+
+                        }}
+                    />
                 </LogoutContainer>
 
             </InfoContainer>

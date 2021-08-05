@@ -1,8 +1,8 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import styled from "styled-components/native";
-import MypageButton from '../../components/MypageButton';
-import ProfileImage from '../../components/ProfileImage';
-import SmallButton from '../../components/SmallButton';
+import {MypageButton, ProfileImage, SmallButton} from "../../components";
+import {LoginContext} from "../../contexts";
+import {Alert} from "react-native";
 
 const Container = styled.View`
     background-color: ${({theme})=> theme.background};
@@ -50,6 +50,9 @@ const LogoutContainer = styled.View`
 `;
 
 const Mypage_User = ( {navigation} ) => {
+    const {setSuccess} = useContext(LoginContext);
+
+
     return (
         <Container>
             
@@ -67,7 +70,21 @@ const Mypage_User = ( {navigation} ) => {
                 </ProfileButton>
                 </ProfileContainer>
                 <LogoutContainer>
-                     <SmallButton title="로그아웃" onPress={ () => {} } containerStyle={{marginTop: 0}} />
+                <SmallButton title="로그아웃" containerStyle={{marginTop: 0}} 
+                        onPress={()=>{
+                            Alert.alert(
+                                "", "로그아웃하시겠습니까?",
+                                [
+                                    { text: "확인", onPress: () => setSuccess(false) },
+                                    {
+                                      text: "취소",
+                                      style: "cancel"
+                                    },
+                                  ]
+                              );
+
+                        }}
+                    />
                 </LogoutContainer>
                
             </InfoContainer>
