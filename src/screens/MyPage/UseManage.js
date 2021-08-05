@@ -1,8 +1,8 @@
 import React, {useState} from 'react';
-import {UseList} from "../utils/data";
+import {UseList} from "../../utils/data";
 import styled from "styled-components/native";
 import {FlatList} from 'react-native';
-import { SmallButton } from '../components';
+import { SmallButton } from '../../components';
 
 const UseContainer = styled.View`
     flex-direction: row;

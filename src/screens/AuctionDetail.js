@@ -127,7 +127,7 @@ const AuctionDetail = ({ navigation, route}) => {
         navigation.setOptions({
             headerTitle: "",
             headerRight: () => (
-                !isUser ?(<MaterialCommunityIcons name="send" size={35} onPress={_onMessagePress}
+                (mode==="Store") ?(<MaterialCommunityIcons name="send" size={35} onPress={_onMessagePress}
                     style={{ marginRight: 15, marginBottom: 3, marginTop: 3, opacity: 0.7 }} />) : null
             )
         });

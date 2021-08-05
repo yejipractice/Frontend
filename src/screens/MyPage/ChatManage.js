@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {chatrooms} from "../utils/data";
+import {chatrooms} from "../../utils/data";
 import styled from "styled-components/native";
 import {FlatList} from 'react-native';
 import moment from 'moment';

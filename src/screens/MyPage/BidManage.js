@@ -1,7 +1,7 @@
 import React, {useState, useContext} from 'react';
 import styled from "styled-components/native";
 import {View, Dimensions, FlatList} from "react-native";
-import {AuctionList} from "../utils/data";
+import {AuctionList} from "../../utils/data";
 
 const WIDTH = Dimensions.get("screen").width; 
 

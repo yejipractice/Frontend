@@ -181,9 +181,9 @@ const RegisterAuction = ({navigation}) => {
     const [endTime, setEndTime] = useState("");
     const [endTimeVisible, setEndTimeVisible] = useState(false);
     const [meetingType, setMeetingType] = useState(null);
-    const [numOfPeople, setNumOfPeople] = useState(0);
-    const [maxPrice, setMaxPrice] = useState(0);
-    const [minPrice, setMinPrice] = useState(0);
+    const [numOfPeople, setNumOfPeople] = useState("");
+    const [maxPrice, setMaxPrice] = useState("");
+    const [minPrice, setMinPrice] = useState("");
     const [errorMessage, setErrorMessage] = useState("아래 정보를 입력해주세요.");
     const [disabled, setDisabled] = useState(true);
     const [uploaded, setUploaded] = useState(false);
@@ -322,8 +322,14 @@ const [selectedLocation, setSelectedLocation] = useState(null);
   try{
       let response = await fetch(fixedUrl, options);
       let res = await response.json();
-      auctionId = res["data"]["auctionId"];
-      return res["success"];
+      console.log(res);
+      console.log(options)
+      console.log(fixedUrl);
+      var success = res["success"];
+      if (success){
+        auctionId = res["data"]["auctionId"];
+      }
+      return success;
    
   }catch (error) {
     console.error(error);
@@ -452,7 +458,7 @@ const [selectedLocation, setSelectedLocation] = useState(null);
             setEndTime("");
             setMeetingType("");
             setFoodType([]);
-            setNumOfPeople(0);
+            setNumOfPeople("");
             setSelectedAge("");
             setSelectedSex("");
             setSelectedLocation("");
@@ -819,7 +825,7 @@ const [selectedLocation, setSelectedLocation] = useState(null);
            
             <InputContiner>
                   <StyledTextInputs 
-                value={numOfPeople}
+                value={numOfPeople.toString()}
                 onChangeText={text => setNumOfPeople(removeWhitespace(text))}
                 autoCapitalize="none"
                 keyboardType="number-pad"
@@ -830,7 +836,7 @@ const [selectedLocation, setSelectedLocation] = useState(null);
                 />
 
                 <StyledTextInputs 
-                value={minPrice}
+                value={minPrice.toString()}
                 onChangeText={text => setMinPrice(removeWhitespace(text))}
                 autoCapitalize="none"
                 keyboardType="number-pad"
@@ -843,7 +849,7 @@ const [selectedLocation, setSelectedLocation] = useState(null);
                   <Label>~</Label>
                 </SmallContainer>
                 <StyledTextInputs
-                value={maxPrice}
+                value={maxPrice.toString()}
                 onChangeText={text => setMaxPrice(removeWhitespace(text))}
                 autoCapitalize="none"
                 keyboardType="number-pad"

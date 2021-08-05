@@ -1,9 +1,9 @@
 import React,{useState, useEffect, useRef, useContext} from 'react';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import {removeWhitespace, validateEmail} from "../utils/common";
-import {Button, Input} from "../components";
+import {removeWhitespace, validateEmail} from "../../utils/common";
+import {Button, Input} from "../../components";
 import styled from "styled-components/native";
-import {UrlContext} from "../contexts";
+import {UrlContext} from "../../contexts";
 
 const Container = styled.View`
     flex: 1;

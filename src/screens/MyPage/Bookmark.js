@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {auctionBookmarks, storeBookmarks} from "../utils/data";
+import {auctionBookmarks, storeBookmarks} from "../../utils/data";
 import styled from "styled-components/native";
 import {FlatList} from 'react-native';
 import {MaterialCommunityIcons} from "@expo/vector-icons";
