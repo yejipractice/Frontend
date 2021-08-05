@@ -8,8 +8,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import Postcode from '@actbase/react-daum-postcode';
 import DropDownPicker from "react-native-dropdown-picker";
 import * as Location from "expo-location";
-import {LoginContext} from "../../contexts";
-
+import {UrlContext, ProgressContext, LoginContext} from "../../contexts";
 
 const WIDTH = Dimensions.get("screen").width;
 const HEIGHT = Dimensions.get("screen").height;
@@ -69,12 +68,11 @@ const StoreImage = styled.Image`
 `;
 
 const ErrorText = styled.Text`
-    align-items: flex-start;
-    width: 100%;
+    position: absolute;
+    align-self: flex-end;
     height: 20px;
-    line-height: 20px;
     color: ${({ theme }) => theme.errorText};
-    margin-left: 10px;
+    margin: 1% 1% 0 0;
 `;
 const TimeContainer = styled.TouchableOpacity`
     background-color: ${({theme})=> theme.background}
@@ -90,21 +88,28 @@ const ButtonTitle = styled.Text`
   color: ${({theme})=> theme.inputPlaceholder}
 `;
 
-
-
 const StoreBasicChange = ({ navigation, route }) => {
 
-    const {allow} = useContext(LoginContext);
+    const {url} = useContext(UrlContext);
+    const {spinner} = useContext(ProgressContext);
+    const {token, allow} = useContext(LoginContext);
     const [allowLoc, setAllowLoc] = useState(allow);
-    // 업체 기본정보
-    const [phoneNumber, setPhoneNumber] = useState('028888888');
-    const [address, setAddress] = useState('');
 
-    const [openTime, setOpenTime] = useState('');
+    // 업체 기본정보
+    const [phoneNumber, setPhoneNumber] = useState(route.params.phoneNumber);
+    const [address, setAddress] = useState(route.params.address);
+
+    const [openTime, setOpenTime] = useState(route.params.openTime);
     const [openTimeVisible, setOpenTimeVisible] = useState(false);
 
-    const [closeTime, setCloseTime] = useState('');
+    const [closeTime, setCloseTime] = useState(route.params.closeTime);
     const [closeTimeVisible, setCloseTimeVisible] = useState(false);
+
+    // 서버에 보낼 시간+위치 type
+    const [openT, setOpenT] = useState(route.params.openT);
+    const [closeT, setCloseT] = useState(route.params.closeT);
+    const [lat, setLat] = useState(route.params.lat);
+    const [lon, setLon] = useState(route.params.lon);
 
     const [opening, setOpening] = useState('');
     const [closing, setClosing] = useState('');
@@ -112,6 +117,7 @@ const StoreBasicChange = ({ navigation, route }) => {
     // 업체 사진들
     const [photos, setPhotos] = useState();
 
+    // 사진 여러개 받아온거 설정
     useEffect(() => {
         if (route.params.photos) {
             setPhotos(route.params.photos);
@@ -131,14 +137,19 @@ const StoreBasicChange = ({ navigation, route }) => {
         };
       };
 
+    //위치 권한확인 
+    useEffect(() => {
+        _getLocPer();
+    })
+
     // 업체유형 드롭다운 
     const [open, setOpen] = useState(false);
-    const [selectedType, setSelectedType] = useState("");
+    const [selectedType, setSelectedType] = useState(route.params.selectedType);
     const [storeType, setStoreType] = useState([
-      {label: "한식", value: "한식"},
-      {label: "중식", value: "중식"},
-      {label: "일식", value: "일식"},
-      {label: "양식", value: "양식"},
+      {label: "한식", value: "KOREAN"},
+      {label: "중식", value: "CHINESE"},
+      {label: "일식", value: "JAPANESE"},
+      {label: "양식", value: "WESTERN "},
       {label: "기타", value: "기타"},
     ]); 
 
@@ -158,10 +169,13 @@ const StoreBasicChange = ({ navigation, route }) => {
         navigation.navigate("MultipleImage", {type: "Store"});
     }
 
+
     const _getLL = async(address) => {
         Location.setGoogleApiKey("AIzaSyBPYCpA668yc46wX23TWIZpQQUj08AzWms");
         let res =  await Location.geocodeAsync(address);
         console.log(res); // 서버에 보낼 위도 경도
+        setLat(res.latitude);
+        setLon(res.longitude);
     };
 
 
@@ -196,10 +210,12 @@ const StoreBasicChange = ({ navigation, route }) => {
     }, [phoneNumber, address, selectedType, photos, openTime, closeTime,opening, closing]);
 
 
+    // 등록 버튼 활성화
     useEffect(() => {
         setDisabled(!(phoneNumber && address && selectedType && photos && openTime && closeTime &&!errorMessage));
     }, [phoneNumber, address, selectedType, photos, openTime, closeTime, errorMessage]);
 
+    // 시간 유효성 검사 위해서 변환
     useEffect(()=> {
         var _open = openTime.slice(0,2)+openTime.slice(4,6);
         var _close = closeTime.slice(0,2)+closeTime.slice(4,6);
@@ -207,7 +223,7 @@ const StoreBasicChange = ({ navigation, route }) => {
         setClosing(_close);
       },[openTime,closeTime]);
 
-
+    // 변경 확인 버튼 (disabled false면 변경 가능)
     useLayoutEffect(() => {
         navigation.setOptions({
             headerRight: () => (
@@ -225,7 +241,7 @@ const StoreBasicChange = ({ navigation, route }) => {
     };
 
     const _setOpenTime = time => {
-
+        setOpenT(time);
         let h = time.getHours();
         let m = time.getMinutes();
 
@@ -250,6 +266,7 @@ const StoreBasicChange = ({ navigation, route }) => {
     };
 
     const _setCloseTime = time => {
+        setCloseT(time);
         let h = time.getHours();
         let m = time.getMinutes();
 
@@ -263,7 +280,6 @@ const StoreBasicChange = ({ navigation, route }) => {
 
         setCloseTime(h+"시 "+m+"분");
         setCloseTimeVisible(false);
-
     };
 
     const _hideCloseTimePicker = () => {
@@ -271,15 +287,103 @@ const StoreBasicChange = ({ navigation, route }) => {
     };
 
     // 기본정보 수정 
-    const _onBasicPress = () => {
+    const _onBasicPress = async() => {
         setUploaded(true);
         if (!disabled) {
-            setErrorMessage("아래 정보를 입력해주세요");
-            setDisabled(true);
-            setUploaded(false);
-            navigation.navigate("Mypage_Store");
+            // 서버에 전송
+            try{
+                spinner.start();
+    
+                const result = await postApi(url+"/member/store");
+                const result_photo = await postImageApi();
+
+                if(result && result_photo){
+                    setErrorMessage("아래 정보를 입력해주세요");
+                    setDisabled(true);
+                    setUploaded(false);
+                    navigation.navigate("StoreManage");
+                }
+                else{
+                    alert("저장에 실패했습니다.");
+                }
+    
+            }catch(e){
+                    console.log("Error", e.message);
+            }finally{
+                spinner.stop();
+            }      
         }
     };
+
+    // 기본정보 post
+    const postApi = async (url) => {
+
+        console.log(url);
+
+        let options = {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token
+            },
+            body: JSON.stringify({ 
+                addr: address,
+                closedTime: closeT,
+                latitude: lat,
+                longitude: lon,
+                openTime: openT,
+                phoneNum: phoneNumber,
+                storeType: selectedType,
+
+            }),
+        };
+        try {
+            let response = await fetch(url,options);
+            let res = await response.json();
+            console.log(res);
+
+            return res["success"];
+
+          } catch (error) {
+            console.error(error);
+          }
+    }
+
+    // 업체 사진 여러장 post
+    const postImageApi = async () => {
+        let fixedUrl = url+'/member/store/imagesss'; 
+
+        let formData = new FormData();
+
+        for (let i = 0; i < photos.length; i++) {
+            let photo = photos[i];
+            formData.append("files", {uri: photo.uri, name: photo.name, type: photo.type});
+        }
+
+        console.log(formData);
+
+        let options = {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'multipart/form-data',
+                'X-AUTH-TOKEN' : token,
+            },
+            body: formData,
+        };
+        try {
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+    
+            console.log(res);
+            return res["success"];
+            
+            } catch (error) {
+            console.error(error);
+        }    
+    
+    }
 
 
     return (
@@ -287,12 +391,12 @@ const StoreBasicChange = ({ navigation, route }) => {
             <KeyboardAwareScrollView
                 extraScrollHeight={20}
             >
-                {uploaded && disabled && <ErrorText>{errorMessage}</ErrorText>}
+                
                 {/* 업체 기본정보 */}
                 <View style={{marginLeft: 10}}>
                     <DescTitle size={23}>업체 기본정보</DescTitle>
-               
                 </View>
+                {uploaded && disabled && <ErrorText>{errorMessage}</ErrorText>}
                 <InfoContainer>
                     <ManageText 
                         label="업체 전화번호"
@@ -310,9 +414,11 @@ const StoreBasicChange = ({ navigation, route }) => {
                                 placeholder="주소"
                                 returnKeyType= "done"
                                 editable={address === '' ? false : true}
+                                onChangeText={text => setAddress(text)}
                             />
                             <SmallButton title="검색" containerStyle={{width: '20%', marginLeft:10}}
                                 onPress={() => {
+                                    
                                     if(allowLoc){
                                         setIsAddressModal(true); 
                                         setAddress("");
@@ -388,6 +494,7 @@ const StoreBasicChange = ({ navigation, route }) => {
                             />  
                 </TypeContainer>
                 <View style={{height: 150}} />
+                
             </KeyboardAwareScrollView>
         </Container>
 
@@ -413,4 +520,4 @@ const styles = StyleSheet.create({
       }
 });
 
-export default StoreBasicChange; 
+export default StoreBasicChange;
