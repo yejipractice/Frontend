@@ -3,18 +3,20 @@ import { ThemeContext } from "styled-components/native";
 import { createStackNavigator } from '@react-navigation/stack';
 import { Mypage_Store, Mypage_User, StoreInfo, StoreInfoChange, UserInfo, UserInfoChange, StoreManage, ReviewManage
     ,ChatManage, Bookmark, Message, AuctionDetail, AuctionBid, PayManage, UseManage, ReviewWrite, DocumentRegister,
-    OrderDetail, StoreDetail, RegisterAuction, MultipleImage, StoreConvChange, StoreBasicChange  } from "../screens";
+    OrderDetail, StoreDetail, RegisterAuction, MultipleImage, StoreConvChange, StoreBasicChange, Login  } from "../screens";
 import BidManageTab from './BidManageTab';
+import {LoginContext} from "../contexts";
 
 
 const Stack = createStackNavigator();
 
 const MypageStack = () => {
     const theme = useContext(ThemeContext);
+    const {mode} = useContext(LoginContext);
     const [isUser, setIsUset] = useState(false);
     return (
         <Stack.Navigator
-            initialRouteName="Mypage_Store"
+            initialRouteName={mode==="STORE" ? "Mypage_Store" : "Mypage_User"}
             screenOptions={{
                 headerTitleAlign: "center",
                 cardStyle: { backgroundColor: theme.backgroundColor },
@@ -35,7 +37,7 @@ const MypageStack = () => {
             <Stack.Screen name="Bookmark" component={Bookmark} options={{ headerBackTitle: false, headerTitle: "즐겨찾기", headerTitleAlign: 'center', headerTitleStyle: { fontSize: 20, fontWeight: 'normal' }, }} />
             <Stack.Screen name="Message" component={Message} options={{ headerBackTitle: false, headerTitle: "메세지", headerTitleAlign: 'center', headerTitleStyle: { fontSize: 20, fontWeight: 'normal' }, }} />
             <Stack.Screen name="AuctionDetail" component={AuctionDetail} options={{ headerBackTitle: false, headerTitle: "", headerTitleAlign: 'center', headerTitleStyle: { fontSize: 20, fontWeight: 'normal' }, }} />
-            <Stack.Screen name="BidManageTab" component={BidManageTab} options={isUser? { headerBackTitle: false, 
+            <Stack.Screen name="BidManageTab" component={BidManageTab} options={mode === "Customer"? { headerBackTitle: false, 
                 headerTitle: "공고 관리", headerTitleAlign: 'center', headerTitleStyle: { fontSize: 20, fontWeight: 'normal' }, } : { headerBackTitle: false, 
                 headerTitle: "입찰 내역", headerTitleAlign: 'center', headerTitleStyle: { fontSize: 20, fontWeight: 'normal' }, }} />
             <Stack.Screen name="AuctionBid" component={AuctionBid} options={{ headerBackTitle: false, headerTitle: "공고 수정", headerTitleAlign: 'center', headerTitleStyle: { fontSize: 20, fontWeight: 'normal' }, }} />

@@ -7,7 +7,7 @@ import { ThemeContext } from "styled-components";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {StoreList} from "../utils/data";
 import * as Location from "expo-location";
-import {LoginContext} from "../contexts";
+import {LoginContext, UrlContext, ProgressContext} from "../contexts";
 
 const HEIGHT = Dimensions.get("screen").width;
 
@@ -122,16 +122,16 @@ const MapText = styled.Text`
     color:${({ theme }) => theme.background};
 `;
 
-const Item = ({item: {url, id, name, ment, distance, score}, onPress, onStarPress, isStar, theme}) => {
-    var sc = Number.parseFloat(score).toFixed(1);
+const Item = ({item: {id, name, storeImages, storeType}, onPress, onStarPress, isStar, theme}) => {
+
     return (
         <ItemContainer onPress={onPress} >
             {/* <StyledImage source={{uri: url}}/> */}
             <StyledImage />
             <ContentContainter>
                 <ContentTitleText>{name}</ContentTitleText>
-                <ContentText>{ment}</ContentText>
-                <ContentText>{distance}M</ContentText>
+                <ContentText>메세지</ContentText>
+                <ContentText>0M</ContentText>
             </ContentContainter>
             <StarBox>
                 {isStar ?
@@ -146,7 +146,7 @@ const Item = ({item: {url, id, name, ment, distance, score}, onPress, onStarPres
                 </StarBox>
             <ScoreBox>
                 <MaterialCommunityIcons name="star" size={15} color={theme.background}/>
-                <ScoreText>{sc}</ScoreText>
+                <ScoreText>5</ScoreText>
             </ScoreBox>
         </ItemContainer>
     );
@@ -154,7 +154,9 @@ const Item = ({item: {url, id, name, ment, distance, score}, onPress, onStarPres
 
 const Store = ({navigation, route}) => {
     const theme = useContext(ThemeContext);
-    const {allow} = useContext(LoginContext);
+    const {allow, token} = useContext(LoginContext);
+    const {url} = useContext(UrlContext);
+    const {spinner} = useContext(ProgressContext);
 
     const [sort,setSort] = useState(0);
     const [isStar, setIsStar] = useState(false);
@@ -162,13 +164,44 @@ const Store = ({navigation, route}) => {
     const [lati, setLati] = useState(0);
     const [longi, setLongi] = useState(0);
     const {menu} = route.params;
+    const [storeListData, setStoreListData] = useState([]);
+
+    const handleApi = async () => {
+        let fixedUrl = url+"/member/stores";
+
+        let options = {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token,
+            },
+        };
+
+        try {
+            spinner.start();
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+            let list = res["list"];
+            setStoreListData(list);
+        }catch(error) {
+            console.error(error);
+        }finally {
+            spinner.stop();
+        }
+    };
+
+    useEffect(()=>{
+        handleApi();
+    },[]);
+
 
     useEffect(()=> {
         // data 정렬 
     }, [sort, menu]);
 
     const _onStorePress = item => {
-        navigation.navigate('StoreDetailStack', { id: item.id, name: item.storeName });
+        navigation.navigate('StoreDetailStack', { id: item.id});
     };
     const _onStarPress = () => {setIsStar(!isStar);}
 
@@ -196,13 +229,7 @@ const Store = ({navigation, route}) => {
             
             <ScrollView>
             <StoresConteinter>
-                <FlatList 
-                horizontal={false}
-                keyExtractor={item => item['id'].toString()}
-                data={StoreList}
-                renderItem={({item}) => (
-                    <Item item={item} onPress={()=> _onStorePress(item)} onStarPress={_onStarPress} isStar={isStar} theme={theme}/>
-                )}/>
+                {storeListData.map(item => (<Item item={item} key={item.id} onPress={()=> _onStorePress(item)} onStarPress={_onStarPress} isStar={isStar} theme={theme}/>))}
             </StoresConteinter>
             <AdditionalBox />
             </ScrollView>

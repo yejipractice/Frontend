@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import styled from "styled-components/native";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
-import {Reviews} from "../utils/data";
+import {Reviews} from "../../utils/data";
 import {Dimensions, FlatList} from "react-native";
 
 const WIDTH = Dimensions.get("screen").width;
@@ -107,10 +107,11 @@ const ReviewSet = ({review: {id, date, name, score, ment, src, userSrc}, onChang
     return (
         <InfoContainer>
             <DefaultText>{date}</DefaultText>
+            { isUser &&
             <ChangeContainer>
-                {isUser && <ChangeText onPress={onChange}>수정</ChangeText>}
+                <ChangeText onPress={onChange}>수정</ChangeText>
                 <ChangeText onPress={onRemove}>삭제</ChangeText>
-            </ChangeContainer>
+            </ChangeContainer> }
             <UserInfoContainer>
                 <UserContainer>
                     <UserImage source={{uri: userSrc}}/>

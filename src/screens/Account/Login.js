@@ -1,11 +1,11 @@
 // 로그인 페이지
 import React, {useState, useRef,useEffect, useContext} from 'react';
 import styled, {ThemeContext} from "styled-components/native";
-import {Input,Button, CheckBoxLetter, IconButton} from "../components";
+import {Input,Button, CheckBoxLetter, IconButton} from "../../components";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
-import {validateEmail,removeWhitespace} from "../utils/common";
-import {images} from "../images";
-import {UrlContext, ProgressContext, LoginConsumer, LoginContext} from "../contexts";
+import {validateEmail,removeWhitespace} from "../../utils/common";
+import {images} from "../../images";
+import {UrlContext, ProgressContext, LoginConsumer, LoginContext} from "../../contexts";
 import {Alert} from "react-native";
 import * as Location from "expo-location";
 
@@ -242,7 +242,8 @@ const Login = ({navigation}) => {
             ref={passwordRef} 
             label="비밀번호" 
             value={password} 
-            onChangeText={text=> setPassword(removeWhitespace(text))}  
+            onChangeText={text=> setPassword(removeWhitespace(text))} 
+            onSubmitEditing={() => _handleLoginPress()} 
             placeholder="비밀번호를 입력하세요" 
             returnKeyType="done" 
             isPassword 
