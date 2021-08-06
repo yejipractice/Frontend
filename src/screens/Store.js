@@ -72,12 +72,12 @@ const StyledImage = styled.View`
 
 const ContentContainter = styled.View`
     padding: 0px 10px;
+    justify-content: center;
 `;
 
 const ContentTitleText = styled.Text`
     font-size: 20px;
     font-weight: bold;
-    margin-bottom: 5px;
     color:${({ theme }) => theme.text};
 `;
 
@@ -130,7 +130,6 @@ const Item = ({item: {id, name, storeImages, storeType}, onPress, onStarPress, i
             <StyledImage />
             <ContentContainter>
                 <ContentTitleText>{name}</ContentTitleText>
-                <ContentText>메세지</ContentText>
                 <ContentText>0M</ContentText>
             </ContentContainter>
             <StarBox>
