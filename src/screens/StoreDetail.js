@@ -249,6 +249,9 @@ const StoreDetail = ({navigation, route}) => {
     const [changedFac, setChangedFac] = useState(null);
 
     const _handleFacilities = () => {
+        if(facilities===[]){
+            return null;
+        }
         let list = [];
         for(var i = 0; i<facilities.length; i++){
             list.push(_changeFac(facilities[i].facilityType));
@@ -285,10 +288,12 @@ const StoreDetail = ({navigation, route}) => {
             setPhoneNumber(res.data.phoneNum);
             setOpenTime(setTime(res.data.openTime));
             setCloseTime(setTime(res.data.closedTime));
-            setParking(res.data.facility.parking);
-            setParkingCount(res.data.facility.parkingCount);
-            setCapacity(res.data.facility.capacity);
-            setFacilities(res.data.facility.facilityEtcs);
+            if(res.data.facility.parking!==null){
+                setParking(res.data.facility.parking);
+                setParkingCount(res.data.facility.parkingCount);
+                setCapacity(res.data.facility.capacity);
+                setFacilities(res.data.facility.facilityEtcs);
+            }
             console.log(res);
             
         }catch(error){
@@ -351,6 +356,16 @@ const StoreDetail = ({navigation, route}) => {
             inactiveDotScale={1}
            />
 
+            {menus.length===0? (
+                <InfoBox isFirst={true}>
+                <InfoTextContainer>
+                    <FirstInfo><InfoText>메뉴</InfoText></FirstInfo>
+                    <SecondInfo><InfoText></InfoText></SecondInfo>
+                    <ThirdInfo><InfoText></InfoText></ThirdInfo>
+                </InfoTextContainer>
+            </InfoBox>
+            ):null}
+
             {menus.map(menu => (
                 <InfoBox isFirst={menu.menuId===1}>
                     <InfoTextContainer>
@@ -390,7 +405,7 @@ const StoreDetail = ({navigation, route}) => {
                 <InfoTextContainer>
                     <FirstInfo><InfoText>최대수용인원</InfoText></FirstInfo>
                     <SecondInfo double><InfoText></InfoText></SecondInfo>
-                    <ThirdInfo double><InfoText>{capacity}명</InfoText></ThirdInfo>
+                    <ThirdInfo double><InfoText>{capacity!==null? `${capacity}명` :""}</InfoText></ThirdInfo>
                </InfoTextContainer>
            </InfoBox>
 
@@ -398,18 +413,32 @@ const StoreDetail = ({navigation, route}) => {
                 <InfoTextContainer>
                     <FirstInfo><InfoText>주차시설</InfoText></FirstInfo>
                     <SecondInfo double><InfoText></InfoText></SecondInfo>
-                    <ThirdInfo double><InfoText>{parking? parkingCount+"대 가능" : "주차불가"}</InfoText></ThirdInfo>
+                    {capacity!==null? (
+                        <ThirdInfo double><InfoText>{parking? parkingCount+"대 가능" : "주차불가"}</InfoText></ThirdInfo>
+                    ) : (
+                        <ThirdInfo double><InfoText></InfoText></ThirdInfo>
+                    )}
                </InfoTextContainer>
            </InfoBox>
-
-           <InfoBox isLast={true}>
+            {capacity!==null? (
+                  <InfoBox isLast={true}>
+                  <InfoTextContainer>
+                      <FirstInfo><InfoText>기타시설</InfoText></FirstInfo>
+                      <SecondInfo double><InfoText></InfoText></SecondInfo>
+                      {(changedFac !== null && changedFac.length > 19) ? (<ThirdInfo double><InfoText style={{fontSize: 15}}>{changedFac}</InfoText></ThirdInfo>) 
+                      : (<ThirdInfo double><InfoText style={{fontSize: 17}}>{changedFac}</InfoText></ThirdInfo>)}
+                 </InfoTextContainer>
+             </InfoBox>
+            ) : (
+                <InfoBox isLast={true}>
                 <InfoTextContainer>
                     <FirstInfo><InfoText>기타시설</InfoText></FirstInfo>
                     <SecondInfo double><InfoText></InfoText></SecondInfo>
-                    {(changedFac !== null && changedFac.length > 19) ? (<ThirdInfo double><InfoText style={{fontSize: 15}}>{changedFac}</InfoText></ThirdInfo>) 
-                    : (<ThirdInfo double><InfoText style={{fontSize: 17}}>{changedFac}</InfoText></ThirdInfo>)}
+                    <ThirdInfo double><InfoText></InfoText></ThirdInfo>
                </InfoTextContainer>
            </InfoBox>
+            )}
+         
            
             <InfoBox isFirst={true}>
                     <InfoTextContainer>

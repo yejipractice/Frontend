@@ -165,6 +165,12 @@ const Store = ({navigation, route}) => {
     const {menu} = route.params;
     const [storeListData, setStoreListData] = useState([]);
 
+    const filterData = (list) => {
+        var response = list.filter(item => item.documentChecked===true);
+        var res = response.filter(item => item.addr!==null);
+        return res;
+    };
+
     const handleApi = async () => {
         let fixedUrl = url+"/member/stores";
 
@@ -182,6 +188,7 @@ const Store = ({navigation, route}) => {
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
             let list = res["list"];
+            list = await filterData(list);
             setStoreListData(list);
         }catch(error) {
             console.error(error);
