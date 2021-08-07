@@ -1,7 +1,7 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import styled from "styled-components/native";
 import { MypageButton, ProfileImage, SmallButton } from '../../components'
-import {LoginContext} from "../../contexts";
+import {LoginContext, UrlContext, ProgressContext} from "../../contexts";
 import {Alert} from "react-native";
 
 const Container = styled.View`
@@ -50,8 +50,39 @@ const LogoutContainer = styled.View`
 `;
 
 const Mypage_Store = ({ navigation }) => {
+    const {token, setSuccess, doc, storeId} = useContext(LoginContext);
+    const {url} = useContext(UrlContext);
+    const {spinner} = useContext(ProgressContext);
+    const [name, setName] = useState("");
 
-    const {setSuccess, doc} = useContext(LoginContext);
+
+    useEffect(()=>{
+        handleApi();
+    },[])
+
+    const handleApi = async () => {
+    let fixedUrl = url+"/member/store/"+storeId;
+
+    let options = {
+        method: 'GET',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            'X-AUTH-TOKEN' : token
+        },
+    };
+
+    try {
+        spinner.start();
+        let response = await fetch(fixedUrl, options);
+        let res = await response.json();
+        setName(res.data.name);
+    }catch (error) {
+        console.error(error);
+      } finally {
+        spinner.stop();
+      }
+    };
 
     return (
         <Container>
@@ -65,7 +96,7 @@ const Mypage_Store = ({ navigation }) => {
                     <ProfileButton onPress={() => {
                         navigation.navigate("StoreInfo");
                     }}>
-                        <Username>업체 이름</Username>
+                       <Username style={{color: name===""? "white" : "black"}}>{name}</Username>
                     </ProfileButton>
                 </ProfileContainer>
                 <LogoutContainer>

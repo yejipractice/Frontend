@@ -85,10 +85,8 @@ const StoreManage = ({ navigation }) => {
 
     const {url} = useContext(UrlContext);
     const {spinner} = useContext(ProgressContext);
-    const {token, doc} = useContext(LoginContext);
+    const {token, doc, storeId} = useContext(LoginContext);
 
-    // 임의로 설정
-    const storeId = 1;
 
     // 업체 기본정보
     const [phoneNumber, setPhoneNumber] = useState("");
@@ -475,6 +473,7 @@ const StoreManage = ({ navigation }) => {
                 {/* 업체 기본정보 */}
                 <View style={{marginLeft: 10}}>
                     <DescTitle size={23}>업체 기본정보</DescTitle>
+                    <DescTitle size={12}>(기본 정보가 입력되어야 업체 조회 리스트에 등록됩니다.)</DescTitle>
                 </View>
                 <InfoContainer>
                     <ManageText 

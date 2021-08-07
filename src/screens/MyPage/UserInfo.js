@@ -224,7 +224,7 @@ const  UesrInfo = ({navigation}) => {
                             onPress={()=>{}}
                         /></AdditionalContainer>
                     </RowContainer>
-                    <InfoText label="지역" content={addr}/>
+                    <InfoText label="주소" content={addr}/>
                 </InfoContainer>
                 
                 <View style={styles.hr}/>

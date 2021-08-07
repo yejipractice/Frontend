@@ -1,10 +1,9 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
-import {  Dimensions, Modal, View, StyleSheet,TouchableOpacity, Alert } from 'react-native';
+import { Modal, View, StyleSheet,TouchableOpacity, Alert } from 'react-native';
 import styled from "styled-components/native";
 import { Input,Button, RadioButton } from '../../components';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { validateEmail, removeWhitespace, validatePassword } from '../../utils/common';
-import { __asyncGenerator } from 'tslib';
 import {ProgressContext, UrlContext, LoginContext} from "../../contexts";
 import Postcode from '@actbase/react-daum-postcode';
 import * as Location from "expo-location";
@@ -384,6 +383,7 @@ const Signup = ({ navigation, route }) => {
                     userType: "CUSTOMER",
                     latitude: lat,
                     longitude: lon,
+                    addr: addr,
                 }
             }
             else if(route.params.mode === 'Store'){
@@ -528,6 +528,7 @@ const Signup = ({ navigation, route }) => {
                 label="주소"
                 value={addr}
                 placeholder="주소를 입력하세요"
+                onChangeText={text => setAddr(text)}
                 editable={addr===""? false: true}
                 returnKeyType="done"
                 hasButton
