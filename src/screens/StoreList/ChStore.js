@@ -1,13 +1,11 @@
 import React, {useState, useEffect, useContext} from 'react';
 import styled from "styled-components/native";
-import {Text, Dimensions, FlatList, View, ScrollView, Alert} from "react-native";
-import { IconButton } from "../components";
-import { images } from '../images';
+import {Dimensions, View, ScrollView, Alert} from "react-native";
 import { ThemeContext } from "styled-components";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import {StoreList} from "../utils/data";
 import * as Location from "expo-location";
-import {LoginContext, UrlContext, ProgressContext} from "../contexts";
+import {LoginContext, UrlContext, ProgressContext} from "../../contexts";
+import {_changeType} from "../../utils/common";
 
 const HEIGHT = Dimensions.get("screen").width;
 
@@ -162,14 +160,17 @@ const Store = ({navigation, route}) => {
     const [loc, setLoc] = useState(null);
     const [lati, setLati] = useState(0);
     const [longi, setLongi] = useState(0);
-    const {menu} = route.params;
+    const menu = _changeType(route.name);
     const [storeListData, setStoreListData] = useState([]);
 
     const filterData = (list) => {
         var response = list.filter(item => item.documentChecked===true);
         var res = response.filter(item => item.addr!==null);
-        return res;
+        var r = res.filter(item => item.storeType === menu);
+        return r;
     };
+
+
 
     const handleApi = async () => {
         let fixedUrl = url+"/member/stores";
