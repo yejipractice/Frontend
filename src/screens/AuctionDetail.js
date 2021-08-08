@@ -6,6 +6,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { BidstoreList } from '../utils/data';
 import {LoginContext, UrlContext, ProgressContext} from "../contexts";
+import { cutDateData, changeDateData } from '../utils/common';
 
 const WIDTH = Dimensions.get("screen").width;
 
@@ -120,6 +121,7 @@ const AuctionDetail = ({ navigation, route}) => {
     const [content, setContent] = useState("");
     const [addr, setAddr] = useState("");
     const [groupCnt, setGruopCnt] = useState(0);
+    const [finished, setFinished] = useState(false);
 
     const _onMessagePress = () => { navigation.navigate("Message" , {name: "닉네임"+AuctionId}) };
 
@@ -162,6 +164,7 @@ const AuctionDetail = ({ navigation, route}) => {
             setContent(data.content);
             setGruopCnt(data.groupCnt);
             setAddr(data.addr);
+            setFinished(checkFinished(data.deadline))
         }catch(error) {
             console.error(error);
         }finally {
@@ -169,7 +172,16 @@ const AuctionDetail = ({ navigation, route}) => {
         }
     };
 
-    const changeDateData = (date) =>{
+    const checkFinished = (d) => {
+        var now = new Date().toJSON();
+        var nowdata = cutDateData(changeDateData(now));
+        if(cutDateData(changeDateData(d)) < nowdata){
+            return true;
+        }
+        return false;
+    };
+
+    const changeDateData1 = (date) =>{
         var y = date.slice(0,4);
         var m = date.slice(5,7);
         var d = date.slice(8,10);
@@ -225,6 +237,7 @@ const AuctionDetail = ({ navigation, route}) => {
     };
 
 
+
     useEffect(()=> {
         handleApi();
     },[]);
@@ -240,6 +253,8 @@ const AuctionDetail = ({ navigation, route}) => {
                     <View style={styles.name}>
                         <TitleBox>
                         <Title>{title}</Title>
+                        { mode === 'STORE' &&
+                        <>
                         {isStar ?
                             (
                                 <MaterialCommunityIcons name="star" size={40} onPress={_onStarPress} color="yellow"
@@ -249,6 +264,7 @@ const AuctionDetail = ({ navigation, route}) => {
                                 <MaterialCommunityIcons name="star-outline" size={40} onPress={_onStarPress} color="yellow"
                                     style={{ position: "absolute", right: '5%', opacity: 0.7 }} />
                         )}
+                         </>}
                         </TitleBox>
                     </View>
                         <TextBox>
@@ -261,11 +277,11 @@ const AuctionDetail = ({ navigation, route}) => {
                 <InfoContainer>
                     <RowItemContainer>
                         <DescTitle style={{marginTop: 10}}>단체유형 및 인원수</DescTitle>
-                        <Desc>{userType} ({groupCnt}명)</Desc>
+                        <Desc>{userType===""? "" : `${userType} (${groupCnt}명)`}</Desc>
                     </RowItemContainer>
                     <RowItemContainer>
                         <DescTitle>예약시간 및 날짜</DescTitle>
-                        <Desc>{changeDateData(reservation)}</Desc>
+                        <Desc>{reservation===""? "" : changeDateData1(reservation)}</Desc>
                     </RowItemContainer>
                     <RowItemContainer>
                         <DescTitle>선호 위치</DescTitle>
@@ -277,7 +293,7 @@ const AuctionDetail = ({ navigation, route}) => {
                     </RowItemContainer>
                     <RowItemContainer>
                         <DescTitle>선호 가격</DescTitle>
-                        <Desc>{minPrice}원 ~ {maxPrice}원</Desc>
+                        <Desc>{(minPrice==="" || maxPrice==="")? "" : `${minPrice}원 ~ ${maxPrice}원`}</Desc>
                     </RowItemContainer>
                     <RowItemContainer border='0'>
                         <DescTitle>추가 사항</DescTitle>
@@ -306,7 +322,7 @@ const AuctionDetail = ({ navigation, route}) => {
                 </InfoContainer>
 
                 {/* Store만 ButtonContainer가 보이도록 구현 필요 이미 참여했으면 수정으로 바꾸기..? */}
-                {!(status==="PROCEEDING") && (mode==="STORE") &&
+                { (!finished&&(mode==="STORE")) &&
                  (<ButtonContainer>
                  <Button
                      title="참여"
