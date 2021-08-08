@@ -165,7 +165,7 @@ background-color:  ${({ theme }) => theme.background};
 
 const RegisterAuction = ({navigation}) => {
   const {allow, token} = useContext(LoginContext);
-  const {aurl} = useContext(UrlContext);
+  const {url} = useContext(UrlContext);
   const {spinner} = useContext(ProgressContext);
   const [allowLoc, setAllowLoc] = useState(allow);
 
@@ -309,7 +309,7 @@ const _getLocPer = async () => {
   }, [allowLoc]);
 
   const handleApi = async () => {
-    let fixedUrl = aurl+"/auction";
+    let fixedUrl = url+"/auction";
 
     let Info = {
       content: additionalContent,

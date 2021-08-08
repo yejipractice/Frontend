@@ -4,7 +4,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Modal, StyleSheet, TouchableOpacity } from 'react-native';
 import {LoginContext, UrlContext, ProgressContext} from "../contexts";
 
-
+//비동기적으로 멘트 끝까지 모두 보내졌는지 다시 확인하기  
 const Container = styled.View`
     flex: 1;
     justify-content: flex-start;
@@ -126,7 +126,7 @@ const AuctionBid = ({ navigation, route }) => {
     useLayoutEffect(() => {
         navigation.setOptions({
             headerRight: () => (
-                disabled ? (<MaterialCommunityIcons name="check" size={35} onPress={_onPress}
+                disabled ? (<MaterialCommunityIcons name="check" size={35} onPress={setUploaded(true)}
                     style={{ marginRight: 10, marginBottom: 3, opacity: 0.3 }} />)
                     : (<MaterialCommunityIcons name="check" size={35} onPress={_onPress}
                         style={{ marginRight: 10, marginBottom: 3, opacity: 1 }} />)

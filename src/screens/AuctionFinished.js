@@ -89,7 +89,7 @@ const Item = React.memo(({item: {auctionId, auctioneers, content, createdDate, d
 const Auction = ({navigation}) => {
     const theme = useContext(ThemeContext);
     const {token} = useContext(LoginContext);
-    const {aurl} = useContext(UrlContext);
+    const {url} = useContext(UrlContext);
     const {spinner} = useContext(ProgressContext);
 
     const [isStar, setIsStar] = useState(false);
@@ -154,7 +154,7 @@ const Auction = ({navigation}) => {
     };
 
     const handleApi = async () => {
-        let fixedUrl = aurl+"/auction/auctions";
+        let fixedUrl = url+"/auction/auctions";
 
         let options = {
             method: 'GET',

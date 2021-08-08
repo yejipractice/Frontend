@@ -121,7 +121,8 @@ const MapText = styled.Text`
 `;
 
 const Item = ({item: {id, name, storeImages, storeType}, onPress, onStarPress, isStar, theme}) => {
-
+    const {mode} = useContext(LoginContext);
+    
     return (
         <ItemContainer onPress={onPress} >
             {/* <StyledImage source={{uri: url}}/> */}

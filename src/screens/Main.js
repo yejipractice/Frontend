@@ -211,7 +211,7 @@ const Store = ({ item: { id, storeName, score, reviews, foodType, src }, onPress
 
 const Main = ({ navigation }) => {
     const theme = useContext(ThemeContext);
-    const {aurl, url} = useContext(UrlContext);
+    const { url} = useContext(UrlContext);
     const {allow, autoLogin, doc, mode, token} = useContext(LoginContext);
     const {spinner} = useContext(ProgressContext);
 
@@ -237,7 +237,7 @@ const Main = ({ navigation }) => {
     };
 
     const handleAuctionApi = async () => {
-        let fixedUrl = aurl+"/auction/auctions";
+        let fixedUrl = url+"/auction/auctions";
 
         let options = {
             method: 'GET',
