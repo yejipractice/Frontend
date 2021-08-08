@@ -85,27 +85,25 @@ const StoreManage = ({ navigation }) => {
 
     const {url} = useContext(UrlContext);
     const {spinner} = useContext(ProgressContext);
-    const {token, doc} = useContext(LoginContext);
+    const {token, doc, storeId} = useContext(LoginContext);
 
-    // 임의로 설정
-    const storeId = 1;
 
     // 업체 기본정보
-    const [phoneNumber, setPhoneNumber] = useState();
-    const [address, setAddress] = useState();
-    const [storeType, setStoreType] = useState();
+    const [phoneNumber, setPhoneNumber] = useState("");
+    const [address, setAddress] = useState("");
+    const [storeType, setStoreType] = useState("");
     const [openTime, setOpeningTime] = useState('');
     const [closeTime, setClosingTime] = useState('');
-    const [lat, setLat] = useState();
-    const [lon, setLon] = useState();
+    const [lat, setLat] = useState("");
+    const [lon, setLon] = useState("");
 
     // 업체 메뉴 리스트
     const [menus, setMenus] = useState([]);
     
     //업체 편의정보
-    const [personNumber, setPersonNumber] = useState();
-    const [isParking, setIsParking] = useState();
-    const [parkingNumber, setParkingNumber] = useState();
+    const [personNumber, setPersonNumber] = useState("");
+    const [isParking, setIsParking] = useState("");
+    const [parkingNumber, setParkingNumber] = useState("");
 
     // 기타시설
     const [facilityEtcs, setFacilityEtcs] = useState([]);
@@ -167,7 +165,6 @@ const StoreManage = ({ navigation }) => {
 
     // 서버 get 처리
     const getApi = async (url) => {
-        console.log(url);
 
         let options = {
             method: 'GET',
@@ -178,27 +175,27 @@ const StoreManage = ({ navigation }) => {
             },
         };
         try {
+            spinner.start();
             let response = await fetch(url,options);
             let res = await response.json();
-            console.log(res);
 
             return res;
 
           } catch (error) {
             console.error(error);
+          } finally {
+              spinner.stop();
           }
     }
 
     // 업체 정보들 불러오기
     const infoGet = async () => {
         let fixedUrl =url+'/member/store/'+`${storeId}`;
-        console.log(fixedUrl);
 
         try{
             spinner.start();
             const res =  await getApi(fixedUrl);
 
-            console.log(res);
 
             if(res.success){
                 // 기본정보 등록되어있으면 값 바꿈
@@ -235,7 +232,6 @@ const StoreManage = ({ navigation }) => {
             spinner.start();
             const res =  await getApi(fixedUrl);
 
-            console.log(res.success);
             if(res.success){
                 setMenus(res.list);
             }
@@ -313,7 +309,6 @@ const StoreManage = ({ navigation }) => {
 
     // 메뉴 삭제 delete 처리
     const deleteApi = async (url) => {
-        console.log(url);
 
         let options = {
             method: 'DELETE',
@@ -381,7 +376,6 @@ const StoreManage = ({ navigation }) => {
         let formData = new FormData();
         formData.append('file', { uri: photo, name: filename, type: type });
 
-        console.log(formData);
         let options = {
             method: 'POST',
             headers: {
@@ -396,7 +390,6 @@ const StoreManage = ({ navigation }) => {
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
 
-            console.log(res);
             return res["success"];
             
             
@@ -457,7 +450,20 @@ const StoreManage = ({ navigation }) => {
         }
     }
 
-
+    const _setList = () => {
+        let list = [];
+        if(room) {list.push("룸")};
+        if(groupseat) {list.push("단체석")}
+        if(sedentary) {list.push("좌식")}
+        if(internet) {list.push("무선 인터넷")}
+        if(highchair) {list.push("유아용 의자")}
+        if(handicap) {list.push("장애인 편의시설")}
+        if(pet) {list.push("반려동물")}
+        var listStr = list.join(", ");
+        
+        
+        return listStr; 
+    };
 
     return (
         <Container>
@@ -467,6 +473,7 @@ const StoreManage = ({ navigation }) => {
                 {/* 업체 기본정보 */}
                 <View style={{marginLeft: 10}}>
                     <DescTitle size={23}>업체 기본정보</DescTitle>
+                    <DescTitle size={12}>(기본 정보가 입력되어야 업체 조회 리스트에 등록됩니다.)</DescTitle>
                 </View>
                 <InfoContainer>
                     <ManageText 
@@ -550,7 +557,7 @@ const StoreManage = ({ navigation }) => {
                     
                     {menus.map(item => (
                         
-                        <RowItemContainer>
+                        <RowItemContainer key={item.menuId}>
                             <View style={{flexDirection: 'row', justifyContent: 'space-between', }}>
                                 <Label>이름 : {item.name}</Label>
                                 <Label>가격 : {item.price}원</Label>
@@ -578,22 +585,14 @@ const StoreManage = ({ navigation }) => {
                     <ManageText 
                         label="주차"
                         isText
-                        text={isParking ? parkingNumber+"명" : "없음" }
+                        text={isParking ? parkingNumber+"대 가능" : "없음" }
                     />
                     
                     {/* 기타시설 list에 넣어서 관리 생각.. */}
                     <ManageText 
                         label="기타시설"
                         isText
-                        text={
-                            (room ? "룸 " : "") + 
-                            (groupseat ? "단체석 " : "") +
-                            (sedentary ? "좌식 " : "") +
-                            (internet ? "무선인터넷 " : "") +
-                            (highchair ? "유아용 의자 " : "") +
-                            (handicap ? "장애인 편의시설 " : "") +
-                            (pet ? "반려동물 " : "") 
-                        }
+                        text={_setList()}
                     />
                     
                 </InfoContainer>
