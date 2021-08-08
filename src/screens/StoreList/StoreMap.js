@@ -128,7 +128,7 @@ const StoreMap = ({navigation, route}) => {
     const mapRef = useRef();
     
     const theme = useContext(ThemeContext);
-    const {token} = useContext(LoginContext);
+    const {token, mode} = useContext(LoginContext);
     const {url} = useContext(UrlContext);
     const {spinner} = useContext(ProgressContext);
 
@@ -245,6 +245,7 @@ const StoreMap = ({navigation, route}) => {
                     <ContentText>{ment}</ContentText>
                     <ContentText>0M</ContentText>
                 </ContentContainter>
+                {mode ==="CUSTOMER" && 
                 <StarBox>
                     {isStar ?
                                 (
@@ -255,7 +256,7 @@ const StoreMap = ({navigation, route}) => {
                                     <MaterialCommunityIcons name="star-outline" size={30} onPress={onStarPress} color="yellow"
                                         style={{ marginLeft: 15, marginBottom: 5, opacity: 0.7 }} />
                                 )}
-                    </StarBox>
+                    </StarBox>}
                 <ScoreBox>
                     <MaterialCommunityIcons name="star" size={12} color={theme.background}/>
                     <ScoreText>{sc}</ScoreText>

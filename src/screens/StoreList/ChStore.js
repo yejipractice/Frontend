@@ -130,6 +130,7 @@ const Item = ({item: {id, name, storeImages, storeType}, onPress, onStarPress, i
                 <ContentTitleText>{name}</ContentTitleText>
                 <ContentText>0M</ContentText>
             </ContentContainter>
+            {mode ==="CUSTOMER" && 
             <StarBox>
                 {isStar ?
                             (
@@ -140,7 +141,7 @@ const Item = ({item: {id, name, storeImages, storeType}, onPress, onStarPress, i
                                 <MaterialCommunityIcons name="star-outline" size={40} onPress={onStarPress} color="yellow"
                                     style={{ marginLeft: 15, marginBottom: 5, opacity: 0.7 }} />
                             )}
-                </StarBox>
+                </StarBox>}
             <ScoreBox>
                 <MaterialCommunityIcons name="star" size={15} color={theme.background}/>
                 <ScoreText>5</ScoreText>
@@ -151,7 +152,7 @@ const Item = ({item: {id, name, storeImages, storeType}, onPress, onStarPress, i
 
 const Store = ({navigation, route}) => {
     const theme = useContext(ThemeContext);
-    const {allow, token} = useContext(LoginContext);
+    const {allow, token, mode} = useContext(LoginContext);
     const {url} = useContext(UrlContext);
     const {spinner} = useContext(ProgressContext);
 
