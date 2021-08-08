@@ -253,8 +253,8 @@ const _getLocPer = async () => {
 
     //현재 위치 
     const getLocation = async () => {
-        if(allow){
-          let location = await Location.getCurrentPositionAsync({}); 
+        if(allowLoc){
+          let location = await Location.getCurrentPositionAsync({accuracy:Location.Accuracy.High}); 
           setLati(location.coords.latitude);
           setLongi(location.coords.longitude);
         }
@@ -280,7 +280,7 @@ const _getLocPer = async () => {
   const getKoreanLocation = async (lat, lng, api) => {
     let response = await fetch(api);
     let res = await response.json();
-    let result = convertKoreanLocation(res);
+    let result = await convertKoreanLocation(res);
     return result;
   };
 
