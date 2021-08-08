@@ -7,7 +7,7 @@ import {Alert} from "react-native";
 const Container = styled.View`
     background-color: ${({theme})=> theme.background};
     flex: 1;
-    padding: 0 50px;
+    padding: 0 10%;
 `;
 
 const IconContainer = styled.View`
@@ -24,11 +24,12 @@ const InfoContainer = styled.View`
 `;
 
 const ProfileContainer = styled.View`
+    width: 100%;
     flex-direction: row;
     align-self: flex-start;
     background-color: ${({theme})=> theme.background};
-    align-items:center;
-    justify-content: center;
+    justify-content: space-between;
+    align-items: center;
     margin-top: 30px;
 `;
 
@@ -38,12 +39,13 @@ const ProfileButton = styled.TouchableOpacity`
     
 `
 const Username = styled.Text`
-    font-size: 25px;
+    font-size: 23px;
     margin-left: 40px;
     font-weight: bold;
 `;
 
 const LogoutContainer = styled.View`
+width: 100%;
     align-items: flex-end;
     justify-content: flex-start;
     margin-right: 20px;

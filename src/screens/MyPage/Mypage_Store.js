@@ -7,7 +7,7 @@ import {Alert} from "react-native";
 const Container = styled.View`
     background-color: ${({ theme }) => theme.background};
     flex: 1;
-    padding: 0 50px;
+    padding: 0 10%;
 `;
 
 const IconContainer = styled.View`
@@ -24,11 +24,12 @@ const InfoContainer = styled.View`
 `;
 
 const ProfileContainer = styled.View`
+    width: 100%;
     flex-direction: row;
     align-self: flex-start;
     background-color: ${({ theme }) => theme.background};
-    align-items:center;
-    justify-content: center;
+    justify-content: space-between;
+    align-items: center;
     margin-top: 30px;
 `;
 
@@ -38,12 +39,13 @@ const ProfileButton = styled.TouchableOpacity`
     
 `
 const Username = styled.Text`
-    font-size: 25px;
+    font-size: 23px;
     margin-left: 40px;
     font-weight: bold;
 `;
 
 const LogoutContainer = styled.View`
+    width: 100%;
     flex-direction: row;
     align-items: flex-end;
     justify-content: space-between;
@@ -101,7 +103,7 @@ const Mypage_Store = ({ navigation }) => {
                 </ProfileContainer>
                 <LogoutContainer>
                     <SmallButton title={doc? "서류 변경" : "서류 등록"}
-                        containerStyle={{ width: '30%' }}
+                        containerStyle={{ width: '35%' }}
                         onPress={() => {navigation.navigate("DocumentRegister")}}
                         uploaded={doc? true : false}
                     />

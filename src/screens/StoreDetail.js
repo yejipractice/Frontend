@@ -288,13 +288,14 @@ const StoreDetail = ({navigation, route}) => {
             setPhoneNumber(res.data.phoneNum);
             setOpenTime(setTime(res.data.openTime));
             setCloseTime(setTime(res.data.closedTime));
-            if(res.data.facility.parking!==null){
+            var uploaded = (res.data.facility===null);
+            if(!uploaded){
                 setParking(res.data.facility.parking);
                 setParkingCount(res.data.facility.parkingCount);
                 setCapacity(res.data.facility.capacity);
                 setFacilities(res.data.facility.facilityEtcs);
             }
-            console.log(res);
+            
             
         }catch(error){
             console.error(error);
