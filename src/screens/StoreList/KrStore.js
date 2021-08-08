@@ -158,10 +158,24 @@ const Store = ({navigation, route}) => {
     const [sort,setSort] = useState(0);
     const [isStar, setIsStar] = useState(false);
     const [loc, setLoc] = useState(null);
-    const [lati, setLati] = useState(0);
-    const [longi, setLongi] = useState(0);
+    const [lati, setLati] = useState(null);
+    const [longi, setLongi] = useState(null);
     const menu = _changeType(route.name);
     const [storeListData, setStoreListData] = useState([]);
+    const [allowLoc, setAllowLoc] = useState(allow);
+    const [isSetting, setIsSetting] = useState(true);
+
+    const _getLocPer = async () => {
+        try{
+            const {status} = await Location.requestForegroundPermissionsAsync();
+            if(status === "granted"){
+                setAllow(true);
+                setAllowLoc(true);
+            };
+        }catch (e) {
+            console.log(e);
+        };
+      };
 
     const filterData = (list) => {
         var response = list.filter(item => item.documentChecked===true);
@@ -190,6 +204,7 @@ const Store = ({navigation, route}) => {
             let list = res["list"];
             list = await filterData(list);
             setStoreListData(list);
+            getLocation();
         }catch(error) {
             console.error(error);
         }finally {
@@ -197,9 +212,19 @@ const Store = ({navigation, route}) => {
         }
     };
 
-    useEffect(()=>{
-        handleApi();
-    },[]);
+    useEffect(()=> {
+        if(!allowLoc){
+            _getLocPer();
+        }else {
+            handleApi();
+        }
+    },[allowLoc]);
+
+    useEffect(()=> {
+        if(lati!==null && longi!==null){
+            setIsSetting(false);
+        }
+    },[lati, longi]);
 
 
     useEffect(()=> {
@@ -212,13 +237,20 @@ const Store = ({navigation, route}) => {
     const _onStarPress = () => {setIsStar(!isStar);}
 
     const getLocation = async () => {
-            let location = await Location.getCurrentPositionAsync({}); 
+        try{
+            spinner.start();
+            let location = await Location.getCurrentPositionAsync({accuracy:Location.Accuracy.High}); 
             setLoc(location);
             setLati(location.coords.latitude);
             setLongi(location.coords.longitude);
-        return loc;
-    };
-
+        }catch(e){
+            console.error(e);
+        }finally{
+            spinner.stop();
+        }
+        
+    return loc;
+};
     return (
         <Container>
             <ButtonsContainer>
@@ -244,22 +276,14 @@ const Store = ({navigation, route}) => {
                 bottom: 10,
                 right: 5,
             }}>
-            <MapButton 
-            onPress={async ()=> {
-                try {
-                    if(allow) {
-                        const res = await getLocation();
-                        console.log(res)
+            {!isSetting && (
+                <MapButton 
+                onPress={()=> {
                         navigation.navigate("StoreMap", {longi: longi, lati: lati});
-                    }else{
-                        Alert.alert("Location Permission Error","위치 정보를 허용해주세요.");
-                    }
-                }catch(e) {
-                    Alert.alert("Error", e.message);
-                }
             }}>
                 <MapText>지도로 보기</MapText>
             </MapButton>
+            )}
             </View>
         </Container>
     );

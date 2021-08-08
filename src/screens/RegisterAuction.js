@@ -159,7 +159,7 @@ right: 10px;
 justify-content: center;
 align-items: center;
 border-radius: 50px;
-border-width: 1px;
+background-color:  ${({ theme }) => theme.background};
 `;
 
 
@@ -918,7 +918,7 @@ const _getLocPer = async () => {
     Alert.alert("Location Permission Error","위치 정보를 허용해주세요.");
   }
 }}>
-<MaterialCommunityIcons name="map-marker" size={30} color="black"/>
+<MaterialCommunityIcons name="apple-safari" size={30} color="black"/>
 </CurrentButton>
 </MapContainer>
 <Label style={{width: WIDTH*0.9, borderRadius: 5, borderWidth: 1, paddingLeft: 5, marginTop: 5, paddingTop: 10, paddingBottom: 10}}>

@@ -398,7 +398,7 @@ const StoreDetail = ({navigation, route}) => {
                 <InfoTextContainer>
                     <FirstInfo><InfoText>영업시간</InfoText></FirstInfo>
                     <SecondInfo double><InfoText></InfoText></SecondInfo>
-                    <ThirdInfo double><InfoText>{openTime} ~ {closeTime}</InfoText></ThirdInfo>
+                    <ThirdInfo double><InfoText>{openTime===null? "" : `${openTime} ~ ${closeTime}`}</InfoText></ThirdInfo>
                </InfoTextContainer>
            </InfoBox>
 
