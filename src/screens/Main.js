@@ -321,33 +321,6 @@ const Main = ({ navigation }) => {
                         )} />
                 </PopularView>
 
-            <RecommededView>
-                    {(mode==="CUSTOMER")
-                        ? (<>
-                            <Title isLoading={isLoading}>사용자 추천 가게</Title>
-                            <FlatList
-                                horizontal={true}
-                                showsHorizontalScrollIndicator={false}
-                                keyExtractor={item => item['id'].toString()}
-                                data={recomendedStore}
-                                renderItem={({ item }) => (
-                                    <Store item={item} theme={theme} onPress={() => _handleStorePress(item)} />
-                                )} />
-                        </>
-                        )
-                        : (<>
-                            <Title isLoading={isLoading}>사용자 추천 공고</Title>
-                            <FlatList
-                                horizontal={true}
-                                showsHorizontalScrollIndicator={false}
-                                keyExtractor={item => item['auctionId'].toString()}
-                                data={latestAuctions}
-                                renderItem={({ item }) => (
-                                    <Item item={item} onPress={() => _handleItemPress(item)} />
-                                )} />
-                            </>
-                    )}
-            </RecommededView>
 
                 <LatestView>
                     <Title isLoading={isLoading}>실시간 최신 공고</Title>

@@ -4,8 +4,9 @@ import {Dimensions, View, ScrollView, Alert} from "react-native";
 import { ThemeContext } from "styled-components";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Location from "expo-location";
-import {LoginContext, UrlContext, ProgressContext} from "../../contexts";
+import {LoginContext, UrlContext} from "../../contexts";
 import {_changeType} from "../../utils/common";
+import {Spinner} from "../../components";
 
 const HEIGHT = Dimensions.get("screen").width;
 
@@ -155,7 +156,6 @@ const Store = ({navigation, route}) => {
     const theme = useContext(ThemeContext);
     const {allow, token, mode} = useContext(LoginContext);
     const {url} = useContext(UrlContext);
-    const {spinner} = useContext(ProgressContext);
 
     const [sort,setSort] = useState(0);
     const [isStar, setIsStar] = useState(false);
@@ -199,7 +199,6 @@ const Store = ({navigation, route}) => {
         };
 
         try {
-            spinner.start();
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
             let list = res["list"];
@@ -208,8 +207,6 @@ const Store = ({navigation, route}) => {
             getLocation();
         }catch(error) {
             console.error(error);
-        }finally {
-            spinner.stop();
         }
     };
 
@@ -238,15 +235,12 @@ const Store = ({navigation, route}) => {
 
     const getLocation = async () => {
         try{
-            spinner.start();
             let location = await Location.getCurrentPositionAsync({accuracy:Location.Accuracy.High}); 
             setLoc(location);
             setLati(location.coords.latitude);
             setLongi(location.coords.longitude);
         }catch(e){
             console.error(e);
-        }finally{
-            spinner.stop();
         }
         
     return loc;

@@ -4,7 +4,8 @@ import {Dimensions, View, ScrollView, Alert} from "react-native";
 import { ThemeContext } from "styled-components";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Location from "expo-location";
-import {LoginContext, UrlContext, ProgressContext} from "../../contexts";
+import {LoginContext, UrlContext} from "../../contexts";
+import {Spinner} from "../../components";
 
 const HEIGHT = Dimensions.get("screen").width;
 
@@ -16,6 +17,7 @@ const Container = styled.View`
 const StoresConteinter = styled.View`
     flex: 1;
     margin-top: 20px;
+    background-color: ${({theme})=> theme.background};
 `;
 
 const ButtonsContainer = styled.View`
@@ -154,7 +156,6 @@ const Store = ({navigation, route}) => {
     const theme = useContext(ThemeContext);
     const {allow, token, mode} = useContext(LoginContext);
     const {url} = useContext(UrlContext);
-    const {spinner} = useContext(ProgressContext);
 
     const [sort,setSort] = useState(0);
     const [isStar, setIsStar] = useState(false);
@@ -198,17 +199,14 @@ const Store = ({navigation, route}) => {
         };
 
         try {
-            spinner.start();
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
             let list = res["list"];
             list = await filterData(list);
             setStoreListData(list);
-            getLocation();
+            await getLocation();
         }catch(error) {
             console.error(error);
-        }finally {
-            spinner.stop();
         }
     };
 
@@ -238,15 +236,12 @@ const Store = ({navigation, route}) => {
 
     const getLocation = async () => {
             try{
-                spinner.start();
                 let location = await Location.getCurrentPositionAsync({accuracy:Location.Accuracy.High}); 
                 setLoc(location);
                 setLati(location.coords.latitude);
                 setLongi(location.coords.longitude);
             }catch(e){
                 console.error(e);
-            }finally{
-                spinner.stop();
             }
             
         return loc;
@@ -265,13 +260,13 @@ const Store = ({navigation, route}) => {
                     <ButtonText>리뷰순</ButtonText>
                 </ButtonBox>
             </ButtonsContainer>
-            
             <ScrollView>
             <StoresConteinter>
-                {storeListData.map(item => (<Item item={item} key={item.id} onPress={()=> _onStorePress(item)} onStarPress={_onStarPress} isStar={isStar} theme={theme}/>))}
+                {!isSetting && storeListData.map(item => (<Item item={item} key={item.id} onPress={()=> _onStorePress(item)} onStarPress={_onStarPress} isStar={isStar} theme={theme}/>))}
             </StoresConteinter>
             <AdditionalBox />
             </ScrollView>
+            {isSetting && <Spinner />}
             <View style={{
                 position: "absolute",
                 bottom: 10,
@@ -285,7 +280,6 @@ const Store = ({navigation, route}) => {
                 <MapText>지도로 보기</MapText>
             </MapButton>
             )}
-            
             </View>
         </Container>
     );

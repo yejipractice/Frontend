@@ -296,7 +296,7 @@ const StoreMap = ({navigation, route}) => {
         showsMyLocationButton={false}
         >
             {storeList.map(item => (
-                <Marker
+                <Marker key={item.id}
                     coordinate={{
                         latitude: item.latitude,
                         longitude: item.longitude,

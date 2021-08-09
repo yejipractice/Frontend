@@ -960,8 +960,8 @@ const _getLocPer = async () => {
         <Container>
           <InfoLabel>추가 정보</InfoLabel>
         <RadioContiner>
-           <DoubleLabel>평균 성별</DoubleLabel>
-            <DoubleLabel>평균 연령대</DoubleLabel>
+           <DoubleLabel>평균 연령대</DoubleLabel>
+            <DoubleLabel>평균 성별</DoubleLabel>
            </RadioContiner>
             <AddContainer>
            <DropDownPicker 
