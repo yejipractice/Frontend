@@ -368,7 +368,7 @@ const StoreDetail = ({navigation, route}) => {
             ):null}
 
             {menus.map(menu => (
-                <InfoBox isFirst={menu.menuId===1}>
+                <InfoBox isFirst={menu.menuId===1} key={menu.menuId}>
                     <InfoTextContainer>
                         <FirstInfo><InfoText>{menu.menuId===1? "메뉴" : ""}</InfoText></FirstInfo>
                         <SecondInfo><InfoText>{menu.name}</InfoText></SecondInfo>

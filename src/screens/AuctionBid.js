@@ -80,7 +80,7 @@ const Menu = styled.View`
 const AuctionBid = ({ navigation, route }) => {
     const {token, id}  = useContext(LoginContext);
     const {spinner}  = useContext(ProgressContext);
-    const {url}  = useContext(UrlContext);
+    const {aurl, url}  = useContext(UrlContext);
 
     const [menus, setMenus] = useState([]);
     const [menuRecommend, setMenuRecommend] = useState("");
@@ -90,13 +90,15 @@ const AuctionBid = ({ navigation, route }) => {
     const [disabled, setDisabled] = useState(false)
     const [uploaded, setUploaded] = useState(false);
     const [errorMessage, setErrorMessage] = useState("정보를 입력해주세요.");
+    const [isLoading, setIsLoading] = useState(false);
 
     const didMountRef = useRef();
 
     const [isModal, setModal] = useState(false);
 
-    const AuctionId = route.params.AuctionId;
-
+    const [auctionId, setAuctionId] = useState(null);
+    const [fix, setFix] = useState(false);
+    const [auctioneerId, setAuctioneerId] = useState(null);
 
     //에러 메세지 설정 
     useEffect(() => {
@@ -120,19 +122,33 @@ const AuctionBid = ({ navigation, route }) => {
     }, [menuRecommend, estimatedPrice, explain]);
 
     useEffect(() => {
-        setDisabled(!(menuRecommend && estimatedPrice && explain && !errorMessage));
-    }, [menuRecommend, estimatedPrice, explain, errorMessage]);
+        setDisabled(!(menuRecommend && estimatedPrice && explain && !errorMessage && !isLoading));
+    }, [menuRecommend, estimatedPrice, explain, errorMessage, isLoading]);
 
     useLayoutEffect(() => {
         navigation.setOptions({
+            headerTitle: fix?"경매 입찰 수정":"경매 입찰 등록",
             headerRight: () => (
-                disabled ? (<MaterialCommunityIcons name="check" size={35} onPress={setUploaded(true)}
+                disabled ? (<MaterialCommunityIcons name="check" size={35} onPress={() =>{setUploaded(true)}}
                     style={{ marginRight: 10, marginBottom: 3, opacity: 0.3 }} />)
-                    : (<MaterialCommunityIcons name="check" size={35} onPress={_onPress}
+                    : (<MaterialCommunityIcons name="check" size={35} onPress={_onCompletePress}
                         style={{ marginRight: 10, marginBottom: 3, opacity: 1 }} />)
             )
         });
     }, [disabled]);
+
+    useEffect(()=>{
+        var p = route.params;
+        if(p.AuctionId){
+            setAuctionId(p.AuctionId);
+        }
+        if(p.auctioneerId){
+            setAuctioneerId(p.auctioneerId);
+        }
+        if(p.fix){
+            setFix(p.fix);
+        }
+    },[route.params]);
 
     // 서버 get 처리
     const getApi = async (url) => {
@@ -154,11 +170,44 @@ const AuctionBid = ({ navigation, route }) => {
           }
     }
 
+    const postfixApi = async () => {
+        let fixedUrl = `${aurl}/auction/auctioneer/${auctioneerId}`;
+
+        let Info = {
+            content: explain,
+            menu: menuRecommend,
+            price: Number(estimatedPrice),
+        };
+
+        let options = {
+            method: 'PUT',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token,
+            },
+            body: JSON.stringify( Info ),
+        };
+
+        try {
+            console.log(fixedUrl)
+            console.log(options)
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+            console.log(res);
+    
+            return res["success"];
+    
+          } catch (error) {
+            console.error(error);
+          }
+    }
+
     // 서버 post 처리
 
     const postApi = async () => {
-        let fixedUrl = url+"/auction/"+`${AuctionId}`+"/auctioneer";
-
+        let fixedUrl = aurl+"/auction/"+auctionId+"/auctioneer";
+        
         let Info = {
             content: explain,
             menu: menuRecommend,
@@ -214,11 +263,39 @@ const AuctionBid = ({ navigation, route }) => {
         menuGet();
     },[])
 
+    useEffect(() => {
+        setIsLoading(false);
+    },[explain])
+
     // 입찰등록 + 스피너 추가할 것
-    const _onPress = async() => {
+    const _onParticipate = async() => {
         try{
             spinner.start();
-            const result = await postApi();
+            var result = await postApi();
+            if (!result) {
+              alert("오류가 발생하였습니다. 잠시후 다시 시도해주세요.");
+            }else {
+              setUploaded(true);
+                setMenuRecommend('');
+                setEstimatedPrice("");
+                setExplain("");
+                setErrorMessage("아래 정보를 입력해주세요");
+                setDisabled(true);
+                setUploaded(false);
+                setIsLoading(false);
+                navigation.navigate("AuctionDetail",{id: auctionId, reload: true});
+            }
+          }catch(e){
+            alert("Register Error", e.message);
+          }finally{
+            spinner.stop();
+          }
+    };
+
+    const _onFixPress = async() => {
+        try{
+            spinner.start();
+            var result = await postfixApi();
             if (!result) {
               alert("오류가 발생하였습니다. 잠시후 다시 시도해주세요.");
             }else {
@@ -230,7 +307,8 @@ const AuctionBid = ({ navigation, route }) => {
                 setErrorMessage("아래 정보를 입력해주세요");
                 setDisabled(true);
                 setUploaded(false);
-                navigation.navigate("AuctionDetail",{id: AuctionId});
+                setIsLoading(false);
+                navigation.navigate("AuctionDetail",{id: auctionId, reload: true});
             }else {
                 alert("오류가 발생하였습니다. 잠시후 다시 시도해주세요.");
               };
@@ -240,7 +318,15 @@ const AuctionBid = ({ navigation, route }) => {
           }finally{
             spinner.stop();
           }
-    };
+    }
+
+    const _onCompletePress = () => {
+        if(fix){
+            _onFixPress();
+        }else{
+            _onParticipate();
+        }
+    }
 
     return (
         <Container>
@@ -272,7 +358,10 @@ const AuctionBid = ({ navigation, route }) => {
             <Label>예상 가격대</Label>
             <StyledTextInput
                 value={estimatedPrice}
-                onChangeText={text => setEstimatedPrice(text)}
+                onChangeText={text => {
+                    setIsLoading(true);
+                    setEstimatedPrice(text);
+                }}
                 placeholder="예상 가격대를 입력하세요."
                 keyboardType="number-pad"
                 returnKeyType="done"
@@ -282,7 +371,10 @@ const AuctionBid = ({ navigation, route }) => {
             <Label>어필/설명</Label>
             <StyledTextInput
                 value={explain}
-                onChangeText={text => setExplain(text)}
+                onChangeText={text => {
+                    setIsLoading(true);
+                    setExplain(text)
+                }}
                 placeholder="어필/설명를 입력하세요."
                 returnKeyType="done"
                 textContentType="none" // iOS only
