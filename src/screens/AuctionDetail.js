@@ -107,7 +107,7 @@ const AuctionDetail = ({ navigation, route}) => {
     const AuctionId = route.params.id;
     const {token, mode, id}  = useContext(LoginContext);
     const {spinner}  = useContext(ProgressContext);
-    const {url}  = useContext(UrlContext);
+    const {aurl}  = useContext(UrlContext);
     const [title, setTitle] = useState("");
     const [userName, setUserName] = useState("");
     const [userType, setUserType] = useState("");
@@ -137,7 +137,7 @@ const AuctionDetail = ({ navigation, route}) => {
     }, []);
     
     const handleApi = async() => {
-        let fixedUrl = url+"/auction/"+AuctionId;
+        let fixedUrl = aurl+"/auction/"+AuctionId;
 
         let options = {
             method: 'GET',

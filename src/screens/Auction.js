@@ -111,7 +111,7 @@ const Item = React.memo(({item: {auctionId, auctioneers, content, createdDate, d
 const Auction = ({navigation}) => {
     const theme = useContext(ThemeContext);
     const {token} = useContext(LoginContext);
-    const {url} = useContext(UrlContext);
+    const {aurl} = useContext(UrlContext);
     const {spinner} = useContext(ProgressContext);
 
     const [isStar, setIsStar] = useState(false);
@@ -176,7 +176,7 @@ const Auction = ({navigation}) => {
     };
 
     const handleApi = async () => {
-        let fixedUrl = url+"/auction/auctions";
+        let fixedUrl = aurl+"/auction/auctions";
 
         let options = {
             method: 'GET',
@@ -255,12 +255,15 @@ const Auction = ({navigation}) => {
             list = _filterSelected2(list, selected2);
         }
 
-        if (selected3 !== null && selected3!=="전체"){
+        if (selected3 !== null){
             let l = selectsigungoo(selected3);
             let stateList = setRegionList(l, l.length);
             setList4(stateList);
-            list = _filterSelected3(list, selected3);
+            if(selected3!=="전체"){
+                list = _filterSelected3(list, selected3);
+            }
         }
+
         if (selected4 !== null && selected4!=="전체") {
             list = _filterSelected3(list, selected4);
         }
