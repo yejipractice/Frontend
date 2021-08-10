@@ -211,8 +211,8 @@ const Store = ({ item: { id, storeName, score, reviews, foodType, src }, onPress
 
 const Main = ({ navigation }) => {
     const theme = useContext(ThemeContext);
-    const {aurl, url} = useContext(UrlContext);
-    const {allow, autoLogin, doc, mode, token, storeId, setStoreId} = useContext(LoginContext);
+    const { aurl, url} = useContext(UrlContext);
+    const {allow, autoLogin, doc, mode, token} = useContext(LoginContext);
     const {spinner} = useContext(ProgressContext);
 
     const [input, setInput] = useState("");
@@ -269,36 +269,10 @@ const Main = ({ navigation }) => {
         setLatestAuctions(res);
     };
    
-    const _setStoreId = async() => {
-        if(mode==="STORE"){
-            let fixedUrl = url+"/member/store";
-
-            let options = {
-                method: 'GET',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-AUTH-TOKEN' : token,
-                },
-            };
     
-            try {
-                spinner.start();
-                let response = await fetch(fixedUrl, options);
-                let res = await response.json();
-                setStoreId(res.data.id);
-            }catch(error) {
-                console.error(error);
-            }finally {
-                spinner.stop();
-            }
-
-        }
-    };
 
     useEffect(()=> {
         handleAuctionApi();
-        _setStoreId();
     },[]);
 
     useEffect(() => {
@@ -347,33 +321,6 @@ const Main = ({ navigation }) => {
                         )} />
                 </PopularView>
 
-            <RecommededView>
-                    {(mode==="CUSTOMER")
-                        ? (<>
-                            <Title isLoading={isLoading}>사용자 추천 가게</Title>
-                            <FlatList
-                                horizontal={true}
-                                showsHorizontalScrollIndicator={false}
-                                keyExtractor={item => item['id'].toString()}
-                                data={recomendedStore}
-                                renderItem={({ item }) => (
-                                    <Store item={item} theme={theme} onPress={() => _handleStorePress(item)} />
-                                )} />
-                        </>
-                        )
-                        : (<>
-                            <Title isLoading={isLoading}>사용자 추천 공고</Title>
-                            <FlatList
-                                horizontal={true}
-                                showsHorizontalScrollIndicator={false}
-                                keyExtractor={item => item['auctionId'].toString()}
-                                data={latestAuctions}
-                                renderItem={({ item }) => (
-                                    <Item item={item} onPress={() => _handleItemPress(item)} />
-                                )} />
-                            </>
-                    )}
-            </RecommededView>
 
                 <LatestView>
                     <Title isLoading={isLoading}>실시간 최신 공고</Title>

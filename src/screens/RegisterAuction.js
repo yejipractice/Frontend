@@ -159,12 +159,12 @@ right: 10px;
 justify-content: center;
 align-items: center;
 border-radius: 50px;
-border-width: 1px;
+background-color:  ${({ theme }) => theme.background};
 `;
 
 
 const RegisterAuction = ({navigation}) => {
-  const {allow, token} = useContext(LoginContext);
+  const {allow, token, setAllow} = useContext(LoginContext);
   const {aurl} = useContext(UrlContext);
   const {spinner} = useContext(ProgressContext);
   const [allowLoc, setAllowLoc] = useState(allow);
@@ -253,8 +253,8 @@ const _getLocPer = async () => {
 
     //현재 위치 
     const getLocation = async () => {
-        if(allow){
-          let location = await Location.getCurrentPositionAsync({}); 
+        if(allowLoc){
+          let location = await Location.getCurrentPositionAsync({accuracy:Location.Accuracy.High}); 
           setLati(location.coords.latitude);
           setLongi(location.coords.longitude);
         }
@@ -280,7 +280,7 @@ const _getLocPer = async () => {
   const getKoreanLocation = async (lat, lng, api) => {
     let response = await fetch(api);
     let res = await response.json();
-    let result = convertKoreanLocation(res);
+    let result = await convertKoreanLocation(res);
     return result;
   };
 
@@ -918,7 +918,7 @@ const _getLocPer = async () => {
     Alert.alert("Location Permission Error","위치 정보를 허용해주세요.");
   }
 }}>
-<MaterialCommunityIcons name="map-marker" size={30} color="black"/>
+<MaterialCommunityIcons name="apple-safari" size={30} color="black"/>
 </CurrentButton>
 </MapContainer>
 <Label style={{width: WIDTH*0.9, borderRadius: 5, borderWidth: 1, paddingLeft: 5, marginTop: 5, paddingTop: 10, paddingBottom: 10}}>
@@ -960,8 +960,8 @@ const _getLocPer = async () => {
         <Container>
           <InfoLabel>추가 정보</InfoLabel>
         <RadioContiner>
-           <DoubleLabel>평균 성별</DoubleLabel>
-            <DoubleLabel>평균 연령대</DoubleLabel>
+           <DoubleLabel>평균 연령대</DoubleLabel>
+            <DoubleLabel>평균 성별</DoubleLabel>
            </RadioContiner>
             <AddContainer>
            <DropDownPicker 
