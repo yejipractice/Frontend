@@ -368,7 +368,7 @@ const StoreDetail = ({navigation, route}) => {
             ):null}
 
             {menus.map(menu => (
-                <InfoBox isFirst={menu.menuId===1}>
+                <InfoBox isFirst={menu.menuId===1} key={menu.menuId}>
                     <InfoTextContainer>
                         <FirstInfo><InfoText>{menu.menuId===1? "메뉴" : ""}</InfoText></FirstInfo>
                         <SecondInfo><InfoText>{menu.name}</InfoText></SecondInfo>
@@ -398,7 +398,7 @@ const StoreDetail = ({navigation, route}) => {
                 <InfoTextContainer>
                     <FirstInfo><InfoText>영업시간</InfoText></FirstInfo>
                     <SecondInfo double><InfoText></InfoText></SecondInfo>
-                    <ThirdInfo double><InfoText>{openTime} ~ {closeTime}</InfoText></ThirdInfo>
+                    <ThirdInfo double><InfoText>{openTime===null? "" : `${openTime} ~ ${closeTime}`}</InfoText></ThirdInfo>
                </InfoTextContainer>
            </InfoBox>
 

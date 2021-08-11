@@ -4,7 +4,8 @@ import {Dimensions, View, ScrollView, Alert} from "react-native";
 import { ThemeContext } from "styled-components";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Location from "expo-location";
-import {LoginContext, UrlContext, ProgressContext} from "../../contexts";
+import {LoginContext, UrlContext} from "../../contexts";
+import {Spinner} from "../../components";
 
 const HEIGHT = Dimensions.get("screen").width;
 
@@ -16,6 +17,7 @@ const Container = styled.View`
 const StoresConteinter = styled.View`
     flex: 1;
     margin-top: 20px;
+    background-color: ${({theme})=> theme.background};
 `;
 
 const ButtonsContainer = styled.View`
@@ -120,7 +122,8 @@ const MapText = styled.Text`
 `;
 
 const Item = ({item: {id, name, storeImages, storeType}, onPress, onStarPress, isStar, theme}) => {
-
+    const {mode} = useContext(LoginContext);
+    
     return (
         <ItemContainer onPress={onPress} >
             {/* <StyledImage source={{uri: url}}/> */}
@@ -129,6 +132,7 @@ const Item = ({item: {id, name, storeImages, storeType}, onPress, onStarPress, i
                 <ContentTitleText>{name}</ContentTitleText>
                 <ContentText>0M</ContentText>
             </ContentContainter>
+            {mode ==="CUSTOMER" && 
             <StarBox>
                 {isStar ?
                             (
@@ -139,7 +143,7 @@ const Item = ({item: {id, name, storeImages, storeType}, onPress, onStarPress, i
                                 <MaterialCommunityIcons name="star-outline" size={40} onPress={onStarPress} color="yellow"
                                     style={{ marginLeft: 15, marginBottom: 5, opacity: 0.7 }} />
                             )}
-                </StarBox>
+            </StarBox>}
             <ScoreBox>
                 <MaterialCommunityIcons name="star" size={15} color={theme.background}/>
                 <ScoreText>5</ScoreText>
@@ -150,17 +154,30 @@ const Item = ({item: {id, name, storeImages, storeType}, onPress, onStarPress, i
 
 const Store = ({navigation, route}) => {
     const theme = useContext(ThemeContext);
-    const {allow, token} = useContext(LoginContext);
+    const {allow, token, mode} = useContext(LoginContext);
     const {url} = useContext(UrlContext);
-    const {spinner} = useContext(ProgressContext);
 
     const [sort,setSort] = useState(0);
     const [isStar, setIsStar] = useState(false);
     const [loc, setLoc] = useState(null);
-    const [lati, setLati] = useState(0);
-    const [longi, setLongi] = useState(0);
+    const [lati, setLati] = useState(null);
+    const [longi, setLongi] = useState(null);
     const menu = route.name;
     const [storeListData, setStoreListData] = useState([]);
+    const [allowLoc, setAllowLoc] = useState(allow);
+    const [isSetting, setIsSetting] = useState(true);
+
+    const _getLocPer = async () => {
+        try{
+            const {status} = await Location.requestForegroundPermissionsAsync();
+            if(status === "granted"){
+                setAllow(true);
+                setAllowLoc(true);
+            };
+        }catch (e) {
+            console.log(e);
+        };
+      };
 
     const filterData = (list) => {
         var response = list.filter(item => item.documentChecked===true);
@@ -182,22 +199,30 @@ const Store = ({navigation, route}) => {
         };
 
         try {
-            spinner.start();
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
             let list = res["list"];
             list = await filterData(list);
             setStoreListData(list);
+            await getLocation();
         }catch(error) {
             console.error(error);
-        }finally {
-            spinner.stop();
         }
     };
 
-    useEffect(()=>{
-        handleApi();
-    },[]);
+    useEffect(()=> {
+        if(!allowLoc){
+            _getLocPer();
+        }else {
+            handleApi();
+        }
+    },[allowLoc]);
+
+    useEffect(()=> {
+        if(lati!==null && longi!==null){
+            setIsSetting(false);
+        }
+    },[lati, longi]);
 
 
     useEffect(()=> {
@@ -210,10 +235,15 @@ const Store = ({navigation, route}) => {
     const _onStarPress = () => {setIsStar(!isStar);}
 
     const getLocation = async () => {
-            let location = await Location.getCurrentPositionAsync({}); 
-            setLoc(location);
-            setLati(location.coords.latitude);
-            setLongi(location.coords.longitude);
+            try{
+                let location = await Location.getCurrentPositionAsync({accuracy:Location.Accuracy.High}); 
+                setLoc(location);
+                setLati(location.coords.latitude);
+                setLongi(location.coords.longitude);
+            }catch(e){
+                console.error(e);
+            }
+            
         return loc;
     };
 
@@ -230,34 +260,26 @@ const Store = ({navigation, route}) => {
                     <ButtonText>리뷰순</ButtonText>
                 </ButtonBox>
             </ButtonsContainer>
-            
             <ScrollView>
             <StoresConteinter>
-                {storeListData.map(item => (<Item item={item} key={item.id} onPress={()=> _onStorePress(item)} onStarPress={_onStarPress} isStar={isStar} theme={theme}/>))}
+                {!isSetting && storeListData.map(item => (<Item item={item} key={item.id} onPress={()=> _onStorePress(item)} onStarPress={_onStarPress} isStar={isStar} theme={theme}/>))}
             </StoresConteinter>
             <AdditionalBox />
             </ScrollView>
+            {isSetting && <Spinner />}
             <View style={{
                 position: "absolute",
                 bottom: 10,
                 right: 5,
             }}>
-            <MapButton 
-            onPress={async ()=> {
-                try {
-                    if(allow) {
-                        const res = await getLocation();
-                        console.log(res)
+            {!isSetting && (
+                <MapButton 
+                onPress={()=> {
                         navigation.navigate("StoreMap", {longi: longi, lati: lati});
-                    }else{
-                        Alert.alert("Location Permission Error","위치 정보를 허용해주세요.");
-                    }
-                }catch(e) {
-                    Alert.alert("Error", e.message);
-                }
             }}>
                 <MapText>지도로 보기</MapText>
             </MapButton>
+            )}
             </View>
         </Container>
     );
