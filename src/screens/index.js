@@ -24,7 +24,7 @@ import UserInfoChange from "./MyPage/UserInfoChange";
 import AuctionFinished from "./AuctionFinished";
 import AuctionBid from './AuctionBid';
 import AuctionDetail from './AuctionDetail';
-import StoreMap from './StoreMap';
+import StoreMap from './StoreList/StoreMap';
 import SearchStore from "./SearchStore"
 import SearchAuction from './SearchAuction';
 import StoreManage from "./MyPage/StoreManage";

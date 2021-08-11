@@ -1,11 +1,11 @@
 import React, { useLayoutEffect, useState, useContext, useEffect} from 'react';
 import styled from "styled-components/native";
-import { Text, View, StyleSheet, Dimensions, TouchableOpacity} from "react-native";
+import { Text, View, StyleSheet, Dimensions, Alert} from "react-native";
 import { Button } from '../components';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { BidstoreList } from '../utils/data';
 import {LoginContext, UrlContext, ProgressContext} from "../contexts";
+import { cutDateData, changeDateData } from '../utils/common';
 
 const WIDTH = Dimensions.get("screen").width;
 
@@ -81,21 +81,40 @@ const Desc = styled.Text`
     margin-top: 7px;
 `;
 
-const Store = styled.View`
-    flex: 1;
-    padding: 5px 0px;
-    justify-content: center;
-    align-items: center;   
-`;
-
-
 const ButtonContainer = styled.View`
     flex-direction: row;
     flex: 1;
     margin : 15px;
     align-items: center;
     justify-content: center;
+`;
 
+const AuctioneerCon = styled.View`
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    padding: 5px 0;
+`;
+
+const AucLineCon = styled.View`
+    flex-direction: row;
+    align-items: center;
+    margin-left: 10px;
+    `;
+
+const Store = styled.TouchableOpacity`
+    width: ${({double}) => double? WIDTH*0.4 : WIDTH*0.2};
+    justify-content: center;
+`;
+
+const StoreText = styled.Text`
+    font-size: 15px;
+    color: ${({ theme }) => theme.text}; 
+`;
+
+const DeleteButton = styled.TouchableOpacity`
+    position: absolute;
+    right: 10px;
 `;
 
 const AuctionDetail = ({ navigation, route}) => {
@@ -105,7 +124,7 @@ const AuctionDetail = ({ navigation, route}) => {
     const [isUser, setIsUser] = useState(route.params.isUser); // 자신의 공고 확인일 경우 true
 
     const AuctionId = route.params.id;
-    const {token, mode}  = useContext(LoginContext);
+    const {token, mode, id}  = useContext(LoginContext);
     const {spinner}  = useContext(ProgressContext);
     const {aurl}  = useContext(UrlContext);
     const [title, setTitle] = useState("");
@@ -120,6 +139,11 @@ const AuctionDetail = ({ navigation, route}) => {
     const [content, setContent] = useState("");
     const [addr, setAddr] = useState("");
     const [groupCnt, setGruopCnt] = useState(0);
+    const [finished, setFinished] = useState(false);
+    const [registered, setRegistered] = useState(false); //참여 여부 
+    const [bidstoreList, setBidstoreList] = useState([]);
+    const [auctioneerId, setAuctioneerId] = useState(null);
+    const [isMine, setIsMine] = useState(false);
 
     const _onMessagePress = () => { navigation.navigate("Message" , {name: "닉네임"+AuctionId}) };
 
@@ -150,6 +174,7 @@ const AuctionDetail = ({ navigation, route}) => {
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
             let data = res.data;
+
             setTitle(data.title);
             setUserName(data.userName);
             setUserType(data.groupType);
@@ -162,6 +187,9 @@ const AuctionDetail = ({ navigation, route}) => {
             setContent(data.content);
             setGruopCnt(data.groupCnt);
             setAddr(data.addr);
+            setFinished(checkFinished(data.deadline))
+            setBidstoreList(data.auctioneers);
+            
         }catch(error) {
             console.error(error);
         }finally {
@@ -169,7 +197,17 @@ const AuctionDetail = ({ navigation, route}) => {
         }
     };
 
-    const changeDateData = (date) =>{
+
+    const checkFinished = (d) => {
+        var now = new Date().toJSON();
+        var nowdata = cutDateData(changeDateData(now));
+        if(cutDateData(changeDateData(d)) < nowdata){
+            return true;
+        }
+        return false;
+    };
+
+    const changeDateData1 = (date) =>{
         var y = date.slice(0,4);
         var m = date.slice(5,7);
         var d = date.slice(8,10);
@@ -224,10 +262,131 @@ const AuctionDetail = ({ navigation, route}) => {
         return res;
     };
 
+    // 입찰 참여 버튼
+    const _bidButtonPress = () => {
+        if(registered){
+            navigation.navigate("AuctionBid", {AuctionId: AuctionId, fix: true, auctioneerId: auctioneerId});
+        }
+        else{
+            navigation.navigate("AuctionBid", {AuctionId: AuctionId});
+        }
+
+    }
+
+    //삭제 버튼
+    const handledeleteApi = async(id) => {
+        let fixedUrl = aurl+"/auction/auctioneer/"+id;
+
+        let options = {
+            method: 'DELETE',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token,
+            },
+            
+        };
+
+        try {
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+            if(res.success){
+                setRegistered(false);
+                alert("삭제하였습니다.");
+            }
+        }catch(error) {
+            console.error(error);
+        }
+    };
+
+    const _checkIsMine = async () => {
+        let fixedUrl = aurl+"/auction/"+id+"/auctions";
+
+        let options = {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token,
+            },
+            
+        };
+
+        try {
+            spinner.start();
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+            var l = res.list.filter(item => item.auctionId===AuctionId);
+            if(l.length!==0){
+                setIsMine(true);
+            }
+        }catch(error) {
+            console.error(error);
+        }finally {
+            spinner.stop();
+        }
+    }
+
+    // 낙찰
+    const checkAuctionApi = async(id) => {
+        let fixedUrl=aurl+"/auction/"+AuctionId+"/success?auctionnerId="+id;
+
+        let options = {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token,
+            },
+            
+        };
+
+        try {
+            spinner.start();
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+            if(res.success){
+                alert("낙찰하였습니다.");
+                //마감하기
+            }
+        }catch(error) {
+            console.error(error);
+        }finally {
+            spinner.stop();
+        }
+    };
+
+    const _deletePress = (id) => {
+        handledeleteApi(id);
+    };
+
+    const checkAuctionPress = (id) => {
+        Alert.alert(
+            "", "해당 업체의 입찰을 낙찰하겠습니까?",
+            [{ text: "확인", 
+            onPress: () => {checkAuctionApi(id);} },
+            { text: "취소", 
+            onPress: () => {} }]
+        );
+    };
 
     useEffect(()=> {
         handleApi();
+    },[route.params, registered]);
+
+    useEffect(() => {
+        _checkIsMine();
     },[]);
+
+
+    useEffect(() => {
+        console.log(bidstoreList);
+        const list = bidstoreList.filter(item => item.storeId===id);
+        if(list.length!==0){
+           setRegistered(true);
+           setAuctioneerId(list[0].auctioneerId); 
+        }
+    },[bidstoreList]);
 
     return (
 
@@ -240,6 +399,8 @@ const AuctionDetail = ({ navigation, route}) => {
                     <View style={styles.name}>
                         <TitleBox>
                         <Title>{title}</Title>
+                        { mode === 'STORE' &&
+                        <>
                         {isStar ?
                             (
                                 <MaterialCommunityIcons name="star" size={40} onPress={_onStarPress} color="yellow"
@@ -249,6 +410,7 @@ const AuctionDetail = ({ navigation, route}) => {
                                 <MaterialCommunityIcons name="star-outline" size={40} onPress={_onStarPress} color="yellow"
                                     style={{ position: "absolute", right: '5%', opacity: 0.7 }} />
                         )}
+                         </>}
                         </TitleBox>
                     </View>
                         <TextBox>
@@ -261,11 +423,11 @@ const AuctionDetail = ({ navigation, route}) => {
                 <InfoContainer>
                     <RowItemContainer>
                         <DescTitle style={{marginTop: 10}}>단체유형 및 인원수</DescTitle>
-                        <Desc>{userType} ({groupCnt}명)</Desc>
+                        <Desc>{userType===""? "" : `${userType} (${groupCnt}명)`}</Desc>
                     </RowItemContainer>
                     <RowItemContainer>
                         <DescTitle>예약시간 및 날짜</DescTitle>
-                        <Desc>{changeDateData(reservation)}</Desc>
+                        <Desc>{reservation===""? "" : changeDateData1(reservation)}</Desc>
                     </RowItemContainer>
                     <RowItemContainer>
                         <DescTitle>선호 위치</DescTitle>
@@ -277,7 +439,7 @@ const AuctionDetail = ({ navigation, route}) => {
                     </RowItemContainer>
                     <RowItemContainer>
                         <DescTitle>선호 가격</DescTitle>
-                        <Desc>{minPrice}원 ~ {maxPrice}원</Desc>
+                        <Desc>{(minPrice==="" || maxPrice==="")? "" : `${minPrice}원 ~ ${maxPrice}원`}</Desc>
                     </RowItemContainer>
                     <RowItemContainer border='0'>
                         <DescTitle>추가 사항</DescTitle>
@@ -290,30 +452,35 @@ const AuctionDetail = ({ navigation, route}) => {
                     <RowItemContainer>
                         <DescTitle size={20} >입찰현황</DescTitle>
                     </RowItemContainer>
-
-                    {BidstoreList.map(item => (
-                        <TouchableOpacity style={styles.row} key={item.id}
-                            onPress={() => {
-                                if(isUser){
-                                    navigation.navigate("BidDetail", {id: item.id})
-                                }
-                            }}>
-                            <Store><Desc>{item.name}</Desc></Store>
-                            <Store><Desc>{item.menu}</Desc></Store>
-                            <Store><Desc>{item.price}원</Desc></Store>
-                        </TouchableOpacity>
+                    
+                    {bidstoreList.map(item => (
+                        <AuctioneerCon key={item.auctioneerId}>
+                        <AucLineCon>
+                            <Store double><StoreText style={{color: item.storeId===id? "blue" : "black"}}>{item.storeName}</StoreText></Store>
+                            <Store><StoreText style={{color: item.storeId===id? "blue" : "black"}}>{item.menu}</StoreText></Store>
+                            <Store><StoreText style={{color: item.storeId===id? "blue" : "black"}}>{item.price}원</StoreText></Store>
+                        </AucLineCon>
+                        {(item.storeId===id) && (
+                            <DeleteButton>
+                            <MaterialCommunityIcons name="delete" size={20} style={{color: "blue"}} onPress={() => _deletePress(item.auctioneerId)}/>
+                            </DeleteButton>
+                        )}
+                        {isMine && (
+                            <DeleteButton>
+                                <MaterialCommunityIcons name="check" size={20} style={{color: "blue"}} onPress={() => checkAuctionPress(item.auctioneerId)}/>
+                            </DeleteButton>
+                        )}
+                        </AuctioneerCon>
                     ))} 
                 </InfoContainer>
 
                 {/* Store만 ButtonContainer가 보이도록 구현 필요 이미 참여했으면 수정으로 바꾸기..? */}
-                {!(status==="PROCEEDING") && (mode==="STORE") &&
+                { (!finished&&(mode==="STORE")) &&
                  (<ButtonContainer>
                  <Button
-                     title="참여"
+                     title={registered? "수정":"참여"}
                      containerStyle={{ width: '100%' }}
-                     onPress={() => {
-                         navigation.navigate("AuctionBid");
-                     }}
+                     onPress={_bidButtonPress}
                  />
              </ButtonContainer>)
                 }
@@ -333,6 +500,7 @@ const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
         marginBottom: 3,
+        paddingLeft: 15,
     },
 });
 
