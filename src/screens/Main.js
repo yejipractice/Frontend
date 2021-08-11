@@ -80,18 +80,9 @@ const Desc = styled.Text`
   margin-right:  ${({ marginRight }) => marginRight ? marginRight : 0}px;
 `;
 
-// const StyledImage = styled.Image`
-//     margin-top: 3px;
-//     margin-bottom: 10px;
-//     background-color:${({ theme }) => theme.imageBackground};
-//     height: 80;
-//     width: 80;
-//     border-radius: ${({ rounded }) => (rounded ? 50 : 0)}px;
-// `;
-
-const StyledImage = styled.View`
+const StyledImage = styled.Image`
     margin-top: 3px;
-    margin-bottom: 3px;
+    margin-bottom: 10px;
     background-color:${({ theme }) => theme.imageBackground};
     height: 80;
     width: 80;
@@ -155,12 +146,11 @@ const LatestTime = styled.Text`
     color: ${({ theme, notTime }) => notTime? theme.text : theme.label}
 `;
 
-const Item = ({ item: {auctionId, auctioneers, content, createdDate, deadline, maxPrice, minPrice, reservation, status, storeType, title, updatedDate, userName, groupType, groupCnt, addr, age, gender}, onPress, latest }) => {
+const Item = ({ item: {auctionId, auctioneers, content, createdDate, deadline, maxPrice, minPrice, reservation, status, storeType, title, updatedDate, userName, groupType, groupCnt, addr, age, gender, path}, onPress, latest }) => {
     return (
         latest ? (
             <RowItemContainer onPress={onPress}>
-                {/* <StyledImage source={{ uri: src }} rounded={true} /> */}
-                <StyledImage rounded={true} />
+                <StyledImage source={{ uri: path }} rounded={true} />
                 <RowDescContainer>
                     <LatestTitle>{title}</LatestTitle>
                     <LatestTime notTime>{groupType} {groupCnt}명</LatestTime>
@@ -175,8 +165,7 @@ const Item = ({ item: {auctionId, auctioneers, content, createdDate, deadline, m
             : (
                 <ItemContainer onPress={onPress} >
                     <ImageContainer>
-                        {/* <StyledImage source={{ uri: src }} rounded={true} /> */}
-                        <StyledImage rounded={true} />
+                        <StyledImage source={{ uri: path }} rounded={true} />
                     </ImageContainer>
                     <DescContainer>
                         <Desc>{title}</Desc>
@@ -188,12 +177,11 @@ const Item = ({ item: {auctionId, auctioneers, content, createdDate, deadline, m
     );
 };
 
-const Store = ({ item: { id, storeName, score, reviews, foodType, src }, onPress, theme }) => {
+const Store = ({ item: { id, storeName, score, reviews, foodType, path }, onPress, theme }) => {
     return (
         <ItemContainer onPress={onPress} >
             <ImageContainer>
-                {/* <StyledImage source={{ uri: src }} rounded={false} /> */}
-                <StyledImage />
+                <StyledImage source={{ uri: path }} rounded={false} />
             </ImageContainer>
             <DescContainer>
                 <Desc>{storeName}</Desc>
@@ -219,6 +207,7 @@ const Main = ({ navigation }) => {
     const [isFocused, setIsFocused] = useState(false);
     const [auctionData, setAuctionData] = useState("");
     const [latestAuctions, setLatestAuctions] = useState("");
+    const [popularAuctions, setPopularAuctions] = useState("");
     const [isLoading, setIsLoading] = useState(true);
 
     const _handleNoticePress = () => { navigation.navigate("Notice") };
@@ -268,6 +257,13 @@ const Main = ({ navigation }) => {
         });
         setLatestAuctions(res);
     };
+
+    const _setPopularAuctionList =() => {
+        var res = auctionData.sort(function(a,b){
+            return b.auctioneers.length - a.auctioneers.length;
+        });
+        setPopularAuctions(res);
+    };
    
     
 
@@ -278,6 +274,7 @@ const Main = ({ navigation }) => {
     useEffect(() => {
         if(auctionData !== ""){
             _setLatestAuctionList();
+            _setPopularAuctionList();
         }
     },[auctionData]);
 
@@ -315,7 +312,7 @@ const Main = ({ navigation }) => {
                         horizontal={true}
                         showsHorizontalScrollIndicator={false}
                         keyExtractor={item => item['auctionId'].toString()}
-                        data={latestAuctions}
+                        data={popularAuctions}
                         renderItem={({ item }) => (
                             <Item item={item} onPress={() => _handleItemPress(item)} />
                         )} />
