@@ -2,7 +2,10 @@ import React, { useState, useContext, useEffect } from 'react';
 import styled from "styled-components/native";
 import { MypageButton, ProfileImage, SmallButton } from '../../components'
 import {LoginContext, UrlContext, ProgressContext} from "../../contexts";
-import {Alert} from "react-native";
+import {Alert, Dimensions} from "react-native";
+
+const WIDTH = Dimensions.get("screen").width;
+const HEIGHT = Dimensions.get("screen").height;
 
 const Container = styled.View`
     background-color: ${({ theme }) => theme.background};
@@ -26,7 +29,6 @@ const InfoContainer = styled.View`
 const ProfileContainer = styled.View`
     width: 100%;
     flex-direction: row;
-    align-self: flex-start;
     background-color: ${({ theme }) => theme.background};
     justify-content: space-between;
     align-items: center;
@@ -38,9 +40,14 @@ const ProfileButton = styled.TouchableOpacity`
     align-items: center;
     
 `
+const ProfileNameButton = styled.TouchableOpacity`
+    width: ${WIDTH*0.5};
+    justify-content: center;
+    align-items: center;
+`
+
 const Username = styled.Text`
     font-size: 23px;
-    margin-left: 40px;
     font-weight: bold;
 `;
 
@@ -95,11 +102,11 @@ const Mypage_Store = ({ navigation }) => {
                     }}>
                         <ProfileImage />
                     </ProfileButton>
-                    <ProfileButton onPress={() => {
+                    <ProfileNameButton onPress={() => {
                         navigation.navigate("StoreInfo");
                     }}>
                        <Username style={{color: name===""? "white" : "black"}}>{name}</Username>
-                    </ProfileButton>
+                    </ProfileNameButton>
                 </ProfileContainer>
                 <LogoutContainer>
                     <SmallButton title={doc? "서류 변경" : "서류 등록"}
