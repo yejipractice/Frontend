@@ -293,6 +293,14 @@ const StoreBasicChange = ({ navigation, route }) => {
       setCloseTimeVisible(false);
     };
 
+    const selectRegion = async(data) => {
+        let ad = JSON.stringify(data.address).replace(/\"/g,'');
+        setAddress(ad);
+        setIsAddressModal(false);
+        setIsChanging(true);
+        await _getLL(ad);
+    };
+
     // 기본정보 수정 
     const _onBasicPress = async() => {
         setUploaded(true);
@@ -301,8 +309,8 @@ const StoreBasicChange = ({ navigation, route }) => {
             try{
                 spinner.start();
     
-                const result = await postApi(url+"/member/store");
-                const result_photo = await postImageApi();
+                var result = await postApi(url+"/member/store");
+                var result_photo = await postImageApi();
 
                 if(result && result_photo){
                     setErrorMessage("아래 정보를 입력해주세요");
@@ -340,13 +348,13 @@ const StoreBasicChange = ({ navigation, route }) => {
                 openTime: openT,
                 phoneNum: phoneNumber,
                 storeType: selectedType,
-
+                comment: "",
+                storeName: "",
             }),
         };
         try {
             let response = await fetch(url,options);
             let res = await response.json();
-
             return res["success"];
 
           } catch (error) {
@@ -356,7 +364,7 @@ const StoreBasicChange = ({ navigation, route }) => {
 
     // 업체 사진 여러장 post
     const postImageApi = async () => {
-        let fixedUrl = url+'/member/store/imagesss'; 
+        let fixedUrl = url+'/member/store/images'; 
 
         let formData = new FormData();
 
@@ -421,7 +429,6 @@ const StoreBasicChange = ({ navigation, route }) => {
                             />
                             <SmallButton title="검색" containerStyle={{width: '20%', marginLeft:10, height: 50, marginTop: 10}}
                                 onPress={() => {
-                                    
                                     if(allowLoc){
                                         setIsAddressModal(true); 
                                         setAddress("");
@@ -437,13 +444,7 @@ const StoreBasicChange = ({ navigation, route }) => {
                             <Postcode
                                 style={{  width: 350, height: 450 }}
                                 jsOptions={{ animated: true, hideMapBtn: true }}
-                                onSelected={data => {
-                                let ad = JSON.stringify(data.address).replace(/\"/g,'');
-                                setAddress(ad);
-                                setIsAddressModal(false);
-                                setIsChanging(true);
-                                _getLL(ad);
-                                }}
+                                onSelected={data => selectRegion(data)}
                             />
                         </View>
                     </Modal>

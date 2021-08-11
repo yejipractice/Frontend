@@ -167,16 +167,8 @@ const Auction = ({navigation}) => {
         {label: "시군구 선택", value: "시군구 선택"},
     ]);
 
-    const filterDataList = (data) => {
-        var now = new Date().toJSON();
-        var nowdata = cutDateData(changeDateData(now));
-        
-        let res = data.filter((item) => cutDateData(changeDateData(item.deadline)) > nowdata);
-        return res;
-    };
-
     const handleApi = async () => {
-        let fixedUrl = aurl+"/auction/auctions";
+        let fixedUrl = aurl+"/auction/auctions/proceeding";
 
         let options = {
             method: 'GET',
@@ -191,7 +183,7 @@ const Auction = ({navigation}) => {
             spinner.start();
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
-            var list = filterDataList(res["list"]);
+            var list = res["list"];
             setAllData(list);
             setAuctionListData(list);
         }catch(error) {

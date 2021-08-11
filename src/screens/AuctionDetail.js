@@ -187,24 +187,14 @@ const AuctionDetail = ({ navigation, route}) => {
             setContent(data.content);
             setGruopCnt(data.groupCnt);
             setAddr(data.addr);
-            setFinished(checkFinished(data.deadline))
+            setFinished(data.status==="End");
             setBidstoreList(data.auctioneers);
-            
+            console.log(res);
         }catch(error) {
             console.error(error);
         }finally {
             spinner.stop();
         }
-    };
-
-
-    const checkFinished = (d) => {
-        var now = new Date().toJSON();
-        var nowdata = cutDateData(changeDateData(now));
-        if(cutDateData(changeDateData(d)) < nowdata){
-            return true;
-        }
-        return false;
     };
 
     const changeDateData1 = (date) =>{
@@ -299,6 +289,10 @@ const AuctionDetail = ({ navigation, route}) => {
         }
     };
 
+    const _pressStore = (item) => {
+        navigation.navigate("AuctionBidDetail", {item: item, isMine: isMine, auctionId: AuctionId, finished: status==="END"});
+    }
+
     const _checkIsMine = async () => {
         let fixedUrl = aurl+"/auction/"+id+"/auctions";
 
@@ -327,47 +321,8 @@ const AuctionDetail = ({ navigation, route}) => {
         }
     }
 
-    // 낙찰
-    const checkAuctionApi = async(id) => {
-        let fixedUrl=aurl+"/auction/"+AuctionId+"/success?auctionnerId="+id;
-
-        let options = {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                'X-AUTH-TOKEN' : token,
-            },
-            
-        };
-
-        try {
-            spinner.start();
-            let response = await fetch(fixedUrl, options);
-            let res = await response.json();
-            if(res.success){
-                alert("낙찰하였습니다.");
-                //마감하기
-            }
-        }catch(error) {
-            console.error(error);
-        }finally {
-            spinner.stop();
-        }
-    };
-
     const _deletePress = (id) => {
         handledeleteApi(id);
-    };
-
-    const checkAuctionPress = (id) => {
-        Alert.alert(
-            "", "해당 업체의 입찰을 낙찰하겠습니까?",
-            [{ text: "확인", 
-            onPress: () => {checkAuctionApi(id);} },
-            { text: "취소", 
-            onPress: () => {} }]
-        );
     };
 
     useEffect(()=> {
@@ -380,7 +335,6 @@ const AuctionDetail = ({ navigation, route}) => {
 
 
     useEffect(() => {
-        console.log(bidstoreList);
         const list = bidstoreList.filter(item => item.storeId===id);
         if(list.length!==0){
            setRegistered(true);
@@ -456,18 +410,13 @@ const AuctionDetail = ({ navigation, route}) => {
                     {bidstoreList.map(item => (
                         <AuctioneerCon key={item.auctioneerId}>
                         <AucLineCon>
-                            <Store double><StoreText style={{color: item.storeId===id? "blue" : "black"}}>{item.storeName}</StoreText></Store>
-                            <Store><StoreText style={{color: item.storeId===id? "blue" : "black"}}>{item.menu}</StoreText></Store>
-                            <Store><StoreText style={{color: item.storeId===id? "blue" : "black"}}>{item.price}원</StoreText></Store>
+                            <Store double onPress={() =>_pressStore(item)}><StoreText style={{color: item.storeId===id? "blue" : "black"}}>{item.storeName}</StoreText></Store>
+                            <Store onPress={() => _pressStore(item)}><StoreText style={{color: item.storeId===id? "blue" : "black"}}>{item.menu}</StoreText></Store>
+                            <Store onPress={() => _pressStore(item)}><StoreText style={{color: item.storeId===id? "blue" : "black"}}>{item.price}원</StoreText></Store>
                         </AucLineCon>
                         {(item.storeId===id) && (
                             <DeleteButton>
                             <MaterialCommunityIcons name="delete" size={20} style={{color: "blue"}} onPress={() => _deletePress(item.auctioneerId)}/>
-                            </DeleteButton>
-                        )}
-                        {isMine && (
-                            <DeleteButton>
-                                <MaterialCommunityIcons name="check" size={20} style={{color: "blue"}} onPress={() => checkAuctionPress(item.auctioneerId)}/>
                             </DeleteButton>
                         )}
                         </AuctioneerCon>

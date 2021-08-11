@@ -63,6 +63,7 @@ const Mypage_Store = ({ navigation }) => {
     const {url} = useContext(UrlContext);
     const {spinner} = useContext(ProgressContext);
     const [name, setName] = useState("");
+    const [image, setImage] = useState("");
 
 
     useEffect(()=>{
@@ -70,7 +71,7 @@ const Mypage_Store = ({ navigation }) => {
     },[])
 
     const handleApi = async () => {
-    let fixedUrl = url+"/member/store/"+id;
+    let fixedUrl = url+"/member/store";
 
     let options = {
         method: 'GET',
@@ -86,6 +87,7 @@ const Mypage_Store = ({ navigation }) => {
         let response = await fetch(fixedUrl, options);
         let res = await response.json();
         setName(res.data.name);
+        setImage(res.data.path);
     }catch (error) {
         console.error(error);
       } finally {
@@ -100,7 +102,9 @@ const Mypage_Store = ({ navigation }) => {
                     <ProfileButton onPress={() => {
                         navigation.navigate("StoreInfo");
                     }}>
-                        <ProfileImage />
+                        {(image !== "") && (
+                            <ProfileImage url={image}/>
+                        )}
                     </ProfileButton>
                     <ProfileNameButton onPress={() => {
                         navigation.navigate("StoreInfo");

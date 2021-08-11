@@ -126,7 +126,7 @@ const StoreManage = ({ navigation }) => {
         navigation.navigate("StoreBasicChange",
         { phoneNumber: phoneNumber, address: address, storeType: storeType, 
             openTime: setTime(openTime), closeTime: setTime(closeTime), selectedType: storeType,
-            openT: openTime, closeT: closeTime, lat: lat, lon: lon});
+            openT: openTime, closeT: closeTime, lat: lat, lon: lon, nameL});
     };
 
     // 업체 편의정보 수정 
@@ -178,7 +178,8 @@ const StoreManage = ({ navigation }) => {
             spinner.start();
             let response = await fetch(url,options);
             let res = await response.json();
-
+            console.log(res);
+            console.log(options);
             return res;
 
           } catch (error) {

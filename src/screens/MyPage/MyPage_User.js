@@ -63,7 +63,8 @@ const Mypage_User = ( {navigation} ) => {
     const {url} = useContext(UrlContext);
     const {spinner} = useContext(ProgressContext);
     const [name, setName] = useState("");
-    
+    const [image, setImage] = useState("");
+     
     useEffect(()=>{
         handleApi();
     },[])
@@ -85,6 +86,7 @@ const Mypage_User = ( {navigation} ) => {
         let response = await fetch(fixedUrl, options);
         let res = await response.json();
         setName(res.data.name);
+        setImage(res.data.path);
     }catch (error) {
         console.error(error);
       } finally {
@@ -100,7 +102,9 @@ const Mypage_User = ( {navigation} ) => {
                 <ProfileButton onPress={() => {
                     navigation.navigate("UserInfo");
                 }}>
-                    <ProfileImage />
+                     {(image !== "") && (
+                            <ProfileImage url={image}/>
+                        )}
                 </ProfileButton>
                 <ProfileNameButton onPress={() => {
                     navigation.navigate("UserInfo");
