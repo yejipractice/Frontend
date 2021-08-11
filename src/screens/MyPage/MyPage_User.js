@@ -65,9 +65,14 @@ const Mypage_User = ( {navigation} ) => {
     const [name, setName] = useState("");
     const [image, setImage] = useState("");
      
-    useEffect(()=>{
+    useEffect(()=> {
         handleApi();
-    },[])
+        // 화면 새로고침
+        const willFocusSubscription = navigation.addListener('focus', () => {
+            handleApi();
+        });
+        return willFocusSubscription;
+    },[]); 
 
     const handleApi = async () => {
     let fixedUrl = url+"/member/customer";

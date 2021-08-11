@@ -424,7 +424,7 @@ const AuctionDetail = ({ navigation, route}) => {
                 </InfoContainer>
 
                 {/* Store만 ButtonContainer가 보이도록 구현 필요 이미 참여했으면 수정으로 바꾸기..? */}
-                { (!finished&&(mode==="STORE")) &&
+                { (status!=="END" &&(mode==="STORE")) &&
                  (<ButtonContainer>
                  <Button
                      title={registered? "수정":"참여"}

@@ -89,7 +89,7 @@ const StoreManage = ({ navigation }) => {
 
 
     // 업체 기본정보
-    const [phoneNumber, setPhoneNumber] = useState("");
+    const [phoneNumber, setPhoneNumber] = useState("first");
     const [address, setAddress] = useState("");
     const [storeType, setStoreType] = useState("");
     const [openTime, setOpeningTime] = useState('');
@@ -126,7 +126,7 @@ const StoreManage = ({ navigation }) => {
         navigation.navigate("StoreBasicChange",
         { phoneNumber: phoneNumber, address: address, storeType: storeType, 
             openTime: setTime(openTime), closeTime: setTime(closeTime), selectedType: storeType,
-            openT: openTime, closeT: closeTime, lat: lat, lon: lon, nameL});
+            openT: openTime, closeT: closeTime, lat: lat, lon: lon, name});
     };
 
     // 업체 편의정보 수정 
@@ -471,7 +471,8 @@ const StoreManage = ({ navigation }) => {
             <KeyboardAwareScrollView
                 extraScrollHeight={20}
             >
-                {/* 업체 기본정보 */}
+                {phoneNumber!=="" && (
+                    <>
                 <View style={{marginLeft: 10}}>
                     <DescTitle size={23}>업체 기본정보</DescTitle>
                     <DescTitle size={12}>(기본 정보가 입력되어야 업체 조회 리스트에 등록됩니다.)</DescTitle>
@@ -481,7 +482,7 @@ const StoreManage = ({ navigation }) => {
                         label="업체 전화번호"
                         TextChange
                         onChangePress={_onBasicPress}
-                        value={phoneNumber}
+                        value={phoneNumber!== "first"? phoneNumber: ""}
                         editable={false}
                     />
                     <ManageText 
@@ -596,8 +597,8 @@ const StoreManage = ({ navigation }) => {
                         text={_setList()}
                     />
                     
-                </InfoContainer>
-                
+                </InfoContainer></>
+                )}
             </KeyboardAwareScrollView>
         </Container>
 

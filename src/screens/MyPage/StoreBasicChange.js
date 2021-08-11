@@ -410,7 +410,7 @@ const StoreBasicChange = ({ navigation, route }) => {
                 <InfoContainer>
                     <ManageText 
                         label="업체 전화번호"
-                        value={phoneNumber}
+                        value={phoneNumber!== "first"? phoneNumber: ""}
                         onChangeText={text => setPhoneNumber(text)}
                         placeholder="업체 전화번호"
                         keyboardType="number-pad"
