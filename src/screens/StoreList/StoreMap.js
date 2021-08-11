@@ -55,7 +55,7 @@ const CurrentLocContainer = styled.TouchableOpacity`
     background-color: ${({theme})=> theme.background}
 `;
 
-const StyledImage = styled.View`
+const StyledImage = styled.Image`
     background-color:${({ theme }) => theme.imageBackground};
     height: 60;
     width: 60;
@@ -234,15 +234,13 @@ const StoreMap = ({navigation, route}) => {
 
     const _onStarPress = () => {setIsStar(!isStar);}
 
-    const Store = ({item: {id, name, ment}, onPress, onStarPress, isStar, theme}) => {
-        var sc = 5;
+    const Store = ({item: {id, name, comment, path, reviewAvg}, onPress, onStarPress, isStar, theme}) => {
         return (
             <ItemContainer onPress={onPress} >
-                {/* <StyledImage source={{uri: url}}/> */}
-                <StyledImage />
+                <StyledImage source={{uri: path}}/>
                 <ContentContainter>
                     <ContentTitleText>{name}</ContentTitleText>
-                    <ContentText>{ment}</ContentText>
+                    <ContentText>{comment}</ContentText>
                     <ContentText>0M</ContentText>
                 </ContentContainter>
                 {mode ==="CUSTOMER" && 
@@ -259,7 +257,7 @@ const StoreMap = ({navigation, route}) => {
                     </StarBox>}
                 <ScoreBox>
                     <MaterialCommunityIcons name="star" size={12} color={theme.background}/>
-                    <ScoreText>{sc}</ScoreText>
+                    <ScoreText>{reviewAvg}</ScoreText>
                 </ScoreBox>
             </ItemContainer>
         );

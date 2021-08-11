@@ -32,7 +32,7 @@ const AdditionalBox = styled.View`
 
 const ButtonBox = styled.TouchableOpacity`
     background-color: ${({theme, checked})=> checked? theme.titleColor :theme.storeButton};
-    width: 30%;
+    width: ${({mode})=> mode==="STORE"? 45 :30}%;
     align-items: center;
     justify-content: center;
     border-radius: 10px;
@@ -55,19 +55,13 @@ const ItemContainer = styled.TouchableOpacity`
     border-color: ${({ theme }) => theme.text};
 `;
 
-// const StyledImage = styled.Image`
-//     background-color:${({ theme }) => theme.imageBackground};
-//     height: 80;
-//     width: 80;
-//     border-radius: 50px;
-// `;
-
-const StyledImage = styled.View`
+const StyledImage = styled.Image`
     background-color:${({ theme }) => theme.imageBackground};
     height: 80;
     width: 80;
     border-radius: 50px;
 `;
+
 
 const ContentContainter = styled.View`
     padding: 0px 10px;
@@ -121,15 +115,15 @@ const MapText = styled.Text`
     color:${({ theme }) => theme.background};
 `;
 
-const Item = ({item: {id, name, storeImages, storeType}, onPress, onStarPress, isStar, theme}) => {
+const Item = ({item: {id, name, storeImages, storeType, path, reviewAvg, comment}, onPress, onStarPress, isStar, theme}) => {
     const {mode} = useContext(LoginContext);
     
     return (
         <ItemContainer onPress={onPress} >
-            {/* <StyledImage source={{uri: url}}/> */}
-            <StyledImage />
+            <StyledImage source={{uri: path}}/>
             <ContentContainter>
                 <ContentTitleText>{name}</ContentTitleText>
+                <ContentText>{comment}</ContentText>
                 <ContentText>0M</ContentText>
             </ContentContainter>
             {mode ==="CUSTOMER" && 
@@ -143,10 +137,10 @@ const Item = ({item: {id, name, storeImages, storeType}, onPress, onStarPress, i
                                 <MaterialCommunityIcons name="star-outline" size={40} onPress={onStarPress} color="yellow"
                                     style={{ marginLeft: 15, marginBottom: 5, opacity: 0.7 }} />
                             )}
-                </StarBox>}
+            </StarBox>}
             <ScoreBox>
                 <MaterialCommunityIcons name="star" size={15} color={theme.background}/>
-                <ScoreText>5</ScoreText>
+                <ScoreText>{reviewAvg}</ScoreText>
             </ScoreBox>
         </ItemContainer>
     );
@@ -163,9 +157,13 @@ const Store = ({navigation, route}) => {
     const [lati, setLati] = useState(null);
     const [longi, setLongi] = useState(null);
     const menu = _changeType(route.name);
+    const [storeAllData, setStoreAllData] = useState([]);
     const [storeListData, setStoreListData] = useState([]);
+    const [distanceListData, setDistanceListData] = useState([]);
     const [allowLoc, setAllowLoc] = useState(allow);
     const [isSetting, setIsSetting] = useState(true);
+    const [realLat, setRealLat] = useState("");
+    const [realLon, setRealLon] = useState("");
 
     const _getLocPer = async () => {
         try{
@@ -186,6 +184,33 @@ const Store = ({navigation, route}) => {
         return r;
     };
 
+    const getlatlon = async () => {
+        let fixedUrl = url+"/member/customer";
+
+        let options = {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token,
+            },
+        };
+
+        try {
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+            var lat = res.data.latitude;
+            var lon = res.data.longitude;
+           setRealLat(lat);
+           setRealLon(lon);
+        }catch(error) {
+            console.error(error);
+        }
+    };
+
+    useEffect(()=>{
+        getlatlon();
+    },[]);
 
     const handleApi = async () => {
         let fixedUrl = url+"/member/stores";
@@ -205,6 +230,7 @@ const Store = ({navigation, route}) => {
             let list = res["list"];
             list = await filterData(list);
             setStoreListData(list);
+            setStoreAllData(list);
             getLocation();
         }catch(error) {
             console.error(error);
@@ -220,14 +246,63 @@ const Store = ({navigation, route}) => {
     },[allowLoc]);
 
     useEffect(()=> {
-        if(lati!==null && longi!==null){
+        if(lati!==null && longi!==null && realLat!=="" && realLon!==""){
             setIsSetting(false);
         }
-    },[lati, longi]);
+    },[lati, longi, realLat, realLon]);
+
+    const scoreSort = () => {
+        var res = storeAllData.sort(function(a,b){
+            return b.reviewAvg - a.reviewAvg;
+        });
+        setStoreListData(res);
+    };
+
+    const reviewSort = () => {
+        var res = storeAllData.sort(function(a,b){
+            return b.reviewCnt - a.reviewCnt;
+        });
+        setStoreListData(res);
+        console.log(res);
+    };
+
+    const caculDistance = (lat1, lng1, lat2, lng2) => {
+
+        function deg2rad(deg) {
+             return deg * (Math.PI/180) 
+        } 
+        
+        var R = 6371; // Radius of the earth in km 
+        var dLat = deg2rad(lat2-lat1); // deg2rad below 
+        var dLon = deg2rad(lng2-lng1); 
+        var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon/2) * Math.sin(dLon/2); 
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+        var d = R * c; // Distance in km 
+        return d;
+    };
+
+    const distanceSort = () => {
+        var res = storeAllData.sort(function(a,b){
+            return caculDistance(realLat, realLon, b.latitude, b.longitude) - caculDistance(realLat, realLon, a.latitude, a.longitude);
+        }); 
+        console.log(res);
+        setDistanceListData(res);
+        return res;
+    }; 
 
     useEffect(()=> {
-        // data 정렬 
-    }, [sort, menu]);
+        if(sort===1){
+            console.log("거리순")
+            distanceSort();
+        }else if(sort === 2){
+            console.log("별점순")
+            scoreSort();
+        }else{
+            console.log("리뷰순")
+            reviewSort();
+        }
+    }, [sort]);
+
 
     const _onStorePress = item => {
         navigation.navigate('StoreDetailStack', { id: item.id});
@@ -246,42 +321,46 @@ const Store = ({navigation, route}) => {
         
     return loc;
 };
-    return (
-        <Container>
-            <ButtonsContainer>
-                <ButtonBox onPress={() => setSort(1)} checked={sort===1}>
-                    <ButtonText>거리순</ButtonText>
-                </ButtonBox>
-                <ButtonBox onPress={() => setSort(2)} checked={sort===2}>
-                    <ButtonText>별점순</ButtonText>
-                </ButtonBox>
-                <ButtonBox onPress={() => setSort(3)} checked={sort===3}>
-                    <ButtonText>리뷰순</ButtonText>
-                </ButtonBox>
-            </ButtonsContainer>
-            
-            <ScrollView>
-            <StoresConteinter>
-                {storeListData.map(item => (<Item item={item} key={item.id} onPress={()=> _onStorePress(item)} onStarPress={_onStarPress} isStar={isStar} theme={theme}/>))}
-            </StoresConteinter>
-            <AdditionalBox />
-            </ScrollView>
-            <View style={{
-                position: "absolute",
-                bottom: 10,
-                right: 5,
-            }}>
-            {!isSetting && (
-                <MapButton 
-                onPress={()=> {
-                        navigation.navigate("StoreMap", {longi: longi, lati: lati});
-            }}>
-                <MapText>지도로 보기</MapText>
-            </MapButton>
+return (
+    <Container>
+        <ButtonsContainer>
+            {mode!=="STORE" && (
+            <ButtonBox mode={mode} onPress={() => setSort(1)} checked={sort===1}>
+                <ButtonText>거리순</ButtonText>
+            </ButtonBox>
             )}
-            </View>
-        </Container>
-    );
+            <ButtonBox mode={mode} onPress={() => setSort(2)} checked={sort===2}>
+                <ButtonText>별점순</ButtonText>
+            </ButtonBox>
+            <ButtonBox mode={mode} onPress={() => setSort(3)} checked={sort===3}>
+                <ButtonText>리뷰순</ButtonText>
+            </ButtonBox>
+        </ButtonsContainer>
+        <ScrollView>
+        <StoresConteinter>
+            {(!isSetting&&sort!==1) && storeListData.map(item => (<Item item={item} key={item.id} onPress={()=> _onStorePress(item)} onStarPress={_onStarPress} isStar={isStar} theme={theme}/>))}
+            {(!isSetting&&sort===1) && distanceListData.map(item => (<Item item={item} key={item.id} onPress={()=> _onStorePress(item)} onStarPress={_onStarPress} isStar={isStar} theme={theme}/>))}
+        </StoresConteinter>
+        <AdditionalBox />
+        </ScrollView>
+        {isSetting && <Spinner />}
+        <View style={{
+            position: "absolute",
+            bottom: 10,
+            right: 5,
+        }}>
+        {!isSetting && (
+            <MapButton 
+            onPress={()=> {
+                    navigation.navigate("StoreMap", {longi: longi, lati: lati});
+        }}>
+            <MapText>지도로 보기</MapText>
+        </MapButton>
+        )}
+        </View>
+    </Container>
+);
 };
+
 
 export default Store; 
