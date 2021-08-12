@@ -208,7 +208,9 @@ const Store = ({navigation, route}) => {
     };
 
     useEffect(()=>{
-        getlatlon();
+        if(mode !== "STORE"){
+            getlatlon();
+        }
     },[]);
 
     const handleApi = async () => {
@@ -245,8 +247,13 @@ const Store = ({navigation, route}) => {
     },[allowLoc]);
 
     useEffect(()=> {
-        if(lati!==null && longi!==null && realLat!=="" && realLon!==""){
-            setIsSetting(false);
+        if(lati!==null && longi!==null){
+            if(mode==="CUSTOMER"&& realLat!=="" && realLon!==""){
+                setIsSetting(false);
+            }
+            if(mode==="STORE"){
+                setIsSetting(false);
+            }
         }
     },[lati, longi, realLat, realLon]);
 
@@ -292,13 +299,10 @@ const Store = ({navigation, route}) => {
 
     useEffect(()=> {
         if(sort===1){
-            console.log("거리순")
             distanceSort();
         }else if(sort === 2){
-            console.log("별점순")
             scoreSort();
         }else{
-            console.log("리뷰순")
             reviewSort();
         }
     }, [sort]);

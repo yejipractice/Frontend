@@ -96,6 +96,7 @@ const StoreManage = ({ navigation }) => {
     const [closeTime, setClosingTime] = useState('');
     const [lat, setLat] = useState("");
     const [lon, setLon] = useState("");
+    const [ment, setMent] = useState("");
 
     // 업체 메뉴 리스트
     const [menus, setMenus] = useState([]);
@@ -126,7 +127,7 @@ const StoreManage = ({ navigation }) => {
         navigation.navigate("StoreBasicChange",
         { phoneNumber: phoneNumber, address: address, storeType: storeType, 
             openTime: setTime(openTime), closeTime: setTime(closeTime), selectedType: storeType,
-            openT: openTime, closeT: closeTime, lat: lat, lon: lon, name});
+            openT: openTime, closeT: closeTime, lat: lat, lon: lon, ment: ment});
     };
 
     // 업체 편의정보 수정 
@@ -179,7 +180,6 @@ const StoreManage = ({ navigation }) => {
             let response = await fetch(url,options);
             let res = await response.json();
             console.log(res);
-            console.log(options);
             return res;
 
           } catch (error) {
@@ -208,6 +208,7 @@ const StoreManage = ({ navigation }) => {
                     setClosingTime(res.data.closedTime);
                     setLat(res.data.latitude);
                     setLon(res.data.longitude);
+                    setMent(res.data.comment);
                 }
                 // 편의정보 등록되어있으면 값 바꿈
                 if(res.data.facility != null){
@@ -493,6 +494,11 @@ const StoreManage = ({ navigation }) => {
                     <ManageText 
                         label="영업시간"
                         value={openTime !== '' ? setTime(openTime)+" ~ "+setTime(closeTime) : ""}
+                        editable={false}
+                    />
+                    <ManageText 
+                        label="간단한 설명"
+                        value={ment}
                         editable={false}
                     />
                     <RowItemContainer>

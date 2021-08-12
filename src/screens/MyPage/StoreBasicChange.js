@@ -98,6 +98,7 @@ const StoreBasicChange = ({ navigation, route }) => {
     // 업체 기본정보
     const [phoneNumber, setPhoneNumber] = useState(route.params.phoneNumber);
     const [address, setAddress] = useState(route.params.address);
+    const [ment, setMent] = useState(route.params.ment);
 
     const [openTime, setOpenTime] = useState(route.params.openTime);
     const [openTimeVisible, setOpenTimeVisible] = useState(false);
@@ -348,7 +349,7 @@ const StoreBasicChange = ({ navigation, route }) => {
                 openTime: openT,
                 phoneNum: phoneNumber,
                 storeType: selectedType,
-                comment: "",
+                comment: ment,
                 storeName: "",
             }),
         };
@@ -465,6 +466,14 @@ const StoreBasicChange = ({ navigation, route }) => {
                             handleConfirm={_setCloseTime} handleCancel={_hideCloseTimePicker}/>
 
                     </RowItemContainer>
+                    
+                    
+                    <ManageText 
+                        label="간단한 설명"
+                        value={ment}
+                        onChangeText={text => setMent(text)}
+                        placeholder="간단한 설명"
+                    />   
 
                     <RowItemContainer>
                         <DescTitle>업체 사진</DescTitle>
@@ -478,12 +487,10 @@ const StoreBasicChange = ({ navigation, route }) => {
 
                     </RowItemContainer>
 
-                    
                     <RowItemContainer>
                         <DescTitle>업체 유형</DescTitle>
                         <View style={{height: HEIGHT*0.05}} />
-                    </RowItemContainer>
-              
+                    </RowItemContainer>             
                 </InfoContainer>
                 <TypeContainer>
                         <DropDownPicker 
