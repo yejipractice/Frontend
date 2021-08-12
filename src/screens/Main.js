@@ -7,7 +7,7 @@ import { popular, recomendedStore } from "../utils/data";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { ThemeContext } from "styled-components";
 import {LoginContext, UrlContext, ProgressContext} from "../contexts";
-import {cutDateData, changeListData, createdDate, changeCreatedDateData} from "../utils/common";
+import {cutDateData, changeListData, createdDate, changeCreatedDateData, removeWhitespace} from "../utils/common";
 
 const WIDTH = Dimensions.get("screen").width;
 const HEIGHT = Dimensions.get("screen").height;
@@ -213,7 +213,7 @@ const Main = ({ navigation }) => {
     const _handleNoticePress = () => { navigation.navigate("Notice") };
 
     const _handleSearchPress = () => { 
-        navigation.navigate("SearchTab", {input: input});
+        navigation.navigate("SearchTab", {input: removeWhitespace(input)});
         setInput("");
      };
 
@@ -243,6 +243,7 @@ const Main = ({ navigation }) => {
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
             setAuctionData(res["list"]);
+            console.log(res.list);
         }catch(error) {
             console.error(error);
         }finally {
@@ -286,7 +287,7 @@ const Main = ({ navigation }) => {
                         value={input}
                         isFocused={isFocused}
                         onChangeText={text => setInput(text)}
-                        onSubmitEditing={_handleSearchPress}
+                        onSubmitEditing={() =>_handleSearchPress()}
                         onFocus={() => setIsFocused(true)}
                         onBlur={() => setIsFocused(false)}
                         placeholder="검색하세요."
