@@ -64,7 +64,6 @@ const ReviewWrite = ({navigation, route}) => {
     const {token, doc, id} = useContext(LoginContext);
 
     const [content, setContent] = useState('');
-    const [photos, setPhotos] = useState([]);
     const [successBidId, setSuccessBidId] = useState(route.params.successBidId);
 
     const [starRating, setStarRating] = useState(0);
