@@ -146,13 +146,13 @@ const Signup = ({ navigation, route }) => {
             if(!email){
                 _errorMessage = "이메일을 입력하세요.";
             }
-            else if (!emailConfirmPress && !isSameEmail)
-            {
-                _errorMessage = "이메일을 인증하세요.";
-            }else if(!emailCodePress) 
-            {
-                _errorMessage = "이메일 인증번호를 확인하세요. ";
-            }
+            // else if (!emailConfirmPress && !isSameEmail)
+            // {
+            //     _errorMessage = "이메일을 인증하세요.";
+            // }else if(!emailCodePress) 
+            // {
+            //     _errorMessage = "이메일 인증번호를 확인하세요. ";
+            // }
             else if(!password){
                 _errorMessage = "비밀번호를 입력하세요.";
             }
@@ -191,44 +191,45 @@ const Signup = ({ navigation, route }) => {
         
     }, [email, password, passwordConfirm, userId, emailConfirmPress,gender,age,emailCodePress, addr]);
 
-    useEffect(() => {
+    // useEffect(() => {
         
-        if(emailMountRef.current){
-            let _emailErrorMessage = '';
-            if(!email){
-                _emailErrorMessage="이메일을 입력하세요.";
-            }else if(!validateEmail(email)) {
-                _emailErrorMessage = "이메일 형식을 확인하세요. ";
-            }
-            else if(!isEmailValidated){
-                _emailErrorMessage = "이메일 중복확인을 해주세요.";
-            }
-            else if(isSameEmail){
-                _emailErrorMessage = "중복된 이메일입니다. ";
-            }
-            else if(!isSameEmail && !emailCodePress){
-                _emailErrorMessage="사용 가능한 이메일입니다. ";
-            }
-            else if(!emailConfirmCode){
-                _emailErrorMessage="이메일 인증번호를 입력하세요. ";
-            }else if(!emailCodePress){
-                _emailErrorMessage="이메일 인증번호를 확인하세요. ";
-            }
-            else if(!isConfirmedEmail && emailCodePress && isCorrect) {
-                _emailErrorMessage="인증번호가 틀렸습니다. ";
-            }
-            else {
-                _emailErrorMessage = "";
-            }
-            setEmailErrorMessage(_emailErrorMessage);
-        }else {
-            emailMountRef.current = true;
-        }
-    },[pressBeforeEmail,email,isSameEmail, isConfirmedEmail, emailConfirmPress, emailConfirmCode, emailCodePress, isEmailValidated]);
+    //     if(emailMountRef.current){
+    //         let _emailErrorMessage = '';
+    //         if(!email){
+    //             _emailErrorMessage="이메일을 입력하세요.";
+    //         }else if(!validateEmail(email)) {
+    //             _emailErrorMessage = "이메일 형식을 확인하세요. ";
+    //         }
+    //         else if(!isEmailValidated){
+    //             _emailErrorMessage = "이메일 중복확인을 해주세요.";
+    //         }
+    //         else if(isSameEmail){
+    //             _emailErrorMessage = "중복된 이메일입니다. ";
+    //         }
+    //         else if(!isSameEmail && !emailCodePress){
+    //             _emailErrorMessage="사용 가능한 이메일입니다. ";
+    //         }
+    //         else if(!emailConfirmCode){
+    //             _emailErrorMessage="이메일 인증번호를 입력하세요. ";
+    //         }else if(!emailCodePress){
+    //             _emailErrorMessage="이메일 인증번호를 확인하세요. ";
+    //         }
+    //         else if(!isConfirmedEmail && emailCodePress && isCorrect) {
+    //             _emailErrorMessage="인증번호가 틀렸습니다. ";
+    //         }
+    //         else {
+    //             _emailErrorMessage = "";
+    //         }
+    //         setEmailErrorMessage(_emailErrorMessage);
+    //     }else {
+    //         emailMountRef.current = true;
+    //     }
+    // },[pressBeforeEmail,email,isSameEmail, isConfirmedEmail, emailConfirmPress, emailConfirmCode, emailCodePress, isEmailValidated]);
 
         useEffect(() => {
             setDisabled(            
-                !(userId && email && password && passwordConfirm && !errorMessage &&isEmailValidated && !emailErrorMessage && !isChanging)
+                false
+                // !(userId && email && password && passwordConfirm && !errorMessage &&isEmailValidated && !emailErrorMessage && !isChanging)
             );
             if(route.params.mode==="User"){
                 if(!gender){
