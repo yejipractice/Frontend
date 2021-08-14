@@ -257,7 +257,7 @@ const StoreMap = ({navigation, route}) => {
                     </StarBox>}
                 <ScoreBox>
                     <MaterialCommunityIcons name="star" size={12} color={theme.background}/>
-                    <ScoreText>{reviewAvg}</ScoreText>
+                    <ScoreText>{Math.round(reviewAvg * 10)/10}</ScoreText>
                 </ScoreBox>
             </ItemContainer>
         );

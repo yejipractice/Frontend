@@ -115,37 +115,6 @@ const MapText = styled.Text`
     color:${({ theme }) => theme.background};
 `;
 
-const Item = ({item: {id, name, storeImages, storeType, path, reviewAvg, comment}, onPress, onStarPress, isStar, theme}) => {
-    const {mode} = useContext(LoginContext);
-    
-    return (
-        <ItemContainer onPress={onPress} >
-            <StyledImage source={{uri: path}}/>
-            <ContentContainter>
-                <ContentTitleText>{name}</ContentTitleText>
-                <ContentText>{comment}</ContentText>
-                <ContentText>0M</ContentText>
-            </ContentContainter>
-            {mode ==="CUSTOMER" && 
-            <StarBox>
-                {isStar ?
-                            (
-                                <MaterialCommunityIcons name="star" size={40} onPress={onStarPress} color="yellow"
-                                    style={{ marginLeft: 15, marginBottom: 5, opacity: 0.7 }} />
-                            )
-                            : (
-                                <MaterialCommunityIcons name="star-outline" size={40} onPress={onStarPress} color="yellow"
-                                    style={{ marginLeft: 15, marginBottom: 5, opacity: 0.7 }} />
-                            )}
-            </StarBox>}
-            <ScoreBox>
-                <MaterialCommunityIcons name="star" size={15} color={theme.background}/>
-                <ScoreText>{reviewAvg}</ScoreText>
-            </ScoreBox>
-        </ItemContainer>
-    );
-};
-
 const Store = ({navigation, route}) => {
     const theme = useContext(ThemeContext);
     const {allow, token, mode} = useContext(LoginContext);
@@ -157,13 +126,44 @@ const Store = ({navigation, route}) => {
     const [lati, setLati] = useState(null);
     const [longi, setLongi] = useState(null);
     const menu = _changeType(route.name);
-    const [storeAllData, setStoreAllData] = useState([]);
     const [storeListData, setStoreListData] = useState([]);
     const [distanceListData, setDistanceListData] = useState([]);
+    const [reviewListData, setReviewListData] = useState([]);
+    const [scoreListData, setScoreListData] = useState([]);
     const [allowLoc, setAllowLoc] = useState(allow);
     const [isSetting, setIsSetting] = useState(true);
     const [realLat, setRealLat] = useState("");
     const [realLon, setRealLon] = useState("");
+
+    const Item = ({item: {id, name, storeImages, storeType, path, reviewAvg, comment, latitude, longitude}, onPress, onStarPress, isStar, theme}) => {
+        
+        return (
+            <ItemContainer onPress={onPress} >
+                <StyledImage source={{uri: path}}/>
+                <ContentContainter>
+                    <ContentTitleText>{name}</ContentTitleText>
+                    <ContentText>{comment}</ContentText>
+                    <ContentText>{Math.round(caculDistance(realLat, realLon, latitude, longitude))}M</ContentText>
+                </ContentContainter>
+                {mode ==="CUSTOMER" && 
+                <StarBox>
+                    {isStar ?
+                                (
+                                    <MaterialCommunityIcons name="star" size={40} onPress={onStarPress} color="yellow"
+                                        style={{ marginLeft: 15, marginBottom: 5, opacity: 0.7 }} />
+                                )
+                                : (
+                                    <MaterialCommunityIcons name="star-outline" size={40} onPress={onStarPress} color="yellow"
+                                        style={{ marginLeft: 15, marginBottom: 5, opacity: 0.7 }} />
+                                )}
+                </StarBox>}
+                <ScoreBox>
+                    <MaterialCommunityIcons name="star" size={15} color={theme.background}/>
+                    <ScoreText>{Math.round(reviewAvg * 10)/10}</ScoreText>
+                </ScoreBox>
+            </ItemContainer>
+        );
+    };
 
     const _getLocPer = async () => {
         try{
@@ -232,7 +232,6 @@ const Store = ({navigation, route}) => {
             let list = res["list"];
             list = await filterData(list);
             setStoreListData(list);
-            setStoreAllData(list);
             getLocation();
         }catch(error) {
             console.error(error);
@@ -259,18 +258,17 @@ const Store = ({navigation, route}) => {
     },[lati, longi, realLat, realLon]);
 
     const scoreSort = () => {
-        var res = storeAllData.sort(function(a,b){
+        var res = storeListData.sort(function(a,b){
             return b.reviewAvg - a.reviewAvg;
         });
-        setStoreListData(res);
+        setScoreListData(res);
     };
 
     const reviewSort = () => {
-        var res = storeAllData.sort(function(a,b){
+        var res = storeListData.sort(function(a,b){
             return b.reviewCnt - a.reviewCnt;
         });
-        setStoreListData(res);
-        console.log(res);
+       setReviewListData(res);
     };
 
     const caculDistance = (lat1, lng1, lat2, lng2) => {
@@ -289,10 +287,9 @@ const Store = ({navigation, route}) => {
     };
 
     const distanceSort = () => {
-        var res = storeAllData.sort(function(a,b){
-            return caculDistance(realLat, realLon, b.latitude, b.longitude) - caculDistance(realLat, realLon, a.latitude, a.longitude);
+        var res = storeListData.sort(function(a,b){
+            return caculDistance(realLat, realLon, a.latitude, a.longitude) - caculDistance(realLat, realLon, b.latitude, b.longitude);
         }); 
-        console.log(res);
         setDistanceListData(res);
         return res;
     }; 
@@ -305,6 +302,10 @@ const Store = ({navigation, route}) => {
         }else{
             reviewSort();
         }
+        const willFocusSubscription = navigation.addListener('focus', () => {
+            handleApi();
+        });
+        return willFocusSubscription;
     }, [sort]);
 
     const _onStorePress = item => {
@@ -342,8 +343,10 @@ return (
         </ButtonsContainer>
         <ScrollView>
         <StoresConteinter>
-            {(!isSetting&&sort!==1) && storeListData.map(item => (<Item item={item} key={item.id} onPress={()=> _onStorePress(item)} onStarPress={_onStarPress} isStar={isStar} theme={theme}/>))}
-            {(!isSetting&&sort===1) && distanceListData.map(item => (<Item item={item} key={item.id} onPress={()=> _onStorePress(item)} onStarPress={_onStarPress} isStar={isStar} theme={theme}/>))}
+        {(!isSetting&&sort===0) && storeListData.map(item => (<Item item={item} key={item.id} onPress={()=> _onStorePress(item)} onStarPress={_onStarPress} isStar={isStar} theme={theme}/>))}
+                {(!isSetting&&sort===1) && distanceListData.map(item => (<Item item={item} key={item.id} onPress={()=> _onStorePress(item)} onStarPress={_onStarPress} isStar={isStar} theme={theme}/>))}
+                {(!isSetting&&sort===2) && scoreListData.map(item => (<Item item={item} key={item.id} onPress={()=> _onStorePress(item)} onStarPress={_onStarPress} isStar={isStar} theme={theme}/>))}
+                {(!isSetting&&sort===3) && reviewListData.map(item => (<Item item={item} key={item.id} onPress={()=> _onStorePress(item)} onStarPress={_onStarPress} isStar={isStar} theme={theme}/>))}
         </StoresConteinter>
         <AdditionalBox />
         </ScrollView>
