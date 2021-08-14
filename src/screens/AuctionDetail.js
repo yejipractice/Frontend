@@ -67,8 +67,8 @@ const InfoContainer = styled.View`
     border: 1px solid black;
 `;
 
-const ScrollCon = styled.ScrollView`
-    height: ${HEIGHT*0.4};
+const ScrollCon = styled.View`
+    height: ${({double})=> double? HEIGHT*0.4 : HEIGHT*0.1};
 `;
 
 
@@ -130,10 +130,14 @@ const DeleteButton = styled.TouchableOpacity`
     right: 10px;
 `;
 
+const CheckButton = styled.View`
+    position: absolute;
+    right: 5px;
+`;
+
 const AuctionDetail = ({ navigation, route}) => {
 
     const [isStar, setIsStar] = useState(false);
-    const _onStarPress = () => { setIsStar(!isStar) };
     const [isUser, setIsUser] = useState(route.params.isUser); // 자신의 공고 확인일 경우 true
 
     const AuctionId = route.params.id;
@@ -157,6 +161,9 @@ const AuctionDetail = ({ navigation, route}) => {
     const [bidstoreList, setBidstoreList] = useState([]);
     const [auctioneerId, setAuctioneerId] = useState(null);
     const [isMine, setIsMine] = useState(false);
+
+    const [data, setData] = useState([]);
+    const [isLoading, setISLoading] = useState(false);
 
     const _onMessagePress = () => { navigation.navigate("Message" , {name: "닉네임"+AuctionId}) };
 
@@ -355,10 +362,140 @@ const AuctionDetail = ({ navigation, route}) => {
         }
     },[bidstoreList]);
 
+    // 즐겨찾기 여부
+    useEffect( () => {
+        getApi();
+        let list = data.map( item => item.auctionId);
+        if(list.includes(AuctionId)){
+            setIsStar(true);
+        }
+    },[isLoading]);
+
+
+    // 즐겨찾기 list 가져오기
+    const getApi = async () => {
+        let fixedUrl = url+"/member/favorites/store";
+
+        let options = {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token,
+            },
+
+        };
+        try {
+            spinner.start();
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+
+            setData(res.list);
+
+            return (res.success);
+
+          } catch (error) {
+            console.error(error);
+          } finally {
+            spinner.stop();
+            setISLoading(true);
+          }
+    };
+
+    // 즐겨찾기 등록 post 처리
+    const postApi = async (id) => {
+        let fixedUrl = url+'/member/favorites'; 
+
+        let options = {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token,
+            },
+            body: JSON.stringify({ 
+                favoritesType: "AUCTION",
+                objectId: id,
+            }),
+        };    
+        try {
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+
+            console.log(res);
+            return res["success"];
+
+            } catch (error) {
+            console.error(error);
+        }    
+    }
+
+
+    // 즐겨찾기 삭제 delete 처리
+    const deleteApi = async (id) => {
+
+        let fixedUrl = url+"/member/favorites";
+
+        let Info = {
+            favoritesType: "AUCTION",
+            objectId: id,
+        };
+
+        let options = {
+            method: 'DELETE',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token
+            },
+            body: JSON.stringify( Info ),
+        };
+        try {
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+            console.log(res);
+
+            return res["success"];
+
+          } catch (error) {
+            console.error(error);
+          }
+    }
+
+    // 즐겨찾기 추가/삭제
+    const _onStarPress = async(id) => {
+        console.log(id);
+        try{
+            spinner.start();
+            let result;
+            // 별이 노란색이면 즐겨찾기 삭제
+            if(isStar){
+                result = await deleteApi(id);
+            } 
+            // 즐겨찾기 추가
+            else{
+                result = await postApi(id);
+            }
+
+            if(!result){
+                alert("다시 시도해주세요");
+            }
+            else{
+                setIsStar(!isStar);
+            }
+        }catch(e){
+                console.log("Error", e.message);
+        }finally{
+            spinner.stop();
+        }
+    }
+
+
     return (
         <KeyboardAwareScrollView
         extraScrollHeight={20}
         nestedScrollEnabled={true}
+        showsVerticalScrollIndicator={false}
         >
         <Container>
                 <Header>
@@ -369,11 +506,11 @@ const AuctionDetail = ({ navigation, route}) => {
                         <>
                         {isStar ?
                             (
-                                <MaterialCommunityIcons name="star" size={40} onPress={_onStarPress} color="yellow"
+                                <MaterialCommunityIcons name="star" size={40} onPress={() => _onStarPress(AuctionId)} color="yellow"
                                     style={{ position: "absolute", right: '5%', opacity: 0.7 }} />
                             )
                             : (
-                                <MaterialCommunityIcons name="star-outline" size={40} onPress={_onStarPress} color="yellow"
+                                <MaterialCommunityIcons name="star-outline" size={40} onPress={() => _onStarPress(AuctionId)} color="yellow"
                                     style={{ position: "absolute", right: '5%', opacity: 0.7 }} />
                         )}
                          </>}
@@ -417,21 +554,28 @@ const AuctionDetail = ({ navigation, route}) => {
                         <DescTitle size={20} >입찰현황</DescTitle>
                     </RowItemContainer>
                     
-                    <ScrollCon nestedScrollEnabled={true}>   
+                    <ScrollCon double={bidstoreList.length > 3}>
+                        <ScrollView nestedScrollEnabled={true}>   
                     {bidstoreList.map(item => (
                         <AuctioneerCon key={item.auctioneerId}>
                         <AucLineCon>
-                            <Store double onPress={() =>_pressStore(item)}><StoreText style={{color: item.storeId===id? "blue" : "black"}}>{item.storeName}</StoreText></Store>
-                            <Store onPress={() => _pressStore(item)}><StoreText style={{color: item.storeId===id? "blue" : "black"}}>{item.menu}</StoreText></Store>
-                            <Store onPress={() => _pressStore(item)}><StoreText style={{color: item.storeId===id? "blue" : "black"}}>{item.price}원</StoreText></Store>
+                            <Store double onPress={() =>_pressStore(item)}><StoreText style={{color: (item.storeId===id || item.success===true)? "blue" : "black"}}>{item.storeName}</StoreText></Store>
+                            <Store onPress={() => _pressStore(item)}><StoreText style={{color: (item.storeId===id || item.success===true)? "blue" : "black"}}>{item.menu}</StoreText></Store>
+                            <Store onPress={() => _pressStore(item)}><StoreText style={{color: (item.storeId===id || item.success===true)? "blue" : "black"}}>{item.price}원</StoreText></Store>
                         </AucLineCon>
                         {(item.storeId===id) && (
                             <DeleteButton>
-                            <MaterialCommunityIcons name="delete" size={20} style={{color: "blue"}} onPress={() => _deletePress(item.auctioneerId)}/>
+                                <MaterialCommunityIcons name="delete" size={20} style={{color: "blue"}} onPress={() => _deletePress(item.auctioneerId)}/>
                             </DeleteButton>
+                        )}
+                        {(item.success===true)&& (
+                            <CheckButton>
+                                <MaterialCommunityIcons name="check" size={20} style={{color: "blue"}} />
+                            </CheckButton>
                         )}
                         </AuctioneerCon>
                     ))}
+                    </ScrollView>
                     </ScrollCon> 
                 </InfoContainer>
 
