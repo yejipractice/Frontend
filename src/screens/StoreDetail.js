@@ -250,7 +250,7 @@ const StoreDetail = ({navigation, route}) => {
                     </DesTextBox>
                     <DesTextBox>
                         <DesText>{storeType}</DesText>
-                        <ReviewButton onPress={onReviewPress}><DesText>{reviewCnt}</DesText></ReviewButton>
+                        <ReviewButton onPress={onReviewPress}><DesText>{reviewCnt}개의 리뷰</DesText></ReviewButton>
                     </DesTextBox>
                 </DesContainer>
             </>
@@ -351,7 +351,7 @@ const StoreDetail = ({navigation, route}) => {
     useEffect( () => {
         getApi();
         if(data!==undefined){
-            let list = data.map( item => item.storeId);
+            let list = data.map(item => item.storeId);
             if(list.includes(id)){
             setIsStar(true);
         }
