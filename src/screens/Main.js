@@ -3,11 +3,11 @@ import styled from "styled-components/native";
 import { IconButton } from "../components";
 import { images } from '../images';
 import { FlatList, ScrollView, Dimensions } from "react-native";
-import { popular, recomendedStore } from "../utils/data";
+import { popular, recomendedStore, StoreList } from "../utils/data";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { ThemeContext } from "styled-components";
 import {LoginContext, UrlContext, ProgressContext} from "../contexts";
-import {cutDateData, changeListData, createdDate, changeCreatedDateData, removeWhitespace} from "../utils/common";
+import {_sortLatest, cutDateData, changeListData, createdDate, changeCreatedDateData, removeWhitespace, _sortPopular} from "../utils/common";
 
 const WIDTH = Dimensions.get("screen").width;
 const HEIGHT = Dimensions.get("screen").height;
@@ -59,12 +59,7 @@ const StyledTextInput = styled.TextInput.attrs(({ theme }) => ({
   `;
 
 const PopularView = styled.View`
-  flex: 4;
-  margin: 10px 0px;
-`;
-
-const RecommededView = styled.View`
-  flex: 4;
+  flex: 2;
   margin: 10px 0px;
 `;
 
@@ -146,7 +141,7 @@ const LatestTime = styled.Text`
     color: ${({ theme, notTime }) => notTime? theme.text : theme.label}
 `;
 
-const Item = ({ item: {auctionId, auctioneers, content, createdDate, deadline, maxPrice, minPrice, reservation, status, storeType, title, updatedDate, userName, groupType, groupCnt, addr, age, gender, path}, onPress, latest }) => {
+const Item = React.memo(({ item: {auctionId, auctioneers, content, createdDate, deadline, maxPrice, minPrice, reservation, status, storeType, title, updatedDate, userName, groupType, groupCnt, addr, age, gender, path}, onPress, latest }) => {
     return (
         latest ? (
             <RowItemContainer onPress={onPress}>
@@ -175,7 +170,7 @@ const Item = ({ item: {auctionId, auctioneers, content, createdDate, deadline, m
                 </ItemContainer>
             )
     );
-};
+});
 
 const Store = ({ item: { id, storeName, score, reviews, foodType, path }, onPress, theme }) => {
     return (
@@ -205,9 +200,9 @@ const Main = ({ navigation }) => {
 
     const [input, setInput] = useState("");
     const [isFocused, setIsFocused] = useState(false);
-    const [auctionData, setAuctionData] = useState("");
-    const [latestAuctions, setLatestAuctions] = useState("");
-    const [popularAuctions, setPopularAuctions] = useState("");
+    const [auctionData, setAuctionData] = useState("first");
+    const [latestAuctions, setLatestAuctions] = useState("first");
+    const [popularAuctions, setPopularAuctions] = useState("first");
     const [isLoading, setIsLoading] = useState(true);
 
     const _handleNoticePress = () => { navigation.navigate("Notice") };
@@ -242,8 +237,10 @@ const Main = ({ navigation }) => {
             spinner.start();
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
-            setAuctionData(res["list"]);
-            console.log(res.list);
+            var a = await _sortLatest(res.list);
+            var b = await _sortPopular(res.list);
+            setLatestAuctions(a.reverse().slice(0,10));
+            setPopularAuctions(b.slice(0,10));
         }catch(error) {
             console.error(error);
         }finally {
@@ -252,32 +249,10 @@ const Main = ({ navigation }) => {
         }
     };
 
-    const _setLatestAuctionList = () => {
-        var res = auctionData.sort(function (a,b){
-            return Number(cutDateData(b.createdDate)) - Number(cutDateData(a.createdDate));
-        });
-        setLatestAuctions(res);
-    };
-
-    const _setPopularAuctionList =() => {
-        var res = auctionData.sort(function(a,b){
-            return b.auctioneers.length - a.auctioneers.length;
-        });
-        setPopularAuctions(res);
-    };
-   
-    
-
     useEffect(()=> {
         handleAuctionApi();
     },[]);
 
-    useEffect(() => {
-        if(auctionData !== ""){
-            _setLatestAuctionList();
-            _setPopularAuctionList();
-        }
-    },[auctionData]);
 
     return (
         <BackCon>
@@ -303,34 +278,28 @@ const Main = ({ navigation }) => {
                 </IconContainer>
             </Header>
 
-            {!isLoading && <FlatList 
-                ListHeaderComponent={
-                <>
-                            
+            {!isLoading &&
+                <>       
                 <PopularView>
                     <Title isLoading={isLoading}>실시간 인기 공고</Title>
-                    <FlatList
-                        horizontal={true}
-                        showsHorizontalScrollIndicator={false}
-                        keyExtractor={item => item['auctionId'].toString()}
-                        data={popularAuctions}
-                        renderItem={({ item }) => (
+                    <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+                        {popularAuctions!=="first" && popularAuctions.map(item => (
                             <Item item={item} onPress={() => _handleItemPress(item)} />
-                        )} />
+                        ))}
+                    </ScrollView>
                 </PopularView>
 
 
                 <LatestView>
                     <Title isLoading={isLoading}>실시간 최신 공고</Title>
+                    <ScrollView>
+                        {latestAuctions!=="first" && latestAuctions.map(item => (
+                            <Item item={item} onPress={() => _handleItemPress(item)} latest={true}/>
+                        ))}
+                    </ScrollView>
                  </LatestView>
-                </> }
-                        horizontal={false}
-                        showsVerticalScrollIndicator={false}
-                        keyExtractor={item => item['auctionId'].toString()}
-                        data={latestAuctions.slice(0,10)}
-                        renderItem={({ item }) => (
-                            <Item item={item} onPress={() => _handleItemPress(item)} latest={true} />
-                        )} />}
+                      
+                </>}
               
 
 
