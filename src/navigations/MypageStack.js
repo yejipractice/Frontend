@@ -7,6 +7,7 @@ import { Mypage_Store, Mypage_User, StoreInfo, StoreInfoChange, UserInfo, UserIn
 import BidManageTab from './BidManageTab';
 import AuctionDetailStack from "./AuctionDetailStack";
 import {LoginContext} from "../contexts";
+import LogManageTab from './LogManageTab';
 
 
 const Stack = createStackNavigator();
@@ -52,6 +53,7 @@ const MypageStack = () => {
             <Stack.Screen name="MultipleImage" component={MultipleImage} options={{ headerTitle: "",headerBackTitle: false, }} />
             <Stack.Screen name="StoreBasicChange" component={StoreBasicChange} options={{ headerTitle: "업체 기본정보 수정", headerBackTitle: false,}} initialParams={[]} />
             <Stack.Screen name="StoreConvChange" component={StoreConvChange} options={{ headerTitle: "업체 편의정보 수정",headerBackTitle: false, }} />
+            <Stack.Screen name="LogManageTab" component={LogManageTab} options={{ headerTitle: "로그 분석",headerBackTitle: false, }} />
             <Stack.Screen name="AuctionDetailStack" component={AuctionDetailStack} options={{headerShown: false}} />
             <Stack.Screen name="AuctionBidDetail" component={AuctionBidDetail}
                 options={{ headerBackTitle: false, headerTitle: "입찰 상세", headerTitleAlign: 'left' }} /> 

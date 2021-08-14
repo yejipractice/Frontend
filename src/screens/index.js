@@ -44,10 +44,14 @@ import StoreBasicChange from "./MyPage/StoreBasicChange";
 import StoreConvChange from './MyPage/StoreConvChange';
 import OnlyCustomer from "./OnlyCustomer";
 import AuctionBidDetail from "./AuctionBidDetail";
+import AucLogManage from "./MyPage/AucLogManage";
+import BidLogManage from "./MyPage/BidLogManage";
+import LogManage from "./MyPage/LogManage";
 
 export {
     AuctionDetail, AuctionBid, AuctionFinished, UserInfoChange, UserInfo, Mypage_User, Mypage_Store, Review, StoreInfoChange,
     SearchAuction, SearchStore, Message, Login, Mode, Notice, Signup, Main, AccountFind, RegisterAuction, Auction, StoreDetail, StoreInfo, StoreMap,
     ReviewManage, ChatManage, Bookmark, BidManage, BidManageFinished, PayManage, UseManage, OrderDetail, StoreManage, ReviewWrite, DocumentRegister,
     MultipleImage,BidDetail,StoreBasicChange,StoreConvChange, OnlyCustomer,AllStore, KrStore, JpStore, EtcStore, WsStore, ChStore, AuctionBidDetail,
+    AucLogManage, BidLogManage, LogManage,
 };
