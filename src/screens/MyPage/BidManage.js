@@ -97,7 +97,7 @@ const Item = ({item: {auctionId, title, storeType, groupType, groupCnt, deadline
 
 const BidManage = ({navigation, route}) => {
 
-    const {url} = useContext(UrlContext);
+    const {aurl} = useContext(UrlContext);
     const {spinner} = useContext(ProgressContext);
     const {token,  id} = useContext(LoginContext);
 
@@ -169,7 +169,7 @@ const BidManage = ({navigation, route}) => {
         try{
             spinner.start();
 
-            const result = await deleteApi(url+"/auction/"+`${id}`);
+            const result = await deleteApi(aurl+"/auction/"+`${id}`);
 
             if(!result){
                 alert("다시 공고를 삭제해주세요.");
@@ -212,7 +212,7 @@ const BidManage = ({navigation, route}) => {
         try{
             spinner.start();
 
-            const result = await deleteApi(url+"/auction/auctioneer/"+`${id}`);
+            const result = await deleteApi(aurl+"/auction/auctioneer/"+`${id}`);
 
             if(!result){
                 alert("다시 시도해주세요.");
@@ -231,7 +231,7 @@ const BidManage = ({navigation, route}) => {
     // 진행중 공고 불러오기
     const getApi = async () => {
 
-        let fixedUrl = (isUser ? url+"/auction/"+`${id}`+"/auctions" : url+"/auction/"+`${id}`+"/auction");
+        let fixedUrl = (isUser ? aurl+"/auction/"+`${id}`+"/auctions" : aurl+"/auction/"+`${id}`+"/auction");
         console.log(fixedUrl);
 
         let options = { 
@@ -249,13 +249,15 @@ const BidManage = ({navigation, route}) => {
             let res = await response.json();
             console.log(res['list']);
 
+            if(res.list!==undefined) {
             if(isUser){
                 setData(_setLatestList(_filterProceeding(res['list'])));
             } else {
                 setData(_setLatestList(_filterProceeding(res.list.auction)));
             }
+        }
+        console.log(res.list);
 
-            console.log(data);
 
             return res["success"];
 
@@ -281,6 +283,9 @@ const BidManage = ({navigation, route}) => {
 
     // 최신순
     const _setLatestList = (prev) => {
+        if(prev===undefined){
+            return;
+        }
         var res = prev.sort(function (a,b){
             return Number(cutDateData(b.createdDate)) - Number(cutDateData(a.createdDate));
         });
@@ -288,26 +293,32 @@ const BidManage = ({navigation, route}) => {
     };
 
     const _filterProceeding = (prev) => {
-        let array = prev.filter((obj) => obj.status === 'PROCEEDING');
-        return array;
+        if(prev===undefined){
+            return;
+        }else{
+            let array = prev.filter((obj) => obj.status === 'PROCEEDING');
+            return array;
+        }
 };
 
 
     return (
         <Container>
             <BidContainer>
-                <FlatList
-                horizontal={false}
-                keyExtractor={item => item['auctionId'].toString()}
-                data={data} 
-                renderItem={({item}) => (
-                    <Item item={item} 
-                        isUser={isUser}
-                        onPress={()=> _onAuctionPress(item['auctionId'])}
-                        onChange={()=> _onChange(item)}
-                        onRemove={() => _onRemove(item['auctionId'])}
-                    />
-                )}/>
+                {data!==undefined && (
+                    <FlatList
+                    horizontal={false}
+                    keyExtractor={item => item['auctionId'].toString()}
+                    data={data} 
+                    renderItem={({item}) => (
+                        <Item item={item} 
+                            isUser={isUser}
+                            onPress={()=> _onAuctionPress(item['auctionId'])}
+                            onChange={()=> _onChange(item)}
+                            onRemove={() => _onRemove(item['auctionId'])}
+                        />
+                    )}/>
+                )}
             </BidContainer>
 
         </Container>

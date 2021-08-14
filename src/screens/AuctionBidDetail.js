@@ -192,7 +192,8 @@ const AuctionBid = ({ navigation, route }) => {
         Alert.alert(
             "", "해당 업체의 입찰을 낙찰하겠습니까?",
             [{ text: "확인", 
-            onPress: () => {checkAuctionApi(auctioneerId);} },
+            onPress: () => {checkAuctionApi(auctioneerId);
+            navigation.pop();} },
             { text: "취소", 
             onPress: () => {} }]
         );

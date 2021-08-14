@@ -284,7 +284,7 @@ const Main = ({ navigation }) => {
                     <Title isLoading={isLoading}>실시간 인기 공고</Title>
                     <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
                         {popularAuctions!=="first" && popularAuctions.map(item => (
-                            <Item item={item} onPress={() => _handleItemPress(item)} />
+                            <Item item={item} onPress={() => _handleItemPress(item)} key={item.id}/>
                         ))}
                     </ScrollView>
                 </PopularView>
@@ -294,7 +294,7 @@ const Main = ({ navigation }) => {
                     <Title isLoading={isLoading}>실시간 최신 공고</Title>
                     <ScrollView>
                         {latestAuctions!=="first" && latestAuctions.map(item => (
-                            <Item item={item} onPress={() => _handleItemPress(item)} latest={true}/>
+                            <Item item={item} onPress={() => _handleItemPress(item)} latest={true} key={item.id}/>
                         ))}
                     </ScrollView>
                  </LatestView>

@@ -143,7 +143,7 @@ const AuctionDetail = ({ navigation, route}) => {
     const AuctionId = route.params.id;
     const {token, mode, id}  = useContext(LoginContext);
     const {spinner}  = useContext(ProgressContext);
-    const {aurl}  = useContext(UrlContext);
+    const {aurl, url}  = useContext(UrlContext);
     const [title, setTitle] = useState("");
     const [userName, setUserName] = useState("");
     const [userType, setUserType] = useState("");
@@ -365,9 +365,11 @@ const AuctionDetail = ({ navigation, route}) => {
     // 즐겨찾기 여부
     useEffect( () => {
         getApi();
-        let list = data.map( item => item.auctionId);
-        if(list.includes(AuctionId)){
+        if(data!==undefined){
+            let list = data.map( item => item.auctionId);
+            if(list.includes(AuctionId)){
             setIsStar(true);
+            }
         }
     },[isLoading]);
 
@@ -502,7 +504,7 @@ const AuctionDetail = ({ navigation, route}) => {
                     <View style={styles.name}>
                         <TitleBox>
                         <Title>{title}</Title>
-                        { mode === 'STORE' &&
+                        {(mode === 'STORE' && status!=="END") &&
                         <>
                         {isStar ?
                             (

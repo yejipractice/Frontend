@@ -135,7 +135,6 @@ const StoreMap = ({navigation, route}) => {
     const [storeListData, setStoreListData] = useState([]);
     const [storeList, setStoreList] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [isStar, setIsStar] = useState(false);
     const [sort, setSort] = useState(0);
     const [region, setRegion] = useState({
         longitude: longi,
@@ -149,6 +148,83 @@ const StoreMap = ({navigation, route}) => {
         lowLat: null,
         lowLon: null,
     });
+
+    const [favorites, setFavorites] = useState([]);
+
+    const _deleteStar = async (id) => {
+        var fixedUrl = url+"/member/favorites";
+
+        let options = {
+            method: 'DELETE',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token,
+            },
+            body: JSON.stringify({ 
+                favoritesType: "STORE",
+                objectId: id,
+            }),
+        };    
+
+        try {
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+
+            return res["success"];
+
+            } catch (error) {
+            console.error(error);
+        }    
+    };
+
+    const _addStar = async (id) => {
+        var fixedUrl = url+"/member/favorites";
+
+        let options = {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token,
+            },
+            body: JSON.stringify({ 
+                favoritesType: "STORE",
+                objectId: id,
+            }),
+        };    
+
+        try {
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+
+            return res["success"];
+
+            } catch (error) {
+            console.error(error);
+        }    
+    };
+
+    const handleStarApi = async () => {
+        var fixedUrl = url+"/member/favorites/customer";
+
+        let options = {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token,
+            },
+        };
+        
+        try {
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+            setFavorites(res.list.map(i => i.storeId));
+        }catch(error) {
+            console.error(error);
+        }
+    };
 
     const handleApi = async () => {
         let fixedUrl = url+"/member/stores";
@@ -215,6 +291,7 @@ const StoreMap = ({navigation, route}) => {
 
     useEffect(()=> {
         handleApi();
+        handleStarApi();
     },[]);
 
     useEffect(()=> {
@@ -232,9 +309,10 @@ const StoreMap = ({navigation, route}) => {
         setSort(item['id']);
     };
 
-    const _onStarPress = () => {setIsStar(!isStar);}
 
-    const Store = ({item: {id, name, comment, path, reviewAvg}, onPress, onStarPress, isStar, theme}) => {
+    const Store = ({item: {id, name, comment, path, reviewAvg}, onPress, theme}) => {
+        const [isStar, setIsStar] = useState(favorites.includes(id)===true);
+
         return (
             <ItemContainer onPress={onPress} >
                 <StyledImage source={{uri: path}}/>
@@ -247,11 +325,11 @@ const StoreMap = ({navigation, route}) => {
                 <StarBox>
                     {isStar ?
                                 (
-                                    <MaterialCommunityIcons name="star" size={30} onPress={onStarPress} color="yellow"
+                                    <MaterialCommunityIcons name="star" size={30} onPress={() => {_deleteStar(id);setIsStar(!isStar)}} color="yellow"
                                         style={{ marginLeft: 15, marginBottom: 5, opacity: 0.7 }} />
                                 )
                                 : (
-                                    <MaterialCommunityIcons name="star-outline" size={30} onPress={onStarPress} color="yellow"
+                                    <MaterialCommunityIcons name="star-outline" size={30} onPress={() => {_addStar(id); setIsStar(!isStar)}} color="yellow"
                                         style={{ marginLeft: 15, marginBottom: 5, opacity: 0.7 }} />
                                 )}
                     </StarBox>}
@@ -333,7 +411,7 @@ const StoreMap = ({navigation, route}) => {
         <ScrollView>
             {!isLoading && (
             <StoresConteinter>
-                {storeList.map(item => ( <Store item={item} key={item.id} onPress={()=> _onStorePress(item)} onStarPress={_onStarPress} isStar={isStar} theme={theme} />))}
+                {storeList.map(item => ( <Store item={item} key={item.id} onPress={()=> _onStorePress(item)}  theme={theme} />))}
             </StoresConteinter>)} 
             
         </ScrollView>

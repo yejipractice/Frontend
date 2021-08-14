@@ -121,7 +121,6 @@ const Store = ({navigation, route}) => {
     const {url} = useContext(UrlContext);
 
     const [sort,setSort] = useState(0);
-    const [isStar, setIsStar] = useState(false);
     const [loc, setLoc] = useState(null);
     const [lati, setLati] = useState(null);
     const [longi, setLongi] = useState(null);
@@ -134,9 +133,86 @@ const Store = ({navigation, route}) => {
     const [isSetting, setIsSetting] = useState(true);
     const [realLat, setRealLat] = useState("");
     const [realLon, setRealLon] = useState("");
+    const [favorites, setFavorites] = useState([]);
 
-    const Item = ({item: {id, name, storeImages, storeType, path, reviewAvg, comment, latitude, longitude}, onPress, onStarPress, isStar, theme}) => {
+    const _deleteStar = async (id) => {
+        var fixedUrl = url+"/member/favorites";
+
+        let options = {
+            method: 'DELETE',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token,
+            },
+            body: JSON.stringify({ 
+                favoritesType: "STORE",
+                objectId: id,
+            }),
+        };    
+
+        try {
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+
+            return res["success"];
+
+            } catch (error) {
+            console.error(error);
+        }    
+    };
+
+    const _addStar = async (id) => {
+        var fixedUrl = url+"/member/favorites";
+
+        let options = {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token,
+            },
+            body: JSON.stringify({ 
+                favoritesType: "STORE",
+                objectId: id,
+            }),
+        };    
+
+        try {
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+
+            return res["success"];
+
+            } catch (error) {
+            console.error(error);
+        }    
+    };
+
+    const handleStarApi = async () => {
+        var fixedUrl = url+"/member/favorites/customer";
+
+        let options = {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token,
+            },
+        };
         
+        try {
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+            setFavorites(res.list.map(i => i.storeId));
+        }catch(error) {
+            console.error(error);
+        }
+    };
+
+    const Item = ({item: {id, name, storeImages, storeType, path, reviewAvg, comment, latitude, longitude}, onPress, theme}) => {
+        const [isStar, setIsStar] = useState(favorites.includes(id)===true);
+
         return (
             <ItemContainer onPress={onPress} >
                 <StyledImage source={{uri: path}}/>
@@ -149,11 +225,11 @@ const Store = ({navigation, route}) => {
                 <StarBox>
                     {isStar ?
                                 (
-                                    <MaterialCommunityIcons name="star" size={40} onPress={onStarPress} color="yellow"
+                                    <MaterialCommunityIcons name="star" size={40} onPress={() => {_deleteStar(id);setIsStar(!isStar)}} color="yellow"
                                         style={{ marginLeft: 15, marginBottom: 5, opacity: 0.7 }} />
                                 )
                                 : (
-                                    <MaterialCommunityIcons name="star-outline" size={40} onPress={onStarPress} color="yellow"
+                                    <MaterialCommunityIcons name="star-outline" size={40} onPress={() => {_addStar(id); setIsStar(!isStar)}} color="yellow"
                                         style={{ marginLeft: 15, marginBottom: 5, opacity: 0.7 }} />
                                 )}
                 </StarBox>}
@@ -211,6 +287,7 @@ const Store = ({navigation, route}) => {
         if(mode !== "STORE"){
             getlatlon();
         }
+        handleStarApi();
     },[]);
 
     const handleApi = async () => {
@@ -289,7 +366,6 @@ const Store = ({navigation, route}) => {
         var res = storeListData.sort(function(a,b){
             return caculDistance(realLat, realLon, a.latitude, a.longitude) - caculDistance(realLat, realLon, b.latitude, b.longitude);
         }); 
-        console.log(res);
         setDistanceListData(res);
         return res;
     }; 
@@ -311,7 +387,6 @@ const Store = ({navigation, route}) => {
     const _onStorePress = item => {
         navigation.navigate('StoreDetailStack', { id: item.id});
     };
-    const _onStarPress = () => {setIsStar(!isStar);}
 
     const getLocation = async () => {
             try{
@@ -343,10 +418,10 @@ const Store = ({navigation, route}) => {
             </ButtonsContainer>
             <ScrollView>
             <StoresConteinter>
-                {(!isSetting&&sort===0) && storeListData.map(item => (<Item item={item} key={item.id} onPress={()=> _onStorePress(item)} onStarPress={_onStarPress} isStar={isStar} theme={theme}/>))}
-                {(!isSetting&&sort===1) && distanceListData.map(item => (<Item item={item} key={item.id} onPress={()=> _onStorePress(item)} onStarPress={_onStarPress} isStar={isStar} theme={theme}/>))}
-                {(!isSetting&&sort===2) && scoreListData.map(item => (<Item item={item} key={item.id} onPress={()=> _onStorePress(item)} onStarPress={_onStarPress} isStar={isStar} theme={theme}/>))}
-                {(!isSetting&&sort===3) && reviewListData.map(item => (<Item item={item} key={item.id} onPress={()=> _onStorePress(item)} onStarPress={_onStarPress} isStar={isStar} theme={theme}/>))}
+                {(!isSetting&&sort===0) && storeListData.map(item => (<Item item={item} key={item.id} onPress={()=> _onStorePress(item)} theme={theme}/>))}
+                {(!isSetting&&sort===1) && distanceListData.map(item => (<Item item={item} key={item.id} onPress={()=> _onStorePress(item)}  theme={theme}/>))}
+                {(!isSetting&&sort===2) && scoreListData.map(item => (<Item item={item} key={item.id} onPress={()=> _onStorePress(item)} theme={theme}/>))}
+                {(!isSetting&&sort===3) && reviewListData.map(item => (<Item item={item} key={item.id} onPress={()=> _onStorePress(item)}   theme={theme}/>))}
             </StoresConteinter>
             <AdditionalBox />
             </ScrollView>

@@ -723,7 +723,7 @@ const _getLocPer = async () => {
   // 수정 put 보내기
   const putApi = async () => {
 
-    let fixedUrl = url+"/auction/"+`${auctionId}`;
+    let fixedUrl = aurl+"/auction/"+`${auctionId}`;
 
     let Info = {
       content: additionalContent,

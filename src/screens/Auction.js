@@ -72,53 +72,18 @@ const ButtonContainer = styled.TouchableOpacity`
     align-items: center;
     `;
 
-const Item = React.memo(({item: {auctionId, auctioneers, content, createdDate, deadline, maxPrice, minPrice, reservation, status, storeType, 
-    title, updatedDate, userName, groupType, groupCnt, addr, age, gender}, onPress, onStarPress, isStar}) => {
-    
-        const {mode} = useContext(LoginContext);
-    
-        return (
-        <ItemContainer onPress={() => onPress(auctionId)} >
-            <TimeTextContiner>
-                <ContentText>{changeDateData(reservation)} 예약</ContentText>
-                <ContentText>마감 {changeEndDateData(deadline)} 전</ContentText>
-            </TimeTextContiner>
-            <ItemBox>
-                <ContentTitleText>{title}</ContentTitleText>
-                { mode === 'STORE' &&
-                <StarBox>
-                {isStar ?
-                            (
-                                <MaterialCommunityIcons name="star" size={40} onPress={onStarPress} color="yellow"
-                                    style={{ marginLeft: 15, marginBottom: 5, opacity: 0.7 }} />
-                            )
-                            : (
-                                <MaterialCommunityIcons name="star-outline" size={40} onPress={onStarPress} color="yellow"
-                                    style={{ marginLeft: 15, marginBottom: 5, opacity: 0.7 }} />
-                            )}
-                </StarBox>}
-                <ContentText>단체 유형: {groupType} ({groupCnt}명)</ContentText>
-                <ContentText>선호 지역: {addr}</ContentText>
-                <ContentText>선호 메뉴: {changeListData(storeType)}</ContentText>
-                <ContentText style={{marginBottom: 10}}>선호 가격대: {minPrice}원 ~ {maxPrice}원</ContentText>
-                <ContentText style={{position: "absolute", right: 5, bottom: 0}}>{changeDateData(createdDate)} 등록</ContentText> 
-            </ItemBox>
-        </ItemContainer>
-    );
-});
-
 
 const Auction = ({navigation}) => {
     const theme = useContext(ThemeContext);
-    const {token} = useContext(LoginContext);
-    const {aurl} = useContext(UrlContext);
+    const {token, id, mode} = useContext(LoginContext);
+    const {aurl, url} = useContext(UrlContext);
     const {spinner} = useContext(ProgressContext);
 
-    const [isStar, setIsStar] = useState(false);
     const [auctionListData, setAuctionListData] = useState([]); 
     const [allData, setAllData] = useState([]); 
     const [isLoading, setIsLoading] = useState(false);
     const [isChanged, setIsChanged] = useState(false);
+    const [favorites, setFavorites] = useState([]);
 
     const [open1, setOpen1] = useState(false);
     const [selected1, setSelected1] = useState(null);
@@ -166,6 +131,117 @@ const Auction = ({navigation}) => {
     const [list4, setList4] = useState([
         {label: "시군구 선택", value: "시군구 선택"},
     ]);
+
+    const Item = React.memo(({item: {auctionId, auctioneers, content, createdDate, deadline, maxPrice, minPrice, reservation, status, storeType, 
+        title, updatedDate, userName, groupType, groupCnt, addr, age, gender}, onPress}) => {
+            const [isStar, setIsStar] = useState(favorites.includes(auctionId)===true);
+            
+        
+            return (
+            <ItemContainer onPress={() => onPress(auctionId)} >
+                <TimeTextContiner>
+                    <ContentText>{changeDateData(reservation)} 예약</ContentText>
+                    <ContentText>마감 {changeEndDateData(deadline)} 전</ContentText>
+                </TimeTextContiner>
+                <ItemBox>
+                    <ContentTitleText>{title}</ContentTitleText>
+                    { mode === 'STORE' &&
+                    <StarBox>
+                    {isStar ?
+                                (
+                                    <MaterialCommunityIcons name="star" size={40}  onPress={() => {_deleteStar(auctionId);setIsStar(!isStar)}} color="yellow"
+                                        style={{ marginLeft: 15, marginBottom: 5, opacity: 0.7 }} />
+                                )
+                                : (
+                                    <MaterialCommunityIcons name="star-outline" size={40} onPress={() => {_addStar(auctionId); setIsStar(!isStar)}} color="yellow"
+                                        style={{ marginLeft: 15, marginBottom: 5, opacity: 0.7 }} />
+                                )}
+                    </StarBox>}
+                    <ContentText>단체 유형: {groupType} ({groupCnt}명)</ContentText>
+                    <ContentText>선호 지역: {addr}</ContentText>
+                    <ContentText>선호 메뉴: {changeListData(storeType)}</ContentText>
+                    <ContentText style={{marginBottom: 10}}>선호 가격대: {minPrice}원 ~ {maxPrice}원</ContentText>
+                    <ContentText style={{position: "absolute", right: 5, bottom: 0}}>{changeDateData(createdDate)} 등록</ContentText> 
+                </ItemBox>
+            </ItemContainer>
+        );
+    });
+
+    const _deleteStar = async (id) => {
+        var fixedUrl = url+"/member/favorites";
+
+        let options = {
+            method: 'DELETE',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token,
+            },
+            body: JSON.stringify({ 
+                favoritesType: "AUCTION",
+                objectId: id,
+            }),
+        };    
+
+        try {
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+
+            return res["success"];
+
+            } catch (error) {
+            console.error(error);
+        }    
+    };
+
+    const _addStar = async (id) => {
+        var fixedUrl = url+"/member/favorites";
+
+        let options = {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token,
+            },
+            body: JSON.stringify({ 
+                favoritesType: "AUCTION",
+                objectId: id,
+            }),
+        };    
+
+        try {
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+
+            return res["success"];
+
+            } catch (error) {
+            console.error(error);
+        }    
+    };
+
+    const handleStarApi = async () => {
+        var fixedUrl = url+"/member/favorites/store";
+
+        let options = {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token,
+            },
+        };
+        
+        try {
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+            console.log(res);
+            setFavorites(res.list.map(i => i.auctionId));
+        }catch(error) {
+            console.error(error);
+        }
+    };
 
     const handleApi = async () => {
         let fixedUrl = aurl+"/auction/auctions/proceeding";
@@ -216,6 +292,7 @@ const Auction = ({navigation}) => {
 
     useEffect(()=> {
         handleApi();
+        handleStarApi();
     }, []);
 
     useEffect(()=> {
@@ -267,8 +344,6 @@ const Auction = ({navigation}) => {
         navigation.navigate("AuctionDetail",{id: itemId})
     };
    
-
-    const _onStarPress = () => { setIsStar(!isStar) };
     
     const _checkSize = str => {
         if (str == null){
@@ -357,7 +432,7 @@ const Auction = ({navigation}) => {
         <AuctionsContainer>
             {!isLoading &&
                 <ScrollView>
-                {auctionListData.map(item => (<Item item={item} key={item.auctionId} onPress={_onAuctionPress} onStarPress={_onStarPress} isStar={isStar}/>))}
+                {auctionListData.map(item => (<Item item={item} key={item.auctionId} onPress={_onAuctionPress} />))}
             </ScrollView>}
         </AuctionsContainer>
         <ButtonContainer>

@@ -4,7 +4,6 @@ import {FlatList} from 'react-native';
 import {MaterialCommunityIcons} from "@expo/vector-icons";
 import { LoginContext, ProgressContext, UrlContext } from '../../contexts';
 import {_changeTypeKorean, changeListData, cutDateData} from "../../utils/common";
-import { localeData } from 'moment';
 
 
 
@@ -77,14 +76,14 @@ const Item = ({item: {id, src, name, menu, type, location}, onPress, onStarPress
 
 const Bookmark = ({navigation, route}) => {
     const {token} = useContext(LoginContext);
-    const {url} = useContext(UrlContext);
+    const {url,aurl} = useContext(UrlContext);
     const {spinner} = useContext(ProgressContext)
     const [isUser, setIsUser] = useState(route.params.isUser);
 
     const [data, setData] = useState([]);
     const [stores, setStores] = useState([]);
     const [auctions, setAuctions] = useState([]);
-
+    const [changed, setChanged] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isDeleted, setIsDeleted] = useState(false);
 
@@ -118,7 +117,6 @@ const Bookmark = ({navigation, route}) => {
 
             setData(res.list);
 
-            //console.log(data);
             
             return (res.success);
 
@@ -149,6 +147,7 @@ const Bookmark = ({navigation, route}) => {
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
 
+            
             const store = {
                 id: res.data.id,
                 name : res.data.name,
@@ -169,11 +168,10 @@ const Bookmark = ({navigation, route}) => {
           }
     };
 
-    console.log(stores);
 
     // 즐겨찾기 해당되는 경매 정보 가져오기
     const getAuctionApi = async (id) => {
-        let fixedUrl = url+'/auction/'+`${id}`;
+        let fixedUrl = aurl+'/auction/'+`${id}`;
         let options = {
             method: 'GET',
             headers: {
@@ -242,7 +240,6 @@ const Bookmark = ({navigation, route}) => {
         try {
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
-            console.log(res);
             return res["success"];
 
           } catch (error) {
@@ -286,7 +283,7 @@ const Bookmark = ({navigation, route}) => {
             }
         }
         
-    },[isLoading, isDeleted]);
+    },[isLoading, isDeleted, changed]);
 
     return (
         <>
@@ -296,7 +293,10 @@ const Bookmark = ({navigation, route}) => {
             data={ isUser ? stores : auctions }
             renderItem={({item}) => (
                 <Item item={item} isUser = {isUser}
-                onStarPress={() => _onRemove(item['id'])}
+                onStarPress={() => {
+                    _onRemove(item['id']);
+                    setChanged(!changed);
+                }}
                 onPress = {() => {
                     if(!isUser){
                         navigation.navigate("AuctionDetail", {id: item['id']});

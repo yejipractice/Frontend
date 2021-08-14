@@ -179,7 +179,6 @@ const StoreManage = ({ navigation }) => {
             spinner.start();
             let response = await fetch(url,options);
             let res = await response.json();
-            console.log(res);
             return res;
 
           } catch (error) {
@@ -196,7 +195,6 @@ const StoreManage = ({ navigation }) => {
         try{
             spinner.start();
             const res =  await getApi(fixedUrl);
-
 
             if(res.success){
                 // 기본정보 등록되어있으면 값 바꿈

@@ -59,7 +59,7 @@ const ReviewWrite = ({navigation, route}) => {
 
     const [photos, setPhotos] = useState([]);
 
-    const {url} = useContext(UrlContext);
+    const {aurl} = useContext(UrlContext);
     const {spinner} = useContext(ProgressContext);
     const {token, doc, id} = useContext(LoginContext);
 
@@ -144,7 +144,7 @@ const ReviewWrite = ({navigation, route}) => {
 
     // 리뷰 post (리뷰내용 + 사진들)
     const postApi = async () => {
-        let fixedUrl = url+'/auction/'+`${successBidId}`+'/review?content='+`${content}`+'&score='+`${starRating}`; 
+        let fixedUrl = aurl+'/auction/'+`${successBidId}`+'/review?content='+`${content}`+'&score='+`${starRating}`; 
         console.log(fixedUrl);
         let formData = new FormData();
 
@@ -214,7 +214,7 @@ const ReviewWrite = ({navigation, route}) => {
             
             <StarContainer>
                 <Text style={{fontSize: 23, marginRight: '2%'}}>별점</Text>
-                <Stars />
+                <Star />
             </StarContainer>
 
             <StyledTextInput
