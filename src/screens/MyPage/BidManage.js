@@ -117,7 +117,7 @@ const BidManage = ({navigation, route}) => {
             {id: item['auctionId'], isChange : true, title: item['title'], reservation: item['reservation'],
             groupType: item['groupType'], storeType: item['storeType'], groupCnt: item['groupCnt'], 
             maxPrice: item['maxPrice'], minPrice: item['minPrice'], addr: item['addr'], content: item['content'],
-            age: item['age'], gender: item['gender'], deadline: item['deadline'] });
+            age: item['age'], gender: item['gender'], deadline: item['deadline'], fix: true });
         }
         else{
             // 입찰 수정

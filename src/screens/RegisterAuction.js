@@ -713,7 +713,7 @@ const _getLocPer = async () => {
 
     });
     }
-  },[]);
+  },[route.params]);
 
 
   useEffect(()=> {

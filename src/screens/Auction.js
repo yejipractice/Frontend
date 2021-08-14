@@ -236,8 +236,9 @@ const Auction = ({navigation}) => {
         try {
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
-            console.log(res);
-            setFavorites(res.list.map(i => i.auctionId));
+            if(res.list!==undefined){
+                setFavorites(res.list.map(i => i.auctionId));
+            }
         }catch(error) {
             console.error(error);
         }
@@ -292,7 +293,10 @@ const Auction = ({navigation}) => {
 
     useEffect(()=> {
         handleApi();
-        handleStarApi();
+        if(mode==="STORE"){
+            handleStarApi();
+        }
+        
     }, []);
 
     useEffect(()=> {
