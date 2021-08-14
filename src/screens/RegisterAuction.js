@@ -1104,7 +1104,7 @@ const _ChangeAuction = async() => {
 
            <StyledTextInputs 
            value={additionalContent}
-           onChangeText={text => setAdditionalContent(text);  setIsLoading(true);}
+           onChangeText={text => {setAdditionalContent(text); setIsLoading(true);}}
            autoCapitalize="none"
            placeholder="추가 사항"
            autoCorrect={false}

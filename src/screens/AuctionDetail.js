@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useState, useContext, useEffect} from 'react';
 import styled from "styled-components/native";
-import { Text, View, StyleSheet, Dimensions, Alert} from "react-native";
+import { Text, View, StyleSheet, Dimensions, Alert, ScrollView} from "react-native";
 import { Button } from '../components';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -8,6 +8,7 @@ import {LoginContext, UrlContext, ProgressContext} from "../contexts";
 import { cutDateData, changeDateData } from '../utils/common';
 
 const WIDTH = Dimensions.get("screen").width;
+const HEIGHT = Dimensions.get("screen").height;
 
 const Container = styled.View`
     flex: 1;
@@ -20,8 +21,7 @@ const Container = styled.View`
 
 const Header = styled.View`
     width: ${WIDTH*0.98};
-    height: 12%;
-    margin-bottom: 20px;
+    height: ${HEIGHT*0.12};
 `;
 
 const Title = styled.Text`
@@ -30,6 +30,13 @@ const Title = styled.Text`
     color: ${({ theme }) => theme.text};
     align-self: flex-start;
     width: 85%;
+`;
+
+const DefaultInfo = styled.View`
+    flex-direction: column;
+    width: ${WIDTH*0.85};
+    border-radius: 10px;
+    border: 1px solid black;
 `;
 
 const TitleBox = styled.View`
@@ -48,14 +55,20 @@ const TextBox = styled.View`
 
 
 const InfoContainer = styled.View`
-    flex: ${({ flex }) => flex ? flex : 7};
+    flex: 1; 
+    width: ${WIDTH*0.85};
     background-color: ${({ theme }) => theme.background}; 
     justify-content: center;
     alignItems: center;
     flex-direction:column;
-    margin : 5%;
+    margin-top : 5%;
+    margin-bottom : 5%;
     border-radius: 10px;
     border: 1px solid black;
+`;
+
+const ScrollCon = styled.ScrollView`
+    height: ${HEIGHT*0.4};
 `;
 
 
@@ -343,12 +356,11 @@ const AuctionDetail = ({ navigation, route}) => {
     },[bidstoreList]);
 
     return (
-
+        <KeyboardAwareScrollView
+        extraScrollHeight={20}
+        nestedScrollEnabled={true}
+        >
         <Container>
-            <KeyboardAwareScrollView
-                extraScrollHeight={20}
-                showsVerticalScrollIndicator={false}
-            >
                 <Header>
                     <View style={styles.name}>
                         <TitleBox>
@@ -373,8 +385,7 @@ const AuctionDetail = ({ navigation, route}) => {
                         </TextBox>
                 </Header>
 
-                {/* 공고 조회에서 클릭시 데이터 연동 구현 필요 */}
-                <InfoContainer>
+                <DefaultInfo>
                     <RowItemContainer>
                         <DescTitle style={{marginTop: 10}}>단체유형 및 인원수</DescTitle>
                         <Desc>{userType===""? "" : `${userType} (${groupCnt}명)`}</Desc>
@@ -399,14 +410,14 @@ const AuctionDetail = ({ navigation, route}) => {
                         <DescTitle>추가 사항</DescTitle>
                         <Desc style={{marginBottom: 10}}>{content}</Desc>
                     </RowItemContainer>
-                </InfoContainer>
-
-
-                <InfoContainer flex={3}>
+                </DefaultInfo>
+           
+                <InfoContainer>
                     <RowItemContainer>
                         <DescTitle size={20} >입찰현황</DescTitle>
                     </RowItemContainer>
                     
+                    <ScrollCon nestedScrollEnabled={true}>   
                     {bidstoreList.map(item => (
                         <AuctioneerCon key={item.auctioneerId}>
                         <AucLineCon>
@@ -420,7 +431,8 @@ const AuctionDetail = ({ navigation, route}) => {
                             </DeleteButton>
                         )}
                         </AuctioneerCon>
-                    ))} 
+                    ))}
+                    </ScrollCon> 
                 </InfoContainer>
 
                 {/* Store만 ButtonContainer가 보이도록 구현 필요 이미 참여했으면 수정으로 바꾸기..? */}
@@ -433,9 +445,8 @@ const AuctionDetail = ({ navigation, route}) => {
                  />
              </ButtonContainer>)
                 }
-               
-            </KeyboardAwareScrollView>
         </Container>
+        </KeyboardAwareScrollView>
 
     );
 };

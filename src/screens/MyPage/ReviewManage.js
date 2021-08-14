@@ -194,10 +194,14 @@ const ReviewManage = ({navigation, route}) => {
 
     // 최신순
     const _setLatestList = (prev) => {
-        var res = prev.sort(function (a,b){
-            return Number(cutDateData(b.createdDate)) - Number(cutDateData(a.createdDate));
-        });
-        return res;
+        if(prev!==undefined){
+            prev = prev.sort(function (a,b){
+                return Number(cutDateData(b.createdDate)) - Number(cutDateData(a.createdDate));
+            });
+        }else {
+            prev = [];
+        }
+        return prev;
     };
 
     // 리뷰 가져오기
