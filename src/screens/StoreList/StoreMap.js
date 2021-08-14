@@ -220,7 +220,9 @@ const StoreMap = ({navigation, route}) => {
         try {
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
-            setFavorites(res.list.map(i => i.storeId));
+            if(res.list!==undefined){
+                setFavorites(res.list.map(i => i.storeId));
+            }
         }catch(error) {
             console.error(error);
         }
@@ -291,7 +293,9 @@ const StoreMap = ({navigation, route}) => {
 
     useEffect(()=> {
         handleApi();
-        handleStarApi();
+        if(mode!=="STORE"){
+            handleStarApi();
+        }
     },[]);
 
     useEffect(()=> {

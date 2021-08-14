@@ -204,7 +204,9 @@ const Store = ({navigation, route}) => {
         try {
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
-            setFavorites(res.list.map(i => i.storeId));
+            if(res.list!==undefined){
+                setFavorites(res.list.map(i => i.storeId));
+            }
         }catch(error) {
             console.error(error);
         }
@@ -286,8 +288,8 @@ const Store = ({navigation, route}) => {
     useEffect(()=>{
         if(mode !== "STORE"){
             getlatlon();
+            handleStarApi();
         }
-        handleStarApi();
     },[]);
 
     const handleApi = async () => {
