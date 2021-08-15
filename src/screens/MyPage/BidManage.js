@@ -82,7 +82,7 @@ const Item = ({item: {auctionId, title, storeType, groupType, groupCnt, deadline
                     <ContentText>단체 유형: {groupType} ({groupCnt}명)</ContentText>
                     <ContentText>선호 지역: {addr}</ContentText>
                     <ContentText>선호 메뉴: {changeListData(storeType)}</ContentText>
-                    <ContentText>선호 가격대: {minPrice}원 ~ {maxPrice}원</ContentText>
+                    <ContentText style={{marginBottom: 10}}>선호 가격대: {minPrice}원 ~ {maxPrice}원</ContentText>
                     <ContentText style={{position: "absolute", right: 5, bottom: 0}}>{changeDateData(createdDate)} 등록</ContentText>
                 </ItemBox>
             </ItemContainer>

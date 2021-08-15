@@ -3,6 +3,7 @@ import styled from "styled-components/native";
 import {FlatList} from 'react-native';
 import { SmallButton } from '../../components';
 import {UrlContext, ProgressContext, LoginContext} from "../../contexts";
+import moment from "moment";
 
 const UseContainer = styled.View`
     flex-direction: row;
@@ -66,7 +67,7 @@ const Item = ({item: {id, src, storeName, menu, price, review}, onReviewPress, o
                     <SmallButton 
                         title={review ? "리뷰완료" : "리뷰쓰기" }
                         onPress={onReviewPress} 
-                        containerStyle={{width: '30%', height: '80%', marginRight: '4%'}}
+                        containerStyle={{width: '40%', height: '80%', marginRight: '4%'}}
                         disabled={review}
                         uploaded={review}
                         />
@@ -80,7 +81,7 @@ const Item = ({item: {id, src, storeName, menu, price, review}, onReviewPress, o
 
 
 const UseManage = ({navigation}) => {
-    const {url} = useContext(UrlContext);
+    const {aurl} = useContext(UrlContext);
     const {spinner} = useContext(ProgressContext);
     const {token} = useContext(LoginContext);
 
@@ -118,11 +119,11 @@ const UseManage = ({navigation}) => {
 
 
     useEffect( () => {
-        getApi(url+"/auction/user/bids");
+        getApi(aurl+"/auction/user/bids");
 
         // 화면 새로고침
         const willFocusSubscription = navigation.addListener('focus', () => {
-            getApi(url+"/auction/user/bids");
+            getApi(aurl+"/auction/user/bids");
         });
 
         return willFocusSubscription;
@@ -130,7 +131,7 @@ const UseManage = ({navigation}) => {
     }, []);
 
     const _onReviewPress = item => {
-        var today = new Date().toJSON();
+        var today = moment().format('YYYY-MM-DD HH:mm:ss');
 
         if(item.reservation < today){
             navigation.navigate("ReviewWrite", {successBidId : item['successBidId']});
