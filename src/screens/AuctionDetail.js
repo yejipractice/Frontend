@@ -113,10 +113,11 @@ const AucLineCon = styled.View`
     flex-direction: row;
     align-items: center;
     margin-left: 10px;
+    margin-right: 20px;
     `;
 
 const Store = styled.TouchableOpacity`
-    width: ${({double}) => double? WIDTH*0.4 : WIDTH*0.2};
+    width: ${({double}) => double? WIDTH*0.35 : WIDTH*0.2};
     justify-content: center;
 `;
 
