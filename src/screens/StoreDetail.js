@@ -257,11 +257,11 @@ const StoreDetail = ({navigation, route}) => {
                     {isStar? 
                     (
                         <MaterialCommunityIcons name="star" size={40} onPress={onStarPress} color="yellow"
-                  style={{marginLeft: 15, marginTop: 5, opacity: 0.7}}/>
+                  style={{position: 'absolute', right: 5, marginTop: 5, opacity: 0.7}}/>
                     ) 
                     : (
                         <MaterialCommunityIcons name="star-outline" size={40} onPress={onStarPress} color="yellow"
-                  style={{marginLeft: 15, marginTop: 5, opacity: 0.7}}/>
+                  style={{position: 'absolute', right: 5, marginTop: 5, opacity: 0.7}}/>
                     )}
                 </StarContainer>}
                 {(name!=="")&& <PhotoMenuCon><DesText style={{color: "blue", backgroundColor: "white"}}>{name}</DesText></PhotoMenuCon>}
@@ -656,9 +656,7 @@ const StoreDetail = ({navigation, route}) => {
            
             <InfoBox isFirst={true}>
                     <InfoTextContainer>
-                    <FirstInfo><InfoText>간단한 한마디</InfoText></FirstInfo>
-                    <SecondInfo><InfoText></InfoText></SecondInfo>
-                    <ThirdInfo><InfoText></InfoText></ThirdInfo>
+                    <FirstInfo><MaterialCommunityIcons name="comment" size={25} color="black" style={{position: "absolute", left: 20}}/></FirstInfo>
                     </InfoTextContainer>
             </InfoBox>
             <InfoBox isLast={true}>
