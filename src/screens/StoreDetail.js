@@ -135,7 +135,7 @@ const StarContainer = styled.View`
 `;
 
 const ReviewButton = styled.TouchableOpacity`
-
+    flex-direction: row;
 `;
 
 
@@ -148,6 +148,30 @@ const StoreDetail = ({navigation, route}) => {
 
     const carouselRef = useRef();
     const [indexSelected, setIndexSelected] = useState(0);
+    const [data, setData] = useState([]);
+    const [isLoading, setISLoading] = useState(false);
+
+    const Stars = ({score}) => {
+        var list = [];
+        var one = parseInt(score);
+        var half = parseInt(score/0.5); 
+        let i = 0;
+        if(score % 2 == 0){
+            for(i = 0; i<one;i++)
+            {
+                list.push(<MaterialCommunityIcons name="star" size={25} color="yellow"/>)
+            }
+        }else {
+            for(i = 0; i<one;i++)
+            {
+                list.push(<MaterialCommunityIcons name="star" size={25} color="yellow"/>)
+            }
+            if((half - one*2) !== 0){
+                list.push(<MaterialCommunityIcons name="star-half" size={25} color="yellow"/>)
+            }
+        }
+        return list;
+    };
 
     // 업체유형 한글로 변환
     const _changeType = (type) => {
@@ -199,12 +223,15 @@ const StoreDetail = ({navigation, route}) => {
         return (h+"시 "+m+"분");
     };
 
-    const StoreImage = ({item: {id, src, des}, onStarPress, isStar,theme, onReviewPress}) => {
+    const StoreImage = ({item: {id, src, des}, onStarPress, isStar,theme, onReviewPress, reviewAvg, reviewCnt}) => {
+        const {mode} = useContext(LoginContext);
+        let score = Math.round(reviewAvg * 10)/10
         return (
             <>
                 {/* <StyledImage source={{uri: src}} /> */}
                 <StyledImageView />
-                <StarContainer>
+                { mode === "CUSTOMER" &&
+                    <StarContainer>
                     {isStar? 
                     (
                         <MaterialCommunityIcons name="star" size={40} onPress={onStarPress} color="yellow"
@@ -214,16 +241,16 @@ const StoreDetail = ({navigation, route}) => {
                         <MaterialCommunityIcons name="star-outline" size={40} onPress={onStarPress} color="yellow"
                   style={{marginLeft: 15, marginTop: 5, opacity: 0.7}}/>
                     )}
-                </StarContainer>
+                </StarContainer>}
                 {(id !== 0 && id <= menus.length) && <PhotoMentCon><DesText style={{color: "blue"}}>{menus[id-1].description}</DesText></PhotoMentCon>}
                 <DesContainer>
                     <DesTextBox>
                         <Title>{storeName}</Title>
-                        <ReviewButton onPress={onReviewPress}><Title>리뷰 별점</Title></ReviewButton>
+                        <ReviewButton onPress={onReviewPress}><Stars score={score}/></ReviewButton>
                     </DesTextBox>
                     <DesTextBox>
                         <DesText>{storeType}</DesText>
-                        <ReviewButton onPress={onReviewPress}><DesText>리뷰 수</DesText></ReviewButton>
+                        <ReviewButton onPress={onReviewPress}><DesText>{reviewCnt}개의 리뷰</DesText></ReviewButton>
                     </DesTextBox>
                 </DesContainer>
             </>
@@ -247,7 +274,11 @@ const StoreDetail = ({navigation, route}) => {
     const [facilities, setFacilities] = useState([]);
     const [capacity, setCapacity]=useState(null);
     const [changedFac, setChangedFac] = useState(null);
-
+    const [comment, setComment] = useState(null);
+    const [reviewAvg, setReviewAvg] = useState(null);
+    const [reviewCnt, setReviewCnt]= useState(null) ;
+    const [pic, setPic] = useState();
+    const [menuPics, setPics] = useState([]);
     const _handleFacilities = () => {
         if(facilities===[]){
             return null;
@@ -279,6 +310,7 @@ const StoreDetail = ({navigation, route}) => {
             spinner.start();
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
+            console.log(res);
             let menuResponse = await fetch(menuUrl, options);
             let menuRes = await menuResponse.json();
             setStoreName(res.data.name);
@@ -288,6 +320,9 @@ const StoreDetail = ({navigation, route}) => {
             setPhoneNumber(res.data.phoneNum);
             setOpenTime(setTime(res.data.openTime));
             setCloseTime(setTime(res.data.closedTime));
+            setComment(res.data.comment);
+            setReviewAvg(res.data.reviewAvg);
+            setReviewCnt(res.data.reviewCnt);
             var uploaded = (res.data.facility===null);
             if(!uploaded){
                 setParking(res.data.facility.parking);
@@ -312,11 +347,20 @@ const StoreDetail = ({navigation, route}) => {
         handleAPI();
     },[]);
 
+    // 즐겨찾기 여부
+    useEffect( () => {
+        getApi();
+        if(data!==undefined){
+            let list = data.map(item => item.storeId);
+            if(list.includes(id)){
+            setIsStar(true);
+        }
+        }
+    },[isLoading]);
+
     const [isStar, setIsStar] = useState(false);
     
     const _onMessagePress = () => {navigation.navigate("Message", {name: "가게 이름"+id})};
-
-    const _onStarPress = () => {setIsStar(!isStar)};
 
     const _onReviewPress = () => {navigation.navigate("Review",{id: id})};
 
@@ -329,7 +373,125 @@ const StoreDetail = ({navigation, route}) => {
             )
         });
     }, []);
-    
+
+
+    // 즐겨찾기 list 가져오기
+    const getApi = async () => {
+        let fixedUrl = url+"/member/favorites/customer";
+
+        let options = {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token,
+            },
+
+        };
+        try {
+            spinner.start();
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+
+            setData(res.list);
+
+            return (res.success);
+
+          } catch (error) {
+            console.error(error);
+          } finally {
+            spinner.stop();
+            setISLoading(true);
+          }
+    };
+
+    // 즐겨찾기 등록 post 처리
+    const postApi = async (id) => {
+        let fixedUrl = url+'/member/favorites'; 
+
+        let options = {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token,
+            },
+            body: JSON.stringify({ 
+                favoritesType: "STORE",
+                objectId: id,
+            }),
+        };    
+        try {
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+
+            console.log(res);
+            return res["success"];
+
+            } catch (error) {
+            console.error(error);
+        }    
+    }
+
+
+    // 즐겨찾기 삭제 delete 처리
+    const deleteApi = async (id) => {
+
+        let fixedUrl = url+"/member/favorites";
+
+        let Info = {
+            favoritesType: "STORE",
+            objectId: id,
+        };
+
+        let options = {
+            method: 'DELETE',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-AUTH-TOKEN' : token
+            },
+            body: JSON.stringify( Info ),
+        };
+        try {
+            let response = await fetch(fixedUrl, options);
+            let res = await response.json();
+            console.log(res);
+
+            return res["success"];
+
+          } catch (error) {
+            console.error(error);
+          }
+    }
+
+    // 즐겨찾기 추가/삭제
+    const _onStarPress = async(id) => {
+        console.log(id);
+        try{
+            spinner.start();
+            let result;
+            // 별이 노란색이면 즐겨찾기 삭제
+            if(isStar){
+                result = await deleteApi(id);
+            } 
+            // 즐겨찾기 추가
+            else{
+                result = await postApi(id);
+            }
+
+            if(!result){
+                alert("다시 시도해주세요");
+            }
+            else{
+                setIsStar(!isStar);
+            }
+        }catch(e){
+                console.log("Error", e.message);
+        }finally{
+            spinner.stop();
+        }
+    }
    
      return (
         <KeyboardAwareScrollView
@@ -342,7 +504,8 @@ const StoreDetail = ({navigation, route}) => {
            ref={carouselRef}
            data={photos}
            renderItem={({item}) => (
-                <StoreImage item={item} onReviewPress={_onReviewPress} onStarPress={_onStarPress} isStar={isStar} theme={theme} />
+                <StoreImage item={item} onReviewPress={_onReviewPress} onStarPress={() => _onStarPress(id)} isStar={isStar} theme={theme} 
+                reviewAvg={reviewAvg} reviewCnt={reviewCnt}/>
             )}
             sliderWidth={WIDTH}
             itemWidth={WIDTH}
@@ -368,9 +531,9 @@ const StoreDetail = ({navigation, route}) => {
             ):null}
 
             {menus.map(menu => (
-                <InfoBox isFirst={menu.menuId===1} key={menu.menuId}>
+                <InfoBox isFirst={menus.indexOf(menu)==0} key={menu.menuId}>
                     <InfoTextContainer>
-                        <FirstInfo><InfoText>{menu.menuId===1? "메뉴" : ""}</InfoText></FirstInfo>
+                        <FirstInfo><InfoText>{menus.indexOf(menu)==0? "메뉴" : ""}</InfoText></FirstInfo>
                         <SecondInfo><InfoText>{menu.name}</InfoText></SecondInfo>
                         <ThirdInfo><InfoText>{String(menu.price)+"원"}</InfoText></ThirdInfo>
                     </InfoTextContainer>
@@ -443,14 +606,14 @@ const StoreDetail = ({navigation, route}) => {
            
             <InfoBox isFirst={true}>
                     <InfoTextContainer>
-                    <FirstInfo><InfoText>추가 설명</InfoText></FirstInfo>
+                    <FirstInfo><InfoText>간단한 한마디</InfoText></FirstInfo>
                     <SecondInfo><InfoText></InfoText></SecondInfo>
                     <ThirdInfo><InfoText></InfoText></ThirdInfo>
                     </InfoTextContainer>
             </InfoBox>
             <InfoBox isLast={true}>
                 <DescInfoContainer>
-                    <InfoText>{text}</InfoText>
+                    <InfoText>{comment}</InfoText>
                 </DescInfoContainer>
                 
             </InfoBox>
