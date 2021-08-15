@@ -15,6 +15,8 @@ import {changeListData} from "../utils/common";
 const WIDTH = Dimensions.get("screen").width;
 const HEIGHT = Dimensions.get("screen").height;
 
+var moment = require('moment');
+
 const Container = styled.View`
     flex: 1;
     justify-content: flex-start;
@@ -199,12 +201,21 @@ const RegisterAuction = ({navigation, route}) => {
   
     const [isLoading, setIsLoading] = useState(false);
 
-    //날짜 데이터
-    const [BD, setBD] = useState("");
-    const [BT, setBT] = useState("");
-    const [ED, setED] = useState("");
-    const [ET, setET] = useState("");
+    const [bookYear, setBookYear] = useState();
+    const [bookMonth, setBookMonth] = useState();
+    const [bookDay, setBookDay] = useState();
+    const [bookHour, setBookHour] = useState();
+    const [bookMinute, setBookMinute] = useState();
 
+    const [endYear, setEndYear] = useState();
+    const [endMonth, setEndMonth] = useState();
+    const [endDay, setEndDay] = useState();
+    const [endHour, setEndHour] = useState();
+    const [endMinute, setEndMinute] = useState();
+
+  const [realBook , setRealBook] = useState();
+  const [realEnd , setRealEnd] = useState();
+  
     // 나이 드롭다운  
     const [open1, setOpen1] = useState(false);
     const [selectedAge, setSelectedAge] = useState("");
@@ -316,10 +327,10 @@ const _getLocPer = async () => {
 
     let Info = {
       content: additionalContent,
-      deadline: endFullData,
+      deadline: moment([endYear, endMonth-1, endDay, endHour, endMinute]),
       maxPrice: maxPrice,
       minPrice: minPrice,
-      reservation: bookFullData,
+      reservation: moment([bookYear, bookMonth-1, bookDay, bookHour, bookMinute]),
       storeType: JSON.stringify(foodType),
       title: title,
       groupType: meetingType,
@@ -340,6 +351,7 @@ const _getLocPer = async () => {
   };
 
   try{
+    console.log(endMonth);
       let response = await fetch(fixedUrl, options);
       let res = await response.json();
       console.log(res);
@@ -450,8 +462,8 @@ const _getLocPer = async () => {
     },[buttonPress]);
 
     const _setData = async () => {
-      bookFullData = BD+BT;
-      endFullData = ED+ET;
+      bookFullData = realBook;
+      endFullData = realEnd;
       return true;
     };
 
@@ -560,6 +572,15 @@ const _getLocPer = async () => {
           return nowString;
         };
 
+        useEffect(()=>{
+           var moment = require('moment');
+           setRealBook(moment(bookYear+"-"+bookMonth+"-"+bookDay+" "+bookHour+":"+bookMinute).toJSON());
+        }, [bookMonth, bookDay, bookYear, bookHour, bookMinute]);
+
+        useEffect(()=>{
+          var moment = require('moment');
+          setRealEnd(moment(endYear+"-"+endMonth+"-"+endDay+" "+endHour+":"+endMinute).toJSON());
+       }, [endMonth, endDay, endYear, endHour, endMinute]);
 
 
       //date picker 각 시간 input에 대한 action 
@@ -571,20 +592,14 @@ const _getLocPer = async () => {
         const days=["일요일","월요일","화요일","수요일","목요일","금요일","토요일"];
 
         const _setBookDate = date => {
-          var strD = date.toJSON();
-          var sliced = strD.slice(0,11);
-          setBD(sliced);
-          var y = date.getFullYear();
-          var m = date.getMonth()+1;
-          if(m < 10){
-            m = "0"+m;
-          }
-          var d = date.getDate();
-          if(d< 10){
-            d = "0"+d;
-          }
-          var w = days[date.getDay()];
-          setBookDate(y+"년 "+m+"월 "+d+"일 "+w);
+          var realdate = moment(date).format("YYYY년 MM월 DD일");
+          var year =  moment(date).format("YYYY");
+          var month =  moment(date).format("MM");
+          var day =  moment(date).format("DD");
+          setBookYear(year);
+          setBookMonth(month);
+          setBookDay(day);
+          setBookDate(realdate);
           setBookDateVisible(false);
           setIsLoading(true);
         };
@@ -598,19 +613,12 @@ const _getLocPer = async () => {
       };
 
       const _setBookTime = time => {
-        var strT = time.toJSON();
-        var sliced = strT.slice(11,time.length);
-        setBT(sliced)
-        var h = time.getHours();
-        var m = time.getMinutes();
-        if(h < 10){
-          h = "0"+h;
-        }
-        
-        if(m< 10){
-          m = "0"+m;
-        }
-        setBookTime(h+"시 "+m+"분");
+        var real = moment(time).format("HH시 mm분");
+        var hour =  moment(time).format("HH");
+        var minute =  moment(time).format("mm");
+        setBookHour(hour);
+        setBookMinute(minute);
+        setBookTime(real);
         setBookTimeVisible(false);
         setIsLoading(true);
       };
@@ -624,20 +632,14 @@ const _getLocPer = async () => {
     };
 
     const _setEndDate = date => {
-      var strD = date.toJSON();
-      var sliced = strD.slice(0,11);
-      setED(sliced);
-      var y = date.getFullYear();
-      var m = date.getMonth()+1;
-      if(m < 10){
-        m = "0"+m;
-      }
-      var d = date.getDate();
-      if(d< 10){
-        d = "0"+d;
-      }
-      var w = days[date.getDay()];
-      setEndDate(y+"년 "+m+"월 "+d+"일 "+w);
+      var realdate = moment(date).format("YYYY년 MM월 DD일");
+      var year =  moment(date).format("YYYY");
+      var month =  moment(date).format("MM");
+      var day =  moment(date).format("DD");
+      setEndYear(year);
+      setEndMonth(month);
+      setEndDay(day);
+      setEndDate(realdate);
       setEndDateVisible(false);
       setIsLoading(true);
     };
@@ -651,19 +653,12 @@ const _getLocPer = async () => {
   };
 
   const _setEndTime = time => {
-    var strT = time.toJSON();
-    var sliced = strT.slice(11,time.length);
-    setET(sliced);
-    var h = time.getHours();
-    var m = time.getMinutes();
-    if(h < 10){
-      h = "0"+h;
-    }
-    
-    if(m< 10){
-      m = "0"+m;
-    }
-    setEndTime(h+"시 "+m+"분");
+    var real = moment(time).format("HH시 mm분");
+    var hour =  moment(time).format("HH");
+    var minute =  moment(time).format("mm");
+    setEndHour(hour);
+    setEndMinute(minute);
+    setEndTime(real);
     setEndTimeVisible(false);
     setIsLoading(true);
   };
@@ -673,14 +668,12 @@ const _getLocPer = async () => {
   };
 
   const _changeDate = date => {
-    var moment = require('moment');
     var w = days[moment(date).day()];
     let text = moment(date).format('YYYY년 MM월 DD일 ') + w;
     return text;
   }
 
   const _changeTime = date => {
-    var moment = require('moment');
     let text = moment(date).format('hh시 mm분');
     return text;
   }
@@ -1105,6 +1098,7 @@ const _ChangeAuction = async() => {
            <StyledTextInputs 
            value={additionalContent}
            onChangeText={text => {setAdditionalContent(text); setIsLoading(true);}}
+           onSubmitEditing={() => setIsLoading(false)}
            autoCapitalize="none"
            placeholder="추가 사항"
            autoCorrect={false}
