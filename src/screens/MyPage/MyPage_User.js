@@ -100,6 +100,17 @@ const Mypage_User = ( {navigation} ) => {
       }
     };
 
+    const clearAll = async () => {
+        try {
+            spinner.start();
+          await AsyncStorage.clear()
+        } catch(e) {
+          console.error(e);
+        }finally{
+            spinner.stop();
+        }
+      };
+
     return (
         <Container>
             
@@ -126,9 +137,7 @@ const Mypage_User = ( {navigation} ) => {
                                 [
                                     { text: "확인", 
                                       onPress: () => {
-                                        AsyncStorage.removeItem('UserToken'); 
-                                        AsyncStorage.removeItem('UserMode');
-                                        AsyncStorage.removeItem('UserId');
+                                        clearAll();
                                         setSuccess(false);
                                         setAutoLogin(false);
                                     }},

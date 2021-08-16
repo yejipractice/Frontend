@@ -59,6 +59,7 @@ const LogoutContainer = styled.View`
     justify-content: space-between;
 `;
 
+
 const Mypage_Store = ({ navigation }) => {
     const {token, setSuccess, doc, id, setAutoLogin} = useContext(LoginContext);
     const {url} = useContext(UrlContext);
@@ -102,6 +103,17 @@ const Mypage_Store = ({ navigation }) => {
       }
     };
 
+    const clearAll = async () => {
+        try {
+            spinner.start();
+          await AsyncStorage.clear()
+        } catch(e) {
+          console.error(e);
+        }finally{
+            spinner.stop();
+        }
+      };
+
     return (
         <Container>
             <InfoContainer>
@@ -132,10 +144,7 @@ const Mypage_Store = ({ navigation }) => {
                                 [
                                     { text: "확인", 
                                       onPress: () => {
-                                        AsyncStorage.removeItem('UserToken');  
-                                        AsyncStorage.removeItem('UserMode');
-                                        AsyncStorage.removeItem('UserId');
-                                        AsyncStorage.removeItem('UserDoc');
+                                        clearAll();
                                         setSuccess(false);
                                         setAutoLogin(false);
                                     }},
