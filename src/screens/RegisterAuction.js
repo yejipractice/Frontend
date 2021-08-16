@@ -373,12 +373,12 @@ const _getLocPer = async () => {
         let _errorMessage="";
         if(!title){
           _errorMessage = "공고 제목을 입력하세요";
-        }else if(!bookDate){
-          _errorMessage = "예약 날짜를 입력하세요";
-        }else if(!bookTime){
-          _errorMessage = "예약 시각을 입력하세요";
-        }else if(parseInt(book)<parseInt(getNowString())) {
-          _errorMessage = "예약 시간을 잘못 입력하였습니다";
+        // }else if(!bookDate){
+        //   _errorMessage = "예약 날짜를 입력하세요";
+        // }else if(!bookTime){
+        //   _errorMessage = "예약 시각을 입력하세요";
+        // }else if(parseInt(book)<parseInt(getNowString())) {
+        //   _errorMessage = "예약 시간을 잘못 입력하였습니다";
         }else if(!meetingType){
           _errorMessage = "단체 유형을 입력하세요";
         }
@@ -420,16 +420,17 @@ const _getLocPer = async () => {
         else if(!selectedLocation){
           _errorMessage = "선호지역을 입력하세요";
         }
-        else if(!endDate){
-          _errorMessage = "공고 마감 날짜를 입력하세요";
-        }
-        else if(!endTime){
-          _errorMessage = "공고 마감 시각을 입력하세요";
-        }else if(parseInt(end)<parseInt(getNowString())) {
-          _errorMessage = "공고 마감 시간을 잘못 입력하였습니다";
-        }else if(parseInt(end)>parseInt(book)){
-          _errorMessage = "공고 마감 시간을 예약 시간 이전으로 설정해주세요."
-        }else if(!additionalContent) {
+        // else if(!endDate){
+        //   _errorMessage = "공고 마감 날짜를 입력하세요";
+        // }
+        // else if(!endTime){
+        //   _errorMessage = "공고 마감 시각을 입력하세요";
+        // }else if(parseInt(end)<parseInt(getNowString())) {
+        //   _errorMessage = "공고 마감 시간을 잘못 입력하였습니다";
+        // }else if(parseInt(end)>parseInt(book)){
+        //   _errorMessage = "공고 마감 시간을 예약 시간 이전으로 설정해주세요."
+        // }
+        else if(!additionalContent) {
           _errorMessage = "추가 사항을 입력하세요.";
         }
         else {
@@ -448,10 +449,12 @@ const _getLocPer = async () => {
 
 
     useEffect(()=> {
+      console.log(1)
       var _book = bookDate.slice(0,4)+bookDate.slice(6,8)+bookDate.slice(10,12)+bookTime.slice(0,2)+bookTime.slice(4,6);
       var _end =  endDate.slice(0,4)+endDate.slice(6,8)+endDate.slice(10,12)+endTime.slice(0,2)+endTime.slice(4,6);
       setBook(_book);
       setEnd(_end);
+      console.log(2)
     },[bookTime,bookDate,endDate,endTime]);
 
     useEffect(() => {
@@ -461,14 +464,19 @@ const _getLocPer = async () => {
     },[buttonPress]);
 
     const _setData = async () => {
+      console.log(3)
       bookFullData = realBook;
       endFullData = realEnd;
+      console.log(4)
       return true;
     };
 
     const f = async (callback1, callback2) => {
+      console.log(5)
       var d = await callback1();
+      console.log(6)
       var res = await callback2();
+      console.log(7)
       return res;
     };
 
@@ -540,6 +548,7 @@ const _getLocPer = async () => {
         },[disabled]);
 
         const getNowString =() => {
+          console.log(10)
           var now = new Date();
           var nowYear = String(now.getFullYear()); 
           var nowMonth = now.getMonth()+1;
@@ -572,7 +581,10 @@ const _getLocPer = async () => {
         };
 
         useEffect(()=>{
-          if(bookMonth!==""){
+          console.log(11)
+          console.log(bookMonth);
+          if(bookMonth!==undefined && bookHour!== undefined && bookMinute !== undefined && bookDay !== undefined && bookYear !== undefined){
+            console.log(12)
             var moment = require('moment');
             var time = moment(bookYear+"-"+bookMonth+"-"+bookDay+" "+bookHour+":"+bookMinute).utc(true).toDate();
             var data = time.toISOString();
@@ -582,7 +594,7 @@ const _getLocPer = async () => {
         }, [bookMonth, bookDay, bookYear, bookHour, bookMinute]);
 
         useEffect(()=>{
-          if(endMonth!==""){
+          if(endMonth!==undefined && endHour !== undefined && endMinute !== undefined && endDay !== undefined && endYear!==undefined){
             var moment = require('moment');
             var time = moment(endYear+"-"+endMonth+"-"+endDay+" "+endHour+":"+endMinute).utc(true).toDate();
             var data = time.toISOString();
