@@ -184,7 +184,7 @@ const ReviewSet = ({review: {reviewId, createdDate, userName, score, content, pa
 };
 
 const ReviewManage = ({navigation, route}) => {
-    const {url} = useContext(UrlContext);
+    const {aurl} = useContext(UrlContext);
     const {spinner} = useContext(ProgressContext);
     const {token,  id} = useContext(LoginContext);
 
@@ -207,7 +207,7 @@ const ReviewManage = ({navigation, route}) => {
     // 리뷰 가져오기
     const getApi = async () => {
 
-        let fixedUrl = url+"/auction/reviews/"+`${isUser ? 'user' : 'store'}`+"/"+`${id}`
+        let fixedUrl = aurl+"/auction/reviews/"+`${isUser ? 'user' : 'store'}`+"/"+`${id}`
 
         let options = {
             method: 'GET',
@@ -264,7 +264,7 @@ const ReviewManage = ({navigation, route}) => {
         try{
             spinner.start();
 
-            const result = await deleteApi(url+"/auction/review/"+`${reviewId}`);
+            const result = await deleteApi(aurl+"/auction/review/"+`${reviewId}`);
 
             if(!result){
                 alert("다시 시도해주세요.");
