@@ -15,7 +15,10 @@ import {changeListData} from "../utils/common";
 const WIDTH = Dimensions.get("screen").width;
 const HEIGHT = Dimensions.get("screen").height;
 
+require('moment-timezone');
 var moment = require('moment');
+moment.tz.setDefault("Asia/Seoul");
+exports.moment = moment;
 
 const Container = styled.View`
     flex: 1;
@@ -327,10 +330,10 @@ const _getLocPer = async () => {
 
     let Info = {
       content: additionalContent,
-      deadline: moment([endYear, endMonth-1, endDay, endHour, endMinute]),
+      deadline: endFullData,
       maxPrice: maxPrice,
       minPrice: minPrice,
-      reservation: moment([bookYear, bookMonth-1, bookDay, bookHour, bookMinute]),
+      reservation: bookFullData,
       storeType: JSON.stringify(foodType),
       title: title,
       groupType: meetingType,
@@ -351,12 +354,8 @@ const _getLocPer = async () => {
   };
 
   try{
-    console.log(endMonth);
       let response = await fetch(fixedUrl, options);
       let res = await response.json();
-      console.log(res);
-      console.log(options)
-      console.log(fixedUrl);
       var success = res["success"];
       if (success){
         auctionId = res["data"]["auctionId"];
@@ -573,13 +572,23 @@ const _getLocPer = async () => {
         };
 
         useEffect(()=>{
-           var moment = require('moment');
-           setRealBook(moment(bookYear+"-"+bookMonth+"-"+bookDay+" "+bookHour+":"+bookMinute).toJSON());
+          if(bookMonth!==""){
+            var moment = require('moment');
+            var time = moment(bookYear+"-"+bookMonth+"-"+bookDay+" "+bookHour+":"+bookMinute).utc(true).toDate();
+            var data = time.toISOString();
+            console.log(data);
+            setRealBook(data);
+          }
         }, [bookMonth, bookDay, bookYear, bookHour, bookMinute]);
 
         useEffect(()=>{
-          var moment = require('moment');
-          setRealEnd(moment(endYear+"-"+endMonth+"-"+endDay+" "+endHour+":"+endMinute).toJSON());
+          if(endMonth!==""){
+            var moment = require('moment');
+            var time = moment(endYear+"-"+endMonth+"-"+endDay+" "+endHour+":"+endMinute).utc(true).toDate();
+            var data = time.toISOString();
+            console.log(data);
+            setRealEnd(data);
+          }
        }, [endMonth, endDay, endYear, endHour, endMinute]);
 
 
