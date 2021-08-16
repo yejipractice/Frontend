@@ -242,6 +242,7 @@ const Main = ({ navigation }) => {
             var b = await _sortPopular(res.list);
             setLatestAuctions(a.reverse().slice(0,10));
             setPopularAuctions(b.slice(0,10));
+            console.log(a.slice(0,10))
         }catch(error) {
             console.error(error);
         }finally {

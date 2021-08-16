@@ -53,13 +53,35 @@ const LoginProvider = ({children}) => {
             doc: doc,
             id: id,
         };
-        AsyncStorage.setItem('user_infomation', JSON.stringify(data));
-        console.log(data);
     };
 
     useEffect(() => {
         setData(token, autoLogin, allow, mode, doc, id);
     },[token, autoLogin, allow, mode, doc, id]);
+
+    useEffect(()=> {
+        if(autoLogin && id!==null){
+            AsyncStorage.mergeItem("UserId", id);
+        }
+    },[id, autoLogin]);
+
+    useEffect(()=> {
+        if(autoLogin && mode!==null){
+            AsyncStorage.mergeItem("UserMode", mode);    
+        }
+    },[mode ,autoLogin]);
+
+    useEffect(()=>{
+        if(autoLogin && mode ==="Store"){
+            AsyncStorage.mergeItem("UserDoc", doc);
+        }
+    },[doc, autoLogin]);
+
+    useEffect(()=>{
+        if(autoLogin){
+            AsyncStorage.mergeItem("UserAllow", allow);
+        }
+    },[allow]);
 
     return (
         <LoginContext.Provider value={value}>

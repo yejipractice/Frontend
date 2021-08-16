@@ -3,6 +3,7 @@ import styled from "styled-components/native";
 import {MypageButton, ProfileImage, SmallButton} from "../../components";
 import {LoginContext, UrlContext, ProgressContext} from "../../contexts";
 import {Alert, Dimensions} from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const WIDTH = Dimensions.get("screen").width;
 const HEIGHT = Dimensions.get("screen").height;
@@ -59,7 +60,7 @@ const LogoutContainer = styled.View`
 
 
 const Mypage_User = ( {navigation} ) => {
-    const {token, setSuccess} = useContext(LoginContext);
+    const {token, setSuccess, setAutoLogin} = useContext(LoginContext);
     const {url} = useContext(UrlContext);
     const {spinner} = useContext(ProgressContext);
     const [name, setName] = useState("");
@@ -123,7 +124,14 @@ const Mypage_User = ( {navigation} ) => {
                             Alert.alert(
                                 "", "로그아웃하시겠습니까?",
                                 [
-                                    { text: "확인", onPress: () => setSuccess(false) },
+                                    { text: "확인", 
+                                      onPress: () => {
+                                        AsyncStorage.removeItem('UserToken'); 
+                                        AsyncStorage.removeItem('UserMode');
+                                        AsyncStorage.removeItem('UserId');
+                                        setSuccess(false);
+                                        setAutoLogin(false);
+                                    }},
                                     {
                                       text: "취소",
                                       style: "cancel"
