@@ -60,7 +60,7 @@ const  StoreInfo = ({navigation}) => {
 
     const getApi = async (url) => {
 
-        console.log(url);
+         
 
         let options = {
             method: 'GET',
@@ -75,7 +75,7 @@ const  StoreInfo = ({navigation}) => {
             spinner.start();
             let response = await fetch(url,options);
             let res = await response.json();
-            console.log(res);
+            
 
             setPhoto(res.data.path);
             setUserName(res.data.name);
@@ -107,7 +107,7 @@ const  StoreInfo = ({navigation}) => {
     // 회원 탈퇴 delete 처리
     const deleteApi = async (url) => {
 
-        console.log(url);
+     
 
         let options = {
             method: 'DELETE',

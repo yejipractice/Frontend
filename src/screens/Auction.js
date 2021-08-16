@@ -265,7 +265,7 @@ const Auction = ({navigation}) => {
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
             var list = res["list"];
-            console.log(list);
+            
             setAllData(list);
             setAuctionListData(list);
         }catch(error) {

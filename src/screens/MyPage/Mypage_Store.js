@@ -90,10 +90,10 @@ const Mypage_Store = ({ navigation }) => {
 
     try {
         spinner.start();
-        console.log(options);
+        
         let response = await fetch(fixedUrl, options);
         let res = await response.json();
-        console.log(res);
+        
         setName(res.data.name);
         setImage(res.data.path);
     }catch (error) {

@@ -65,20 +65,17 @@ const ChangeText = styled.Text`
     margin-left: 2%;
 `;
 
-const _handleDeadline = (date) => {
-    return date.slice(2,4)+date.slice(5,7)+date.slice(8,10)+date.slice(11,13)+date.slice(14,16)+" 마감";
-};
+
 
 const Item = ({item: {auctionId, title, storeType, groupType, groupCnt, deadline, addr, minPrice, maxPrice, reservation, createdDate}, 
                 onPress, onChange, onRemove, isUser, onChartPress}) => {
-
 
     return (
         <View>
             <ItemContainer onPress={() => onPress(auctionId)} >
                 <TimeTextContiner>
                     <ContentText>{changeDateData(reservation)} 예약</ContentText>
-                    <ContentText>{_handleDeadline(deadline)}</ContentText>
+                    <ContentText>마감 {changeEndDateData(deadline)} 전</ContentText>
                 </TimeTextContiner>
                 <ItemBox>
                     <ContentTitleText>{title}</ContentTitleText>
@@ -98,6 +95,7 @@ const Item = ({item: {auctionId, title, storeType, groupType, groupCnt, deadline
                 <ChangeText onPress={onChange}>수정</ChangeText>
                 <ChangeText onPress={onRemove}>삭제</ChangeText>
             </ChangeContainer> }
+            
         </View>
 
     );
@@ -114,8 +112,6 @@ const BidManage = ({navigation, route}) => {
     const [isUser, setIsUser] = useState(route.params.isUser);
 
     const _onAuctionPress = itemId => {navigation.navigate("AuctionDetail",{id: itemId})};
-
-    
 
 
     // 입찰내역 수정으로 이동
@@ -194,6 +190,7 @@ const BidManage = ({navigation, route}) => {
         }
     }
 
+
     // 입찰 삭제 delete 처리
     const deleteBidApi = async (url) => {
 
@@ -221,7 +218,7 @@ const BidManage = ({navigation, route}) => {
         try{
             spinner.start();
 
-            const result = await deleteBidApi(url+"/auction/auctioneer/"+`${id}`);
+            const result = await deleteBidApi(aurl+"/auction/auctioneer/"+`${id}`);
 
             if(!result){
                 alert("다시 시도해주세요.");
@@ -237,11 +234,12 @@ const BidManage = ({navigation, route}) => {
         }
     }
 
+
     // 진행중 공고 불러오기
     const getApi = async () => {
 
         let fixedUrl = (isUser ? aurl+"/auction/"+`${id}`+"/auctions" : aurl+"/auction/"+`${id}`+"/auction");
-        console.log(fixedUrl);
+       
 
         let options = { 
             method: 'GET',
@@ -256,7 +254,10 @@ const BidManage = ({navigation, route}) => {
             spinner.start();
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
-            
+
+
+            let list = res['list'].map( item => item.auction );
+
 
             if(res.list!==undefined) {
             if(isUser){
@@ -265,8 +266,6 @@ const BidManage = ({navigation, route}) => {
                 setData(_setLatestList(_filterProceeding(list)));
             }
         }
-       
-
 
             return res["success"];
 
@@ -310,10 +309,10 @@ const BidManage = ({navigation, route}) => {
         }
 };
 
-   // 로그 분석으로 이동
-   const onChartPress = (id) => {
-    navigation.navigate("AucLogManageTab", {auctionId: id})
-}
+    // 로그 분석으로 이동
+    const onChartPress = (id) => {
+        navigation.navigate("AucLogManageTab", {auctionId: id})
+    }
 
 
     return (
@@ -331,7 +330,7 @@ const BidManage = ({navigation, route}) => {
                             onChange={()=> _onChange(item)}
                             onRemove={() => _onRemove(item['auctionId'])}
                             onChartPress={() => onChartPress(item['auctionId'])}
-                            />
+                        />
                     )}/>
                 )}
             </BidContainer>

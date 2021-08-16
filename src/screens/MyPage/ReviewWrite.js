@@ -59,12 +59,13 @@ const ReviewWrite = ({navigation, route}) => {
 
     const [photos, setPhotos] = useState([]);
 
-    const {aurl} = useContext(UrlContext);
+    const {url} = useContext(UrlContext);
     const {spinner} = useContext(ProgressContext);
     const {token, doc, id} = useContext(LoginContext);
 
     const [content, setContent] = useState('');
     let successBidId = route.params.successBidId;
+
 
     const [starRating, setStarRating] = useState(0);
     const [maxRating, setMaxRating] = useState([1, 2, 3, 4, 5]);
@@ -100,7 +101,7 @@ const ReviewWrite = ({navigation, route}) => {
     useEffect(() => {
         if (route.params.photos) {
             setPhotos(route.params.photos);
-            console.log(route.params.photos);
+             
         }
       }, [route.params.photos, photos]);
 
@@ -144,8 +145,8 @@ const ReviewWrite = ({navigation, route}) => {
 
     // 리뷰 post (리뷰내용 + 사진들)
     const postApi = async () => {
-        let fixedUrl = url+'/auction/'+`${successBidId}`+"/review";  
-        console.log(fixedUrl);
+        let fixedUrl = url+'/auction/'+`${successBidId}`+"/review"; 
+       
         let formData = new FormData();
 
         photos.map( item => formData.append("files", {uri: item.uri, name: item.name, type: item.type}));
@@ -155,7 +156,8 @@ const ReviewWrite = ({navigation, route}) => {
         formData.append("successBidId", successBidId);
 
 
-        
+         
+
         let options = {
             method: 'POST',
             headers: {
@@ -170,7 +172,7 @@ const ReviewWrite = ({navigation, route}) => {
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
 
-            console.log(res);
+            
             return res["success"];
 
           } catch (error) {

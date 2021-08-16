@@ -15,14 +15,14 @@ const Container = styled.View`
 const ReviewLog = () => {
 
   const {id} = useContext(LoginContext);
-  const {url} = useContext(UrlContext);
+  const {surl} = useContext(UrlContext);
   const {spinner} = useContext(ProgressContext);
   const [data, setData] = useState("");
 
   const getApi = async () => {
 
-    let fixedUrl = url+"/search/log/storereview?storeId="+id;
-    console.log(fixedUrl);
+    let fixedUrl = surl+"/search/log/storereview?storeId="+id;
+ 
 
     let options = {
         method: 'GET',

@@ -5,6 +5,8 @@ import {UrlContext, ProgressContext, LoginContext} from "../../contexts";
 import {changeDateData, changeListData, cutDateData} from "../../utils/common";
 import { MaterialIcons } from '@expo/vector-icons'; 
 
+
+
 const WIDTH = Dimensions.get("screen").width; 
 
 const BidContainer = styled.View`
@@ -65,8 +67,9 @@ const TitleContainer = styled.View`
 
 
 const Item = ({item: {auctionId, title, storeType, groupType,  groupCnt, addr, minPrice, maxPrice, reservation, createdDate},
-     onPress,isUser,successList, sid, onChartPress}) => {
-         // 낙찰 성공 여부 파악
+         onPress,isUser,successList, sid, onChartPress}) => {
+        
+    // 낙찰 성공 여부 파악
     const _bidSuccess = (id) => {
         if(successList===undefined){
             return;
@@ -78,7 +81,8 @@ const Item = ({item: {auctionId, title, storeType, groupType,  groupCnt, addr, m
             }
         }
     };
-        return (
+    
+    return (
         <ItemContainer onPress={() => onPress(auctionId)} >
             <TimeTextContiner>
                 <ContentText>{changeDateData(reservation)} 예약</ContentText>
@@ -87,8 +91,9 @@ const Item = ({item: {auctionId, title, storeType, groupType,  groupCnt, addr, m
                 <TitleContainer>
                     <ContentTitleText>{title}</ContentTitleText>
                     { !isUser &&
-                  <BidResultText color = { _bidSuccess(sid) ? "green" : "red"}>{ _bidSuccess(sid) ? "낙찰" : "실패"}</BidResultText>
+                    <BidResultText color = { _bidSuccess(sid) ? "green" : "red"}>{ _bidSuccess(sid) ? "낙찰" : "실패"}</BidResultText>
                     }
+                    
                 </TitleContainer>
                 {isUser && 
                         <MaterialIcons name="insert-chart-outlined" size={26}  onPress={onChartPress} 
@@ -133,6 +138,7 @@ const BidManageFinished = ({navigation, route}) => {
             spinner.start();
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
+    
             let list = res['list'].map( item => item.auction );
 
             if(res.list!==undefined){
@@ -141,7 +147,8 @@ const BidManageFinished = ({navigation, route}) => {
             } else {
                 setData(_setLatestList(_filterProceeding(list)));
             }}
-            console.log(list[0]);
+
+         
 
 
             return res["success"];
@@ -157,7 +164,7 @@ const BidManageFinished = ({navigation, route}) => {
     // 낙찰된 공고 불러오기
     const getSuccessApi = async () => {
 
-        let fixedUrl = url+"/auction/store/bids";
+        let fixedUrl = aurl+"/auction/store/bids";
         let options = {
             method: 'GET',
             headers: {
@@ -171,9 +178,10 @@ const BidManageFinished = ({navigation, route}) => {
             spinner.start();
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
-
+    
             let list = res['list'].map( item => item.auctionId );
             setSuccessList(list);
+
             return res["success"];
 
           } catch (error) {
@@ -183,11 +191,13 @@ const BidManageFinished = ({navigation, route}) => {
           }
     }
 
+
     useEffect( () => {
         getApi();
         if(!isUser){
             getSuccessApi();
         }
+
     },[]);
 
 
@@ -202,6 +212,7 @@ const BidManageFinished = ({navigation, route}) => {
         return res;
     };
 
+
     const _filterProceeding = (prev) => {
         if(prev===undefined){
             return;
@@ -209,12 +220,12 @@ const BidManageFinished = ({navigation, route}) => {
             let array = prev.filter((obj) => obj.status.includes('END') === true);
             return array;
         }
-};
+    };
 
- // 로그 분석으로 이동
- const onChartPress = (id) => {
-    navigation.navigate("AucLogManageTab", {auctionId: id})
-}
+    // 로그 분석으로 이동
+    const onChartPress = (id) => {
+        navigation.navigate("AucLogManageTab", {auctionId: id})
+    }
     return (
         <Container>
             <BidContainer>

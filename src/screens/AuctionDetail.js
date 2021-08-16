@@ -537,7 +537,7 @@ const AuctionDetail = ({ navigation, route}) => {
                             <Store onPress={() => _pressStore(item)}><StoreText style={{color: (item.storeId===id || item.success===true)? "blue" : "black"}}>{item.menu}</StoreText></Store>
                             <Store onPress={() => _pressStore(item)}><StoreText style={{color: (item.storeId===id || item.success===true)? "blue" : "black"}}>{item.price}원</StoreText></Store>
                         </AucLineCon>
-                        {(item.storeId===id) && (
+                        {(item.storeId===id) && finished && (
                             <DeleteButton>
                                 <MaterialCommunityIcons name="delete" size={20} style={{color: "blue"}} onPress={() => _deletePress(item.auctioneerId)}/>
                             </DeleteButton>

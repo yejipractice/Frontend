@@ -252,7 +252,7 @@ const Main = ({ navigation }) => {
 
     useEffect(()=> {
         handleAuctionApi();
-        console.log(token);
+       
     },[]);
 
 

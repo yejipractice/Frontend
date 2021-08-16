@@ -14,14 +14,14 @@ const Container = styled.View`
 
 const LogManage = () => {
   const {id} = useContext(LoginContext);
-  const {url} = useContext(UrlContext);
+  const {surl} = useContext(UrlContext);
   const {spinner} = useContext(ProgressContext);
   const [data, setData] = useState("");
 
   const getApi = async () => {
 
-    let fixedUrl = url+"/search/log/storeview?storeId="+id;
-    console.log(fixedUrl);
+    let fixedUrl = surl+"/search/log/storeview?storeId="+id;
+    
 
     let options = {
         method: 'GET',
@@ -47,7 +47,7 @@ const LogManage = () => {
       }
 }
 
-console.log(data);
+ 
 
 
 useEffect(() => {

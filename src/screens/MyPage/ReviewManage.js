@@ -222,7 +222,7 @@ const ReviewManage = ({navigation, route}) => {
             spinner.start();
             let response = await fetch(fixedUrl,options);
             let res = await response.json();
-            console.log(res);
+         
 
             setReviews(res.list);
 
@@ -237,8 +237,7 @@ const ReviewManage = ({navigation, route}) => {
 
      // 리뷰 삭제 delete 처리
      const deleteApi = async (url) => {
-
-        console.log(url);
+ 
 
         let options = {
             method: 'DELETE',

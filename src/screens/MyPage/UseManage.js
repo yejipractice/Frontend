@@ -89,7 +89,7 @@ const UseManage = ({navigation}) => {
 
     const getApi = async (url) => {
 
-        console.log(url);
+       
 
         let options = {
             method: 'GET',
@@ -104,9 +104,10 @@ const UseManage = ({navigation}) => {
             spinner.start();
             let response = await fetch(url,options);
             let res = await response.json();
-            console.log(res);
+            
 
             setList(res.list);
+            
 
             return res["success"];
 
@@ -131,9 +132,11 @@ const UseManage = ({navigation}) => {
     }, []);
 
     const _onReviewPress = item => {
-        var today = moment().format('YYYY-MM-DD HH:mm:ss');
-
-        if(item.reservation < today){
+        const moment = require('moment');
+        const today = moment().format('YYYYMMDDhhmm');
+        const reservation = moment(item.reservation).format('YYYYMMDDhhmm');
+         
+        if(reservation < today){
             navigation.navigate("ReviewWrite", {successBidId : item['successBidId']});
         }
         else{

@@ -188,7 +188,6 @@ const Login = ({navigation}) => {
                     AsyncStorage.setItem('UserToken', tokenData);
                 }
             }
-            
             return res["success"];
         }catch (error) {
             console.error(error);

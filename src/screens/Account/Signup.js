@@ -227,8 +227,7 @@ const Signup = ({ navigation, route }) => {
     },[pressBeforeEmail,email,isSameEmail, isConfirmedEmail, emailConfirmPress, emailConfirmCode, emailCodePress, isEmailValidated]);
 
         useEffect(() => {
-            setDisabled(            
-                false
+            setDisabled(         
                 !(userId && email && password && passwordConfirm && !errorMessage &&isEmailValidated && !emailErrorMessage && !isChanging)
             );
             if(route.params.mode==="User"){
@@ -345,7 +344,7 @@ const Signup = ({ navigation, route }) => {
         // 이메일 키값 전송 api
         const postemailApi = async () => {
             let fixedUrl = url+'/member/auth/verify?email='+`${email}`;
-            console.log(fixedUrl);
+            
             
             let options = {
                 method: 'POST',
@@ -358,7 +357,7 @@ const Signup = ({ navigation, route }) => {
                 let response = await fetch(fixedUrl, options);
                 let res = await response.json();
 
-                console.log(res);
+ 
                 return res["success"];
 
               } catch (error) {
@@ -403,12 +402,12 @@ const Signup = ({ navigation, route }) => {
                 body: JSON.stringify( Info ),
             
             };
-            console.log(JSON.stringify( Info ));
+          
             try {
                 let response = await fetch(fixedUrl, options);
                 let res = await response.json();
 
-                console.log(res);
+               
                 return res["success"];
                 
                 
@@ -421,11 +420,11 @@ const Signup = ({ navigation, route }) => {
         // 서버 get 처리
         const getApi = async (url) => {
             
-            console.log(url);
+         
             try {
                 let response = await fetch(url);
                 let res = await response.json();
-                console.log(res);
+             
                 let msg = res["msg"];
                 if (msg === "이미 등록된 회원 이메일입니다."){
                     return "overlap"
