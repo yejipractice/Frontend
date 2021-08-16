@@ -5,6 +5,7 @@ import {ProfileImage, InfoText,ToggleButton, RadioButton} from '../../components
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { MaterialIcons } from '@expo/vector-icons';
 import {UrlContext, LoginContext, ProgressContext} from "../../contexts";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Container = styled.View`
     flex: 1;
@@ -150,6 +151,17 @@ const  UesrInfo = ({navigation}) => {
           }
     }
 
+    const clearAll = async () => {
+        try {
+            spinner.start();
+          await AsyncStorage.clear()
+        } catch(e) {
+          console.error(e);
+        }finally{
+            spinner.stop();
+        }
+      };
+
     // 회원 탈퇴 처리
     const _onDelete = async() => {
         try{
@@ -163,7 +175,10 @@ const  UesrInfo = ({navigation}) => {
             else{
                 Alert.alert(
                     "", "회원탈퇴 되었습니다",
-                    [{ text: "확인", onPress: () => {setSuccess(false);} }] );
+                    [{ text: "확인", onPress: () => {
+                        clearAll();
+                        setSuccess(false);
+                    } }] );
             }
 
         }catch(e){
