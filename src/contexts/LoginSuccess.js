@@ -60,26 +60,34 @@ const LoginProvider = ({children}) => {
     },[token, autoLogin, allow, mode, doc, id]);
 
     useEffect(()=> {
+        console.log("itss id")
         if(autoLogin && id!==null){
-            AsyncStorage.mergeItem("UserId", id);
+            var UId = {id : id};
+            AsyncStorage.mergeItem("UserId", JSON.stringify(UId));
         }
     },[id, autoLogin]);
 
     useEffect(()=> {
+        console.log("itss mode")
         if(autoLogin && mode!==null){
-            AsyncStorage.mergeItem("UserMode", mode);    
+            var UMd = {mode : mode};
+            AsyncStorage.mergeItem("UserMode", JSON.stringify(UMd));    
         }
     },[mode ,autoLogin]);
 
     useEffect(()=>{
+        console.log("itss doc")
         if(autoLogin && mode ==="Store"){
-            AsyncStorage.mergeItem("UserDoc", doc);
+            var UDc = {doc : doc};
+            AsyncStorage.mergeItem("UserDoc", JSON.stringify(UDc));
         }
     },[doc, autoLogin]);
 
     useEffect(()=>{
+        console.log("itss allow")
         if(autoLogin){
-            AsyncStorage.mergeItem("UserAllow", allow);
+            var UAl = {allow: allow};
+            AsyncStorage.mergeItem("UserAllow", JSON.stringify(UAl));
         }
     },[allow]);
 

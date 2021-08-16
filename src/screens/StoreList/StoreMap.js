@@ -128,7 +128,7 @@ const StoreMap = ({navigation, route}) => {
     const mapRef = useRef();
     
     const theme = useContext(ThemeContext);
-    const {token, mode} = useContext(LoginContext);
+    const {token, mode, setAllow} = useContext(LoginContext);
     const {url} = useContext(UrlContext);
     const {spinner} = useContext(ProgressContext);
 

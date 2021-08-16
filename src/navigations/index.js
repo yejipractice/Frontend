@@ -17,23 +17,45 @@ const Navigation = () => {
     const getTokenData = async () => {
         try{
             spinner.start()
-            var res = await AsyncStorage.getItem("UserToken");
-            if(res!==null){
-                setSuccess(true);
-                setAutoLogin(true);
-                setToken(res);
-                var UserId = await AsyncStorage.getItem("UserId");
-                setId(UserId);
-                var UserMode = await AsyncStorage.getItem("UserMode");
-                setMode(UserMode);
-                var UserAllow = await AsyncStorage.getItem("UserAllow");
-                setAllow(UserAllow);
-                if(UserMode === "Store"){
-                    var UserDoc = await AsyncStorage.getItem("UserDoc");
-                    setDoc(UserDoc);
+            AsyncStorage.getItem("UserToken", (err, result) => {
+                console.log(result);
+                if(result!==null){
+                    setSuccess(true);
+                    setAutoLogin(true);
+                    setToken(result);
+                    AsyncStorage.getItem("UserId", (err, res) => {
+                        console.log(res);
+                        if(JSON.parse(res)==null) setId(JSON.parse(res).id);
+                    });
+        
+                    AsyncStorage.getItem("UserMode", (err, res) => {
+                        console.log(res);
+                        if(res!==null) {
+                            if(res==="STORE"){
+                                console.log("its Store");
+                                setMode("Store");
+                            }else if (res === "CUSTOMER"){
+                                console.log("its Customer");
+                                setMode("Customer");
+                            }
+                        if(res==="STORE"){
+                            AsyncStorage.getItem("UserDoc", (e, r) => {
+                                console.log(JSON.parse(r));
+                                if(JSON.parse(r)!==null) {setDoc(JSON.parse(r).doc)};
+                            });
+                        }}
+                    });
+                    AsyncStorage.getItem("UserAllow", (err, res) => {
+                        console.log(JSON.parse(res));
+                        if(JSON.parse(res)!==null) {setAllow(JSON.parse(res).allow)};
+                    });
+                        return true;
+                }else{
+                    console.log("no");
+                    setIsReady(false);
+                    return false;
                 }
-            };
-            return (res!==null);
+            });
         }catch(e){
             console.error(e);
         }finally{
@@ -43,10 +65,18 @@ const Navigation = () => {
 
     useEffect(()=>{
        var res = getTokenData();
-       if(res){
+       if(res===true){
         setIsReady(true);
        }
     },[]);
+
+    useEffect(()=>{
+        if(success){
+            setIsReady(true);
+        }else{
+            setIsReady(false);
+        }
+    },[success]);
 
     return (
         <>
