@@ -64,7 +64,9 @@ const ChangeText = styled.Text`
     margin-left: 2%;
 `;
 
-
+const _handleDeadline = (date) => {
+    return date.slice(2,4)+date.slice(5,7)+date.slice(8,10)+date.slice(11,13)+date.slice(14,16)+" 마감";
+};
 
 const Item = ({item: {auctionId, title, storeType, groupType, groupCnt, deadline, addr, minPrice, maxPrice, reservation, createdDate}, 
                 onPress, onChange, onRemove, isUser}) => {
@@ -75,7 +77,7 @@ const Item = ({item: {auctionId, title, storeType, groupType, groupCnt, deadline
             <ItemContainer onPress={() => onPress(auctionId)} >
                 <TimeTextContiner>
                     <ContentText>{changeDateData(reservation)} 예약</ContentText>
-                    <ContentText>마감 {changeEndDateData(deadline)} 전</ContentText>
+                    <ContentText>{_handleDeadline(deadline)}</ContentText>
                 </TimeTextContiner>
                 <ItemBox>
                     <ContentTitleText>{title}</ContentTitleText>

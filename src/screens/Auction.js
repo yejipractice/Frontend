@@ -141,7 +141,7 @@ const Auction = ({navigation}) => {
             <ItemContainer onPress={() => onPress(auctionId)} >
                 <TimeTextContiner>
                     <ContentText>{changeDateData(reservation)} 예약</ContentText>
-                    <ContentText>마감 {changeEndDateData(deadline)} 전</ContentText>
+                    <ContentText>{_handleDeadline(deadline)}</ContentText>
                 </TimeTextContiner>
                 <ItemBox>
                     <ContentTitleText>{title}</ContentTitleText>
@@ -166,6 +166,10 @@ const Auction = ({navigation}) => {
             </ItemContainer>
         );
     });
+
+    const _handleDeadline = (date) => {
+        return date.slice(2,4)+date.slice(5,7)+date.slice(8,10)+date.slice(11,13)+date.slice(14,16)+" 마감";
+    };
 
     const _deleteStar = async (id) => {
         var fixedUrl = url+"/member/favorites";
@@ -261,6 +265,7 @@ const Auction = ({navigation}) => {
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
             var list = res["list"];
+            console.log(list);
             setAllData(list);
             setAuctionListData(list);
         }catch(error) {
