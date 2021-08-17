@@ -23,10 +23,10 @@
 │   ├── navigateions # @react-navigation
 │   ├── utils 
 │   └── screens # ui screens
-            ├── Account # Login, Sign up ...
-            ├── Mypage # Mypage
-            ├── StoreList # Store tab, map
-            └── auction.js etc # Auction, Bid, Search
+│           ├── Account # Login, Sign up ...
+│           ├── Mypage # Mypage
+│           ├── StoreList # Store tab, map
+│           └── auction.js etc # Auction, Bid, Search
 
 ```
 
