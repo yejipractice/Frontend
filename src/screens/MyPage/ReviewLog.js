@@ -2,7 +2,7 @@ import React,{useEffect, useContext, useState} from 'react';
 import styled from 'styled-components/native';
 import { Dimensions } from 'react-native';
 import { WebView } from 'react-native-webview';
-import {  ProgressContext, UrlContext } from '../../contexts';
+import { LoginContext, ProgressContext, UrlContext } from '../../contexts';
 
 const WIDTH = Dimensions.get("screen").width;
 const HEIGHT = Dimensions.get("screen").height;
@@ -12,17 +12,17 @@ const Container = styled.View`
   background-color: ${({ theme }) => theme.background};
 `;
 
-const AucLogManage = ({route}) => {
+const ReviewLog = () => {
 
-  let id = route.params.auctionId;
+  const {id} = useContext(LoginContext);
   const {surl} = useContext(UrlContext);
   const {spinner} = useContext(ProgressContext);
   const [data, setData] = useState("");
 
   const getApi = async () => {
 
-    let fixedUrl = surl+"/search/log/auctionview?auctionId="+id;
-     
+    let fixedUrl = surl+"/search/log/storereview?storeId="+id;
+ 
 
     let options = {
         method: 'GET',
@@ -48,22 +48,22 @@ const AucLogManage = ({route}) => {
       }
 }
 
-
 useEffect(() => {
   getApi();
 },[]);
-  return (
-      <Container>
-        <WebView 
-          originWhitelist={["*"]}
-          scalesPageToFit={true}
-          bounces={false}
-          javaScriptEnabled
-          style={{ height: HEIGHT*1.5, width: WIDTH*2.3 }}
-          source={{ 
-          html: `${data}` }}
-        />    
-      </Container>
+
+    return (
+        <Container>
+            <WebView 
+              originWhitelist={["*"]}
+              scalesPageToFit={true}
+              bounces={false}
+              javaScriptEnabled
+              style={{ height: HEIGHT*1.5, width: WIDTH*2.3 }}
+              source={{ 
+                html: `${data}` }}
+            />    
+        </Container>
   );
 };
-export default AucLogManage;  
+export default ReviewLog;  
