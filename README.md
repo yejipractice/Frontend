@@ -16,7 +16,8 @@
 
 ## 디렉터리별 설명
 
-```FrontEnd
+```
+FrontEnd
 ├── src
 │   ├── components # components source
 │   ├── contexts # context api
@@ -33,7 +34,8 @@
 ## Get started
 
 
-```# Install Expo 
+```
+# Install Expo 
 npm install -g expo-cli
 
 # Install dependencies
