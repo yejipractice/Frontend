@@ -343,8 +343,8 @@ const Signup = ({ navigation, route }) => {
 
         // 이메일 키값 전송 api
         const postemailApi = async () => {
-            let fixedUrl = url+'/member/auth/verify?email='+`${email}`;
-            
+            let fixedUrl = url+'/member/auth/mailgunVerify?email='+`${email}`;
+                      
             
             let options = {
                 method: 'POST',

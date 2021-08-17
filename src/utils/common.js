@@ -14,12 +14,14 @@ export const validatePassword = password => {
 };
 
 export const changeDateData = date => {
+    if(date!==null){
     var y = date.slice(0,4);
     var m = date.slice(5,7);
     var d = date.slice(8,10);
     var h = date.slice(11,13);
     var min = date.slice(14,16);
-    return y+"/"+m+"/"+d+" "+h+":"+min;    
+    return y+"/"+m+"/"+d+" "+h+":"+min;   
+    } 
 };
 
 export const changeEndDateData = date => {

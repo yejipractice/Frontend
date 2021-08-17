@@ -168,8 +168,9 @@ const Auction = ({navigation}) => {
     });
 
     const _handleDeadline = (date) => {
+        if(date!==null){
         return date.slice(2,4)+date.slice(5,7)+date.slice(8,10)+date.slice(11,13)+date.slice(14,16)+" 마감";
-    };
+    }};
 
     const _deleteStar = async (id) => {
         var fixedUrl = url+"/member/favorites";
@@ -268,6 +269,7 @@ const Auction = ({navigation}) => {
             
             setAllData(list);
             setAuctionListData(list);
+            console.log(list);
         }catch(error) {
             console.error(error);
         }finally {
