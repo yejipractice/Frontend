@@ -35,6 +35,12 @@ FrontEnd
 
 
 ```
+# Douwnload Code
+git clone https://github.com/Dining-together/Frontend.git
+
+# 디렉터리 이동
+cd Frontend
+
 # Install Expo 
 npm install -g expo-cli
 
