@@ -272,6 +272,8 @@ const Store = ({navigation, route}) => {
             let location = await Location.getCurrentPositionAsync({accuracy:Location.Accuracy.High}); 
             setLatitude(location.coords.latitude);
             setLongitude(location.coords.longitude);
+            setRealLat(location.coords.latitude);
+            setRealLon(location.coords.longitude);
         }catch(e){
             console.error(e);
         }finally{
@@ -312,6 +314,7 @@ const Store = ({navigation, route}) => {
         if(mode !== "STORE"){
             handleStarApi();
         }
+        console.log(latitude, longitude);
     },[]);
 
 
@@ -372,7 +375,7 @@ const Store = ({navigation, route}) => {
             distanceSort();
         }else if(sort === 2){
             scoreSort();
-        }else{
+        }else if(sort === 3){
             reviewSort();
         }
     }, [sort]);
