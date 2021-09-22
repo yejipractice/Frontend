@@ -8,6 +8,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { ThemeContext } from "styled-components";
 import {LoginContext, UrlContext, ProgressContext} from "../contexts";
 import {_sortLatest, cutDateData, changeListData, createdDate, changeCreatedDateData, removeWhitespace, _sortPopular} from "../utils/common";
+import * as Location from "expo-location";
 
 const WIDTH = Dimensions.get("screen").width;
 const HEIGHT = Dimensions.get("screen").height;
@@ -196,7 +197,7 @@ const Store = ({ item: { id, storeName, score, reviews, foodType, path }, onPres
 const Main = ({ navigation }) => {
     const theme = useContext(ThemeContext);
     const { aurl, url} = useContext(UrlContext);
-    const {allow, autoLogin, doc, mode, token} = useContext(LoginContext);
+    const {allow, autoLogin, doc, mode, token, latitude, longitude, setLatitude, setLongitude} = useContext(LoginContext);
     const {spinner} = useContext(ProgressContext);
 
     const [input, setInput] = useState("");
@@ -250,9 +251,25 @@ const Main = ({ navigation }) => {
         }
     };
 
+       //현위치 
+       const getLocation = async () => {
+        try{
+            spinner.start()
+            let location = await Location.getCurrentPositionAsync({accuracy:Location.Accuracy.High}); 
+            setLatitude(location.coords.latitude);
+            setLongitude(location.coords.longitude);
+        }catch(e){
+            console.error(e);
+        }finally{
+            spinner.stop();
+        }
+};
+
     useEffect(()=> {
         handleAuctionApi();
-       
+        if(latitude===null || longitude===null){
+            getLocation();
+        }
     },[]);
 
 
