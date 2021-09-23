@@ -415,7 +415,7 @@ const Store = ({navigation, route}) => {
             
             <MapButton 
                 onPress={()=> {
-                        navigation.navigate("StoreMap", {longi: realLon, lati: realLon});
+                        navigation.navigate("StoreMap", {longi: longitude, lati: latitude});
             }}>
                 <MapText>지도로 보기</MapText>
             </MapButton>
