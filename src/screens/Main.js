@@ -197,7 +197,7 @@ const Store = ({ item: { id, storeName, score, reviews, foodType, path }, onPres
 const Main = ({ navigation }) => {
     const theme = useContext(ThemeContext);
     const { aurl, url} = useContext(UrlContext);
-    const {allow, autoLogin, doc, mode, token, latitude, longitude, setLatitude, setLongitude} = useContext(LoginContext);
+    const {allow, autoLogin, doc, mode, token, latitude, longitude, setLatitude, setLongitude, setAllow} = useContext(LoginContext);
     const {spinner} = useContext(ProgressContext);
 
     const [input, setInput] = useState("");
@@ -206,6 +206,7 @@ const Main = ({ navigation }) => {
     const [latestAuctions, setLatestAuctions] = useState("first");
     const [popularAuctions, setPopularAuctions] = useState("first");
     const [isLoading, setIsLoading] = useState(true);
+    const [allowLoc, setAllowLoc] = useState(allow);
 
     const _handleNoticePress = () => { navigation.navigate("Notice") };
 
@@ -221,6 +222,18 @@ const Main = ({ navigation }) => {
     const _handleStorePress = item => {
         navigation.navigate('StoreDetail', { id: item.id, name: item.storeName })
     };
+
+    const _getLocPer = async () => {
+        try{
+            const {status} = await Location.requestForegroundPermissionsAsync();
+            if(status === "granted"){
+                setAllow(true);
+                setAllowLoc(true);
+            };
+        }catch (e) {
+            console.log(e);
+        };
+      };
 
     const handleAuctionApi = async () => {
         let fixedUrl = aurl+"/auction/auctions";
@@ -265,12 +278,20 @@ const Main = ({ navigation }) => {
         }
 };
 
-    useEffect(()=> {
+    useEffect(()=>{
         handleAuctionApi();
-        if(latitude===null || longitude===null){
-            getLocation();
-        }
     },[]);
+
+    useEffect(()=> {
+        if(latitude===null || longitude===null){
+            if(!allowLoc){
+                _getLocPer();
+            }else{
+                getLocation();
+            }
+        }
+    },[allowLoc]);
+
 
 
     return (
