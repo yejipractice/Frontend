@@ -1,7 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import styled from 'styled-components/native';
 import { SmallButton } from '../components';
-import { ScrollView } from 'react-native';
+import { ScrollView, Dimensions } from 'react-native';
+import {UrlContext, LoginContext, ProgressContext} from ".././contexts";
+import SockJs from "sockjs-client";
+import Stomp from 'stompjs';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+
+const HEIGHT = Dimensions.get("screen").height;
 
 const Container = styled.View`
   flex: 1;
@@ -9,12 +15,14 @@ const Container = styled.View`
 `;
 
 const ChatEntireCon = styled.View`
-  flex: 9;
+  margin-bottom: ${HEIGHT*0.07};
   background-color: ${({ theme }) => theme.background};
 `;
 
 const InputContainer = styled.View`
-  flex: 1;
+  height: ${HEIGHT*0.07};
+  bottom: 0;
+  position: absolute;
   flex-direction: row;
 `;
 
@@ -22,11 +30,12 @@ const ChatInput = styled.TextInput.attrs(({ theme }) => ({
   placeholderTextColor: theme.inputPlaceholder,
 }))`
     width: 80%;
+    height: 95%;
     background-color: ${({ theme }) => theme.background};
     color: ${({ theme }) => theme.text};
-    padding: 20px 10px;
     font-size: 16px;
     border: 1px solid;
+    padding: 10px; 0;
 `;
 
 const OtherchatContainer = styled.View`
@@ -117,16 +126,76 @@ const OtherChat = ({chat: {id, name, desc} }) => {
 };
 
 
-const _handleMessageSend = () => {};
-
 const Message = ({navigation, route}) => {
 
   const [messages, setMessages] = useState([]);
-  const [text, setText] = useState();
+  const [list, setList] = useState([]);
+  const [text, setText] = useState("");
+  const {curl} = useContext(UrlContext);
+  const {token, mode, id} = useContext(LoginContext);
+  const {spinner} = useContext(ProgressContext);
 
-  // 추후 데이터 받아오고 수정
+  const roomId = route.params.roomId;
+  const sender = route.params.sender;
+  
+  let sock;
+  let ws;
+
+const connect = async() => {
+    var data = {
+      type:'ENTER',
+      roomId: roomId,
+      sender: sender,
+      message: "",
+    };
+
+    ws.connect(
+      {"token": token}, 
+      () => {
+        console.log("STOMP Connection");
+    
+        ws.subscribe("/chat/sub/room/"+roomId, (message) => {
+        var content = JSON.parse(message.body);
+        console.log("content:");
+        console.log(content);
+        });
+
+        ws.send("/chat/pub/message", {"token": token}, JSON.stringify(data));
+      },
+      (error) => {
+        alert("서버 연걸에 실패하였습니다. 다시 접속해주세요.");
+      });
+};
+
+  useEffect(() => {
+    sock = new SockJs(curl+"/chat/chatting");
+    ws = Stomp.over(sock);
+    connect();
+    
+    return () => {
+      if(ws){
+        ws.disconnect();
+      }
+    }
+  }, []);
+  
+
+  const _handleMessageSend = () => {
+      var newMessage = {
+        type: "TALK",
+        roomId: roomId,
+        message: text,
+        sender: sender,
+      };
+
+      ws.send("/chat/pub/message", {"token": token}, JSON.stringify(newMessage));
+      setText("");
+  };
 
   return (
+    <KeyboardAwareScrollView
+    contentContainerStyle={{flex: 1}}
+    extraHeight={20}>
     <Container>
       <ChatEntireCon>
       <ScrollView>
@@ -249,6 +318,7 @@ const Message = ({navigation, route}) => {
           />
       </InputContainer>
     </Container>
+    </KeyboardAwareScrollView>
   );
 };
 

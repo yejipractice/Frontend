@@ -172,7 +172,7 @@ background-color:  ${({ theme }) => theme.background};
 
 const RegisterAuction = ({navigation, route}) => {
   const {allow, token, setAllow, longitude, latitude, setLatitude, setLongitude} = useContext(LoginContext);
-  const {url} = useContext(UrlContext);
+  const {url, aurl} = useContext(UrlContext);
   const {spinner} = useContext(ProgressContext);
   const [allowLoc, setAllowLoc] = useState(allow);
 
@@ -333,7 +333,7 @@ const _getLocPer = async () => {
 
   // 공고 생성 API
   const handleApi = async () => {
-    let fixedUrl = url+"/auction";
+    let fixedUrl = aurl+"/auction";
 
     let Info = {
       content: additionalContent,
@@ -706,7 +706,7 @@ const _getLocPer = async () => {
   // 수정 put 보내기
   const putApi = async () => {
 
-    let fixedUrl = url+"/auction/"+`${auctionId}`;
+    let fixedUrl = aurl+"/auction/"+`${auctionId}`;
 
     let Info = {
       content: additionalContent,
