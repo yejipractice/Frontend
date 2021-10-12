@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import styled from 'styled-components/native';
 import { SmallButton } from '../components';
-import { ScrollView, Dimensions } from 'react-native';
+import { ScrollView, Dimensions, RefreshControl } from 'react-native';
 import {UrlContext, LoginContext, ProgressContext} from ".././contexts";
-import SockJs from "sockjs-client";
+import SockJS from "sockjs-client";
 import Stomp from 'stompjs';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
@@ -96,29 +96,29 @@ const UserNameText = styled.Text`
   margin-left: 3%;
 `;
 
-const OwnChat = ({chat: {id, name, desc} }) => {
+const OwnChat = ({item: {id, sender, message} }) => {
   return (
     <ChatContainer style = {true}>
       <TimeContainer>
-        <TimeText>2:42</TimeText>
+        <TimeText></TimeText>
       </TimeContainer>
       <OwnchatContainer>
-        <ChatText>안녕하세요</ChatText>
+        <ChatText>{message}</ChatText>
       </OwnchatContainer>
   </ChatContainer>
   );
 };
 
-const OtherChat = ({chat: {id, name, desc} }) => {
+const OtherChat = ({item: {id, sender, message} }) => {
   return (
     <OtherEntireCon>
-    <UserNameText>{route.params.name}</UserNameText>
+    <UserNameText>{sender}</UserNameText>
       <ChatContainer>
         <OtherchatContainer>
-          <ChatText>넵 안녕하세요</ChatText>
+          <ChatText>{message}</ChatText>
         </OtherchatContainer>
         <TimeContainer>
-          <TimeText>2:45</TimeText>
+          <TimeText></TimeText>
         </TimeContainer>
       </ChatContainer>
       </OtherEntireCon>
@@ -128,59 +128,143 @@ const OtherChat = ({chat: {id, name, desc} }) => {
 
 const Message = ({navigation, route}) => {
 
-  const [messages, setMessages] = useState([]);
-  const [list, setList] = useState([]);
+  const [messages, setMessages] = useState([]); // 모든 채팅z  
+  const [filteredMessages, setFilteredMessages] = useState([]); 
   const [text, setText] = useState("");
   const {curl} = useContext(UrlContext);
   const {token, mode, id} = useContext(LoginContext);
   const {spinner} = useContext(ProgressContext);
+  const [refreshing, setRefreshing] = useState(false);
 
   const roomId = route.params.roomId;
   const sender = route.params.sender;
   
-  let sock;
-  let ws;
+  const sock = new SockJS(curl+"/chat/chatting");
+  const ws = Stomp.over(sock);
 
-const connect = async() => {
+  
+  const connect = async(list) => {
+    console.log("list");
+    console.log(list);
+    console.log("message");
+    console.log(messages);
     var data = {
       type:'ENTER',
       roomId: roomId,
       sender: sender,
       message: "",
     };
-
+    try{
+    spinner.start()
     ws.connect(
-      {"token": token}, 
+      {}, 
       () => {
         console.log("STOMP Connection");
-    
         ws.subscribe("/chat/sub/room/"+roomId, (message) => {
-        var content = JSON.parse(message.body);
-        console.log("content:");
-        console.log(content);
+            var content = JSON.parse(message.body);
+            let mList = [];
+            if(messages.length===0){
+              mList = list;
+            }else {
+              mList = messages;
+            }
+            mList.push(content)
+            setMessages(filterData(mList));
         });
-
-        ws.send("/chat/pub/message", {"token": token}, JSON.stringify(data));
-      },
-      (error) => {
-        alert("서버 연걸에 실패하였습니다. 다시 접속해주세요.");
+        ws.send("/chat/pub/message", {}, JSON.stringify(data));
       });
+    }catch(error) {
+      alert("서버 연걸에 실패하였습니다. 다시 접속해주세요.");
+    }finally{
+      spinner.stop()
+    }
 };
 
+  
+
+const _getMessage = async (id) => {
+  var fixedUrl = curl+"/chat/room/"+roomId;
+
+  let options = {
+    method: 'GET',
+    headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-AUTH-TOKEN' : token,
+    },
+};    
+
+  try {
+      let response = await fetch(fixedUrl, options);
+      let res = await response.json();
+      let mList = filterData(res.list)
+      setMessages(mList)
+      return mList;
+      } catch (error) {
+      console.error(error);
+  }    
+};
+
+
   useEffect(() => {
-    sock = new SockJs(curl+"/chat/chatting");
-    ws = Stomp.over(sock);
-    connect();
-    
+    _getMessage()
+    .then((list) => connect(list));
     return () => {
       if(ws){
-        ws.disconnect();
+        ws.disconnect(() => {
+          ws.unsubscribe('sub-0');
+        });
       }
     }
   }, []);
+
+  const wait = (timeout) => {
+    return new Promise(resolve => {
+      setTimeout(resolve, timeout);
+    });
+  }
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    wait(2000).then(() => setRefreshing(false));
+  }, [])
+
+
   
+  const filterData = (list) => {
+     let filtered = list.filter((l) => l.type === "TALK");
+     return filtered;
+  };
+
+    const waitForConnection = (ws, callback) => {
+      reconnect++;
+      console.log("연결 상태는?");
+      console.log(ws.ws.readyState);
+      console.log("재연결 횟수는?");
+      console.log(reconnect)
+      if(reconnect >= 50){
+        alert("오류가 발생하였습니다. 잠시 후 다시 전송해주세요. ");
+        console.log(messages)
+        return
+      }
+      setTimeout(
+        function() {
+          if(ws.ws.readyState=== 1){
+            callback();
+          }else {
+            waitForConnection(ws, callback);
+          }
+        }, 
+        100*10 
+      );
+    }
+
+
+  var reconnect = 0;
 
   const _handleMessageSend = () => {
+      reconnect = 0;
+      
       var newMessage = {
         type: "TALK",
         roomId: roomId,
@@ -188,8 +272,12 @@ const connect = async() => {
         sender: sender,
       };
 
-      ws.send("/chat/pub/message", {"token": token}, JSON.stringify(newMessage));
-      setText("");
+        
+        waitForConnection(ws, function () {
+          ws.send("/chat/pub/message", {}, JSON.stringify(newMessage));
+          console.log(ws.ws.readyState);
+          setText("");
+        });
   };
 
   return (
@@ -198,111 +286,18 @@ const connect = async() => {
     extraHeight={20}>
     <Container>
       <ChatEntireCon>
-      <ScrollView>
-            <ChatContainer style = {true}>
-              <TimeContainer>
-                <TimeText>2:42</TimeText>
-              </TimeContainer>
-              <OwnchatContainer>
-                <ChatText>안녕하세요</ChatText>
-              </OwnchatContainer>
-          </ChatContainer>
-
-          <OtherEntireCon>
-              <UserNameText>{route.params.name}</UserNameText>
-                <ChatContainer>
-                  <OtherchatContainer>
-                    <ChatText>넵 안녕하세요</ChatText>
-                  </OtherchatContainer>
-                  <TimeContainer>
-                    <TimeText>2:45</TimeText>
-                  </TimeContainer>
-                </ChatContainer>
-          </OtherEntireCon>
-
-          <ChatContainer style = {true}>
-              <TimeContainer>
-                <TimeText>2:42</TimeText>
-              </TimeContainer>
-              <OwnchatContainer>
-                <ChatText>안녕하세요</ChatText>
-              </OwnchatContainer>
-          </ChatContainer>
-
-          <OtherEntireCon>
-              <UserNameText>{route.params.name}</UserNameText>
-                <ChatContainer>
-                  <OtherchatContainer>
-                    <ChatText>넵 안녕하세요</ChatText>
-                  </OtherchatContainer>
-                  <TimeContainer>
-                    <TimeText>2:45</TimeText>
-                  </TimeContainer>
-                </ChatContainer>
-          </OtherEntireCon>
-
-          <ChatContainer style = {true}>
-              <TimeContainer>
-                <TimeText>2:42</TimeText>
-              </TimeContainer>
-              <OwnchatContainer>
-                <ChatText>안녕하세요</ChatText>
-              </OwnchatContainer>
-          </ChatContainer>
-
-          <OtherEntireCon>
-              <UserNameText>{route.params.name}</UserNameText>
-                <ChatContainer>
-                  <OtherchatContainer>
-                    <ChatText>넵 안녕하세요</ChatText>
-                  </OtherchatContainer>
-                  <TimeContainer>
-                    <TimeText>2:45</TimeText>
-                  </TimeContainer>
-                </ChatContainer>
-          </OtherEntireCon>
-
-          <ChatContainer style = {true}>
-              <TimeContainer>
-                <TimeText>2:42</TimeText>
-              </TimeContainer>
-              <OwnchatContainer>
-                <ChatText>안녕하세요</ChatText>
-              </OwnchatContainer>
-          </ChatContainer>
-
-          <OtherEntireCon>
-              <UserNameText>{route.params.name}</UserNameText>
-                <ChatContainer>
-                  <OtherchatContainer>
-                    <ChatText>넵 안녕하세요</ChatText>
-                  </OtherchatContainer>
-                  <TimeContainer>
-                    <TimeText>2:45</TimeText>
-                  </TimeContainer>
-                </ChatContainer>
-          </OtherEntireCon>
-
-          <ChatContainer style = {true}>
-              <TimeContainer>
-                <TimeText>2:42</TimeText>
-              </TimeContainer>
-              <OwnchatContainer>
-                <ChatText>안녕하세요</ChatText>
-              </OwnchatContainer>
-          </ChatContainer>
-
-          <OtherEntireCon>
-              <UserNameText>{route.params.name}</UserNameText>
-                <ChatContainer>
-                  <OtherchatContainer>
-                    <ChatText>넵 안녕하세요</ChatText>
-                  </OtherchatContainer>
-                  <TimeContainer>
-                    <TimeText>2:45</TimeText>
-                  </TimeContainer>
-                </ChatContainer>
-          </OtherEntireCon>
+      <ScrollView
+      refreshControl ={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>
+      }
+      >
+        {messages.map(f => {
+          if(f.sender === sender){
+            return (<OwnChat item={f} key={f.id}/>)
+          }else{
+            return (<OtherChat item={f} key={f.id}/>)
+          }
+        })}
       </ScrollView>
       </ChatEntireCon>
       <InputContainer>
