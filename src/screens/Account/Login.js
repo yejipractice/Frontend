@@ -289,9 +289,10 @@ const Login = ({navigation}) => {
             </Letter>
 
            
-           {/* <SocialContainer>
+           <SocialContainer>
                 <QText>SNS 계정 로그인</QText>
-            <SocialBackground color={theme.kakaoColor}>
+                <SocialBackground color={theme.kakaoColor} 
+                onPress={() => {navigation.navigate("KakaoLogin");}}>
                     <KakaoImage source={images.kakaoLogin} />
                     <ButtonText isKakao={true}>카카오 로그인</ButtonText>
                 </SocialBackground>
@@ -299,7 +300,7 @@ const Login = ({navigation}) => {
                     <NaverImage source={images.naverLogin} />
                     <ButtonText>네이버 로그인</ButtonText>
                 </SocialBackground>
-            </SocialContainer> */}
+            </SocialContainer>
 
             <SocialContainer style={{marginTop: 20}}>
                 <QText>아직 회원이 아니신가요?</QText>
