@@ -108,8 +108,6 @@ const  UesrInfo = ({navigation}) => {
     // 메뉴추가/수정 팝업창
     const [isPwModal, setIsPwModal] = useState(false);
     
-    // 알림 수신동의
-    const [isNoticed, setIsNoticed] = useState(false);
 
      // 서버 get 처리 (정보 가져오기)
      const getApi = async (url) => {
@@ -238,8 +236,9 @@ const  UesrInfo = ({navigation}) => {
 
     // 비밀번호 확인
     const postApi = async () => {
-        let fixedUrl = url+"/member/password/verification?password="+pw;
-
+        let pwpw = removeWhitespace(pw)
+        pwpw = encodeURIComponent(pwpw)
+        let fixedUrl = url+"/member/password/verification?password="+pwpw;
         let options = {
             method: 'POST',
             headers: {
@@ -253,7 +252,7 @@ const  UesrInfo = ({navigation}) => {
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
 
-            console.log(res, pw);
+            console.log(res);
 
             return res["success"];
         }catch (error) {
@@ -305,7 +304,7 @@ const  UesrInfo = ({navigation}) => {
                             placeholder="비밀번호"
                             secureTextEntry={true}
                             returnKeyType= "done"
-                            onChangeText={text => removeWhitespace(setPw(text))}
+                            onChangeText={text => setPw(text)}
                         />
                         <SmallButton title="확인" containerStyle={{width: '20%', marginLeft:10, height: 50, marginTop: 10}}
                             onPress={_onPwPress}

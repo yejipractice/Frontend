@@ -148,18 +148,27 @@ const Bookmark = ({navigation, route}) => {
             let response = await fetch(fixedUrl, options);
             let res = await response.json();
             
-            
-            const store = {
+           if(res.data.storeImages[0]!==undefined){
+                var store = {
                 id: res.data.id,
                 name : res.data.name,
                 type : res.data.storeType,
                 location : res.data.addr,
-                photo: res.data.storeImages[0],
+                photo: res.data.storeImages[0].path,
             }
+            }else{
+                var store = {
+                    id: res.data.id,
+                    name : res.data.name,
+                    type : res.data.storeType,
+                    location : res.data.addr,
+                    photo: null
+            }
+           } 
             newadd.push(store);
 
             setStores(newadd);
-
+            console.log(res.data)
             
             return res["success"];
 
