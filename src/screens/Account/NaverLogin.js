@@ -6,17 +6,19 @@ import {UrlContext, ProgressContext, LoginConsumer, LoginContext} from "../../co
 import * as Location from "expo-location";
 
 
-const KakaoLogin = () => {
+const NaverLogin = () => {
+
 
     const {spinner} = useContext(ProgressContext);
     const {url} = useContext(UrlContext);
-    const {token, allow, setSuccess, setAllow, setAutoLogin, setToken, setMode, setId, setLatitude, setLongitude} = useContext(LoginContext);
+    const {token, mode, doc, allow, setSuccess, setAllow, setAutoLogin, setToken, setMode, setId, setLatitude, setLongitude} = useContext(LoginContext);
 
-    const CLIENT_ID = "cce7add11392983e7402a4bb7ad6fd07";
-    const REDIRECT_URI = url+"/member/social/login/kakao";
+    const CLIENT_ID = "9MUAPcyGVhbTteFu3l97";
+    const REDIRECT_URI = url+"/member/social/login/naver";
     const runFirst = `window.ReactNativeWebView.postMessage("this is message from web");`;
 
     let tokenData = "";
+    const random_state = "dining";
 
     // code 분리
     const LogInProgress = (data) => {
@@ -24,12 +26,16 @@ const KakaoLogin = () => {
         // substringd으로 url에서 code=뒤를 substring하면 된다.
         if(data != null){
             const exp = "code=";
+            const exp2 = "&state=";
             let condition = data.indexOf(exp);
+            let condition2 = data.indexOf(exp2);
 
-            if (condition != -1) {
-                let request_code = data.substring(condition + exp.length);
-
+            if (condition != -1 && condition2 != -1) {
+                console.log("data: " + data);
+                let request_code = data.substring(condition + exp.length, condition2);
                 console.log("access code: " + request_code);
+                let request_state = data.substring(condition2 + exp2.length);
+                console.log("access state: " + request_state);
 
                 // 인가코드 전달 -> 토큰 발급
                 _handleLoginPress(request_code);
@@ -42,7 +48,7 @@ const KakaoLogin = () => {
     // Back으로 token 전달 
     const requestToken = async (code) => {
 
-        const token_url = url+`/member/auth/signin/kakao?code=${code}`;
+        const token_url = url+`/member/auth/signin/naver?code=${code}`;
 
         let options = {
             method: 'POST',
@@ -53,6 +59,7 @@ const KakaoLogin = () => {
         };
 
         try{
+            console.log(token_url)
             let response = await fetch(token_url, options);
             let res = await response.json();
 
@@ -68,7 +75,6 @@ const KakaoLogin = () => {
         }catch (error) {
             console.error(error);
           }
-
     };
 
     const getModeApi = async () => {
@@ -135,7 +141,7 @@ const KakaoLogin = () => {
                 originWhitelist={['*']}
                 scalesPageToFit={false}
                 style={{ marginTop: 30 }}                
-                source={{ uri: `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}` }}
+                source={{ uri: `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&state=${random_state}` }}
                 javaScriptEnabled={true}
                 injectedJavaScript={runFirst}
                 onMessage={(event) => {LogInProgress(event.nativeEvent["url"]); }}
@@ -147,4 +153,4 @@ const KakaoLogin = () => {
 };
 
 
-export default KakaoLogin; 
+export default NaverLogin; 

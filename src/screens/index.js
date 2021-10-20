@@ -44,10 +44,11 @@ import BidLogManage from "./MyPage/BidLogManage";
 import LogManage from "./MyPage/LogManage";
 import ReviewLog from "./MyPage/ReviewLog";
 import KakaoLogin from './Account/KakaoLogin';
+import NaverLogin from "./Account/NaverLogin";
 export {
     AuctionDetail, AuctionBid, AuctionFinished, UserInfoChange, UserInfo, Mypage_User, Mypage_Store, Review, StoreInfoChange,
     SearchAuction, SearchStore, Message, Login, Mode, Notice, Signup, Main, AccountFind, RegisterAuction, Auction, StoreDetail, StoreInfo, StoreMap,
     ReviewManage, ChatManage, Bookmark, BidManage, BidManageFinished, PayManage, UseManage, OrderDetail, StoreManage, ReviewWrite, DocumentRegister,
     MultipleImage,BidDetail,StoreBasicChange,StoreConvChange, OnlyCustomer,AllStore, AuctionBidDetail,
-    AucLogManage, BidLogManage, LogManage, ReviewLog, KakaoLogin
+    AucLogManage, BidLogManage, LogManage, ReviewLog, KakaoLogin, NaverLogin
 };

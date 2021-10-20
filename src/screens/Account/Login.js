@@ -298,7 +298,8 @@ const Login = ({navigation}) => {
                     <KakaoImage source={images.kakaoLogin} />
                     <ButtonText isKakao={true}>카카오 로그인</ButtonText>
                 </SocialBackground>
-                <SocialBackground color={theme.naverColor} hasMarginTop={true}>
+                <SocialBackground color={theme.naverColor} hasMarginTop={true}
+                onPress={() => {navigation.navigate("NaverLogin");}}>
                     <NaverImage source={images.naverLogin} />
                     <ButtonText>네이버 로그인</ButtonText>
                 </SocialBackground>
